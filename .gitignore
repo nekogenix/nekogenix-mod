@@ -1,0 +1,36 @@
+# Gradle and compiled output
+.gradle/
+build/
+out/
+bin/
+*.class
+
+# Local game instances
+/run/
+/runs/
+
+# IDE metadata
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.classpath
+.project
+.settings/
+
+# Logs and JVM diagnostics
+*.log
+hs_err_pid*
+replay_pid*
+*.hprof
+
+# Local environment values
+.env
+.env.*
+!.env.example
+
+# Operating system metadata
+.DS_Store
+Thumbs.db
+desktop.ini
