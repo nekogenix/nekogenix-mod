@@ -15,5 +15,12 @@
   "effect.nekogenix.neko_transformation": "Перетворення на неко",
   "effect.nekogenix.feline_agility": "Котяча спритність",
   "effect.nekogenix.feline_vision": "Котячий зір",
-  "effect.nekogenix.soft_paw_pads": "М’які подушечки лап"
+  "effect.nekogenix.soft_paw_pads": "М’які подушечки лап",
+  "tooltip.nekogenix.injection_use": "Утримуйте ЛКМ для введення",
+  "tooltip.nekogenix.stages": "Три стадії по ігровій добі",
+  "tooltip.nekogenix.agility": "+100% до швидкості бігу та пересування навприсядки",
+  "tooltip.nekogenix.vision": "Нічний зір поблизу неосвітлених місць (16 блоків)",
+  "tooltip.nekogenix.paws": "-75% шкоди від падіння",
+  "tooltip.nekogenix.delayed": "Ефекти настануть через ігрову добу",
+  "tooltip.nekogenix.stage_ability": "Наприкінці кожної — випадкова здібність"
 }

@@ -14,5 +14,12 @@
   "effect.nekogenix.neko_transformation": "Neko Transformation",
   "effect.nekogenix.feline_agility": "Feline Agility",
   "effect.nekogenix.feline_vision": "Feline Vision",
-  "effect.nekogenix.soft_paw_pads": "Soft Paw Pads"
+  "effect.nekogenix.soft_paw_pads": "Soft Paw Pads",
+  "tooltip.nekogenix.injection_use": "Hold Left Click to inject",
+  "tooltip.nekogenix.stages": "Three stages of one game day each",
+  "tooltip.nekogenix.agility": "+100% Sprinting and Sneaking Speed",
+  "tooltip.nekogenix.vision": "Night vision near unlit areas (16 blocks)",
+  "tooltip.nekogenix.paws": "-75% Fall Damage",
+  "tooltip.nekogenix.delayed": "Effects begin after one game day",
+  "tooltip.nekogenix.stage_ability": "One random ability at the end of each stage"
 }

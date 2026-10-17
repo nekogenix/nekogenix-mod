@@ -33,7 +33,7 @@ public final class SalivaExposure {
             entity.removeData(Content.EXPOSURE);
             entity.addEffect(new MobEffectInstance(MobEffects.POISON, 600, 2));
             entity.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 1200, 0));
-            level.playSound(null, entity.blockPosition(), SoundEvents.PLAYER_BURP, SoundSource.PLAYERS, 0.8F, 0.6F);
+            level.playSound(null, entity, SoundEvents.PLAYER_BURP, SoundSource.PLAYERS, 0.8F, 0.6F);
         }
     }
 

@@ -35,6 +35,7 @@ public final class TransformationHandler {
     public static void tick(PlayerTickEvent.Post event) {
         if (!(event.getEntity() instanceof ServerPlayer player) || !player.isAlive()) return;
         NekoState state = player.getData(Content.NEKO);
+        FelineSounds.sync(player);
         if (state.tick(player.getRandom())) {
             refreshEffects(player);
             InjectionHandler.sound(player, SoundEvents.AMETHYST_BLOCK_CHIME, 0.8F, 0.9F);
@@ -56,14 +57,23 @@ public final class TransformationHandler {
                     NekoState.SHOCK_DURATION - state.elapsed(), 0, false, false, false));
         }
         marker(player, Content.TRANSFORMING, state.phase() == NekoState.Phase.TRANSFORMING,
-                3 * NekoState.DAY - state.elapsed());
+                state.stageRemaining(), state.stage());
         marker(player, Content.AGILITY, state.has(NekoState.AGILITY), -1);
         marker(player, Content.VISION, state.has(NekoState.VISION), -1);
         marker(player, Content.PAWS, state.has(NekoState.PAWS), -1);
     }
 
     private static void marker(ServerPlayer player, Holder<MobEffect> effect, boolean enabled, int duration) {
-        if (enabled && !player.hasEffect(effect)) player.addEffect(new MobEffectInstance(effect, Math.max(-1, duration), 0, false, false, true));
+        marker(player, effect, enabled, duration, 0);
+    }
+
+    private static void marker(ServerPlayer player, Holder<MobEffect> effect, boolean enabled, int duration, int amplifier) {
+        MobEffectInstance current = player.getEffect(effect);
+        if (enabled && (current == null || current.getAmplifier() != amplifier
+                || effect.is(Content.TRANSFORMING) && Math.abs(current.getDuration() - duration) > 20)) {
+            if (current != null) player.removeEffect(effect);
+            player.addEffect(new MobEffectInstance(effect, Math.max(-1, duration), amplifier, false, false, true));
+        }
         if (!enabled && player.hasEffect(effect)) player.removeEffect(effect);
     }
 
@@ -96,9 +106,13 @@ public final class TransformationHandler {
         var level = player.level();
         BlockPos origin = player.blockPosition();
         if (level.isDay() && level.canSeeSky(origin) && level.getBrightness(net.minecraft.world.level.LightLayer.SKY, origin) > 0) return false;
-        for (BlockPos pos : BlockPos.betweenClosed(origin.offset(-5, -5, -5), origin.offset(5, 5, 5))) {
-            if (pos.distSqr(origin) <= 25 && level.hasChunkAt(pos) && !level.getBlockState(pos).isSolidRender(level, pos)
-                    && level.getMaxLocalRawBrightness(pos) == 0) return true;
+        for (BlockPos pos : BlockPos.betweenClosed(origin.offset(-16, -16, -16), origin.offset(16, 16, 16))) {
+            if (pos.distSqr(origin) > 256 || !level.hasChunkAt(pos)) continue;
+            // Moonlight must not prevent vision in an area with no emitted light.
+            boolean dark = level.isNight()
+                    ? level.getBrightness(net.minecraft.world.level.LightLayer.BLOCK, pos) == 0
+                    : level.getMaxLocalRawBrightness(pos) == 0;
+            if (dark && !level.getBlockState(pos).isSolidRender(level, pos)) return true;
         }
         return false;
     }

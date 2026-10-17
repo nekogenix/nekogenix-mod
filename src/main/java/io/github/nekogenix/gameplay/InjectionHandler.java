@@ -68,12 +68,13 @@ public final class InjectionHandler {
         if (session.elapsed == FORWARD_TICKS) sound(player, SoundEvents.BOTTLE_EMPTY, 0.7F, 1.25F);
         if (session.elapsed < TOTAL_TICKS) return;
         if (player.getData(Content.NEKO).begin()) {
+            FelineSounds.sync(player);
             player.setItemInHand(InteractionHand.MAIN_HAND, Content.USED_SYRINGE.toStack());
             player.hurt(player.damageSources().generic(), 1.0F);
             TransformationHandler.refreshEffects(player);
             player.serverLevel().sendParticles(ParticleTypes.WITCH, player.getX(), player.getY() + 1,
                     player.getZ(), 15, 0.3, 0.5, 0.3, 0.03);
-            sound(player, SoundEvents.PLAYER_BREATH, 0.9F, 0.65F);
+            sound(player, SoundEvents.CAT_PURREOW, 0.9F, 1.0F);
         }
         cancel(player, session);
         session.waitingForRelease = true;

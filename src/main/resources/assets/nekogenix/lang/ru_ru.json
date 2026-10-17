@@ -14,5 +14,12 @@
   "effect.nekogenix.neko_transformation": "Превращение в неко",
   "effect.nekogenix.feline_agility": "Кошачья ловкость",
   "effect.nekogenix.feline_vision": "Кошачье зрение",
-  "effect.nekogenix.soft_paw_pads": "Мягкие подушечки лап"
+  "effect.nekogenix.soft_paw_pads": "Мягкие подушечки лап",
+  "tooltip.nekogenix.injection_use": "Удерживайте ЛКМ для введения",
+  "tooltip.nekogenix.stages": "Три стадии по игровым суткам",
+  "tooltip.nekogenix.agility": "+100% к скорости бега и передвижения крадучись",
+  "tooltip.nekogenix.vision": "Ночное зрение рядом с неосвещёнными местами (16 блоков)",
+  "tooltip.nekogenix.paws": "-75% урона от падения",
+  "tooltip.nekogenix.delayed": "Эффекты наступят через игровые сутки",
+  "tooltip.nekogenix.stage_ability": "В конце каждой — случайная способность"
 }
