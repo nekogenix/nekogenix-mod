@@ -1,0 +1,29 @@
+{
+  "sources": [
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:mob_effect/nausea",
+      "sprite": "nekogenix:injection_shock"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:mob_effect/luck",
+      "sprite": "nekogenix:neko_transformation"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:mob_effect/speed",
+      "sprite": "nekogenix:feline_agility"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:mob_effect/night_vision",
+      "sprite": "nekogenix:feline_vision"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:mob_effect/slow_falling",
+      "sprite": "nekogenix:soft_paw_pads"
+    }
+  ]
+}

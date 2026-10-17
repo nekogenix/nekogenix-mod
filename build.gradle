@@ -1,0 +1,61 @@
+plugins {
+    id 'java-library'
+    id 'net.neoforged.moddev' version '2.0.148'
+}
+
+group = 'io.github.nekogenix'
+version = mod_version
+base.archivesName = 'nekogenix-neoforge'
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+sourceSets {
+    gameTest {
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+    }
+}
+configurations {
+    gameTestImplementation.extendsFrom implementation
+    gameTestRuntimeOnly.extendsFrom runtimeOnly
+}
+
+neoForge {
+    version = neo_version
+    addModdingDependenciesTo sourceSets.gameTest
+    runs {
+        client { client() }
+        server {
+            server()
+            programArgument '--nogui'
+        }
+        gameTestServer {
+            type = 'gameTestServer'
+            systemProperty 'neoforge.enabledGameTestNamespaces', 'nekogenix'
+        }
+        configureEach {
+            gameDirectory = project.layout.projectDirectory.dir("run/${name}")
+            logLevel = org.slf4j.event.Level.INFO
+        }
+    }
+    mods {
+        nekogenix {
+            sourceSet sourceSets.main
+            sourceSet sourceSets.gameTest
+        }
+    }
+}
+
+tasks.named('processResources', ProcessResources) {
+    inputs.property 'mod_version', project.version
+    filesMatching('META-INF/neoforge.mods.toml') {
+        expand mod_version: project.version
+    }
+}
+
+tasks.named('jar', Jar) {
+    from('LICENSE.md')
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
