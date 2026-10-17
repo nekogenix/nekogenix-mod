@@ -74,7 +74,7 @@ public final class InjectionHandler {
             TransformationHandler.refreshEffects(player);
             player.serverLevel().sendParticles(ParticleTypes.WITCH, player.getX(), player.getY() + 1,
                     player.getZ(), 15, 0.3, 0.5, 0.3, 0.03);
-            sound(player, SoundEvents.CAT_PURREOW, 0.9F, 1.0F);
+            sound(player, SoundEvents.PLAYER_BREATH, 0.9F, 0.65F);
         }
         cancel(player, session);
         session.waitingForRelease = true;

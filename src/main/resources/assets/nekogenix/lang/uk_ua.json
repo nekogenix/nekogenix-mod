@@ -22,5 +22,6 @@
   "tooltip.nekogenix.vision": "Нічний зір поблизу неосвітлених місць (16 блоків)",
   "tooltip.nekogenix.paws": "-75% шкоди від падіння",
   "tooltip.nekogenix.delayed": "Ефекти настануть через ігрову добу",
-  "tooltip.nekogenix.stage_ability": "Наприкінці кожної — випадкова здібність"
+  "tooltip.nekogenix.stage_ability": "Наприкінці кожної — випадкова здібність",
+  "options.nekogenix.neko_voice": "Неко голос"
 }
