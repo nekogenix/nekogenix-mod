@@ -1,6 +1,8 @@
 package io.github.nekogenix.item;
 
 import io.github.nekogenix.gameplay.SalivaExposure;
+import java.util.List;
+import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
@@ -13,6 +15,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
 
@@ -22,6 +25,11 @@ public final class SalivaBottleItem extends Item {
     public SalivaBottleItem(boolean splash) {
         super(new Item.Properties().stacksTo(1));
         this.splash = splash;
+    }
+
+    @Override
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+        ModTooltips.saliva(context, tooltip);
     }
 
     @Override

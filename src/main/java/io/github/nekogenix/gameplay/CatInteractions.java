@@ -34,7 +34,7 @@ public final class CatInteractions {
             event.getItemStack().consume(1, player);
             var sample = Content.SALIVA_SWAB.toStack();
             if (!player.addItem(sample)) player.drop(sample, false);
-            cat.level().playSound(null, cat.blockPosition(), SoundEvents.CAT_PURR, SoundSource.NEUTRAL, 0.8F, 1.2F);
+            cat.level().playSound(null, cat.blockPosition(), SoundEvents.CAT_PURREOW, SoundSource.NEUTRAL, 1.0F, 1.1F);
         } else if (cat.getPersistentData().getLong(FLEE_UNTIL) <= cat.level().getGameTime()) {
             cat.getPersistentData().putLong(FLEE_UNTIL, cat.level().getGameTime() + 120);
             cat.getPersistentData().putUUID(FLEE_FROM, player.getUUID());

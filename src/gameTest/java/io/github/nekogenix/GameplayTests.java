@@ -2,11 +2,16 @@ package io.github.nekogenix;
 
 import com.mojang.authlib.GameProfile;
 import io.github.nekogenix.gameplay.InjectionHandler;
+import io.github.nekogenix.gameplay.FelineSounds;
+import io.github.nekogenix.gameplay.TransformationHandler;
 import io.github.nekogenix.gameplay.SalivaExposure;
 import io.github.nekogenix.state.NekoState;
 import io.netty.channel.embedded.EmbeddedChannel;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.network.Connection;
@@ -29,6 +34,7 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 import net.neoforged.neoforge.network.registration.NetworkRegistry;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.PlayLevelSoundEvent;
 
 @GameTestHolder(Nekogenix.ID)
 @PrefixGameTestTemplate(false)
@@ -198,6 +204,73 @@ public final class GameplayTests {
             NeoForge.EVENT_BUS.post(new PlayerInteractEvent.EntityInteract(player, InteractionHand.MAIN_HAND, cat));
             helper.assertTrue(player.getInventory().countItem(Content.SALIVA_SWAB.get()) == 1
                     && player.getMainHandItem().getCount() == 1, "A foreign cat provides no sample and consumes no swab");
+            remove(player);
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "empty")
+    public static void stagesAndFelineVoices(GameTestHelper helper) {
+        ServerPlayer player = player(helper);
+        var state = player.getData(Content.NEKO);
+        state.begin();
+        FelineSounds.sync(player);
+        var hurt = NeoForge.EVENT_BUS.post(new PlayLevelSoundEvent.AtEntity(player,
+                Holder.direct(SoundEvents.PLAYER_HURT), SoundSource.PLAYERS, 1, 1));
+        helper.assertTrue(hurt.getSound().value() == SoundEvents.CAT_HURT, "Feline hurt voice starts during shock");
+        for (int stage = 0; stage < 3; stage++) {
+            var saved = state.serializeNBT(helper.getLevel().registryAccess());
+            saved.putInt("phase", NekoState.Phase.TRANSFORMING.ordinal());
+            saved.putInt("elapsed", stage * NekoState.DAY + 120);
+            state.deserializeNBT(helper.getLevel().registryAccess(), saved);
+            TransformationHandler.refreshEffects(player);
+            var effect = player.getEffect(Content.TRANSFORMING);
+            helper.assertTrue(effect != null && effect.getAmplifier() == stage
+                    && effect.getDuration() == NekoState.DAY - 120, "Saved progress restores the correct stage and timer");
+            for (int i = 120; i < NekoState.DAY; i++) state.tick(helper.getLevel().random);
+            int count = (state.has(1) ? 1 : 0) + (state.has(2) ? 1 : 0) + (state.has(4) ? 1 : 0);
+            helper.assertTrue(count == stage + 1, "Each completed stage grants one distinct ability");
+        }
+        TransformationHandler.refreshEffects(player);
+        helper.assertTrue(state.isNeko() && !player.hasEffect(Content.TRANSFORMING), "Stage three ends in full transformation");
+        var death = NeoForge.EVENT_BUS.post(new PlayLevelSoundEvent.AtPosition(player.level(), player.position(),
+                Holder.direct(SoundEvents.PLAYER_DEATH), SoundSource.PLAYERS, 1, 1));
+        helper.assertTrue(death.getSound().value() == SoundEvents.CAT_DEATH, "Server voice events identify their player");
+        for (int i = 0; i < 9; i++) state.loseLife();
+        FelineSounds.sync(player);
+        hurt = NeoForge.EVENT_BUS.post(new PlayLevelSoundEvent.AtEntity(player,
+                Holder.direct(SoundEvents.PLAYER_HURT), SoundSource.PLAYERS, 1, 1));
+        helper.assertTrue(hurt.getSound().value() == SoundEvents.PLAYER_HURT, "Human voices return with human state");
+        remove(player);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 120)
+    public static void darknessAtDistanceAndAtNight(GameTestHelper helper) {
+        ServerPlayer player = player(helper);
+        var level = helper.getLevel();
+        BlockPos origin = helper.absolutePos(new BlockPos(2, 3, 2)).atY(150);
+        player.teleportTo(origin.getX(), origin.getY(), origin.getZ());
+        level.setDayTime(6000);
+        level.setBlockAndUpdate(origin.above(2), Blocks.STONE.defaultBlockState());
+        BlockPos cell = origin.offset(12, 0, 0);
+        for (BlockPos pos : BlockPos.betweenClosed(cell.offset(-1, -1, -1), cell.offset(1, 1, 1))) {
+            level.setBlockAndUpdate(pos, (pos.equals(cell) ? Blocks.AIR : Blocks.STONE).defaultBlockState());
+        }
+        helper.runAfterDelay(30, () -> {
+            helper.assertTrue(level.getMaxLocalRawBrightness(cell) == 0, "The distant chamber has zero light");
+            helper.assertTrue(TransformationHandler.inDarkness(player), "Darkness twelve blocks away activates vision");
+            level.setBlockAndUpdate(cell, Blocks.STONE.defaultBlockState());
+        });
+        helper.runAfterDelay(60, () -> {
+            helper.assertFalse(TransformationHandler.inDarkness(player), "Partial daylight alone does not activate vision");
+            level.setBlockAndUpdate(origin, Blocks.TORCH.defaultBlockState());
+            level.setDayTime(13000);
+        });
+        helper.runAfterDelay(90, () -> {
+            helper.assertTrue(level.getBrightness(net.minecraft.world.level.LightLayer.BLOCK, origin) > 0,
+                    "The nearby torch emits light");
+            helper.assertTrue(TransformationHandler.inDarkness(player), "Unlit night within sixteen blocks survives a nearby torch");
             remove(player);
             helper.succeed();
         });

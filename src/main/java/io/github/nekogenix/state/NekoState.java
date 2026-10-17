@@ -25,6 +25,8 @@ public final class NekoState implements INBTSerializable<CompoundTag> {
     public int elapsed() { return elapsed; }
     public boolean isNeko() { return phase == Phase.NEKO; }
     public boolean has(int ability) { return (abilities & ability) != 0; }
+    public int stage() { return phase == Phase.TRANSFORMING ? Math.min(2, elapsed / DAY) : 0; }
+    public int stageRemaining() { return DAY - elapsed % DAY; }
 
     public boolean begin() {
         if (phase != Phase.HUMAN) return false;

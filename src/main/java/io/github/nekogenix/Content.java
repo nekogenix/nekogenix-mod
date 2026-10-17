@@ -3,6 +3,7 @@ package io.github.nekogenix;
 import com.mojang.serialization.Codec;
 import io.github.nekogenix.gameplay.InjectionHandler;
 import io.github.nekogenix.item.SalivaBottleItem;
+import io.github.nekogenix.item.NekoInjectionItem;
 import io.github.nekogenix.item.SalivaProjectile;
 import io.github.nekogenix.state.NekoState;
 import net.minecraft.core.registries.Registries;
@@ -40,7 +41,7 @@ public final class Content {
             () -> new SalivaBottleItem(false));
     public static final DeferredItem<SalivaBottleItem> SPLASH_SALIVA = ITEMS.register("splash_bottle_of_cat_saliva",
             () -> new SalivaBottleItem(true));
-    public static final DeferredItem<Item> INJECTION = ITEMS.registerSimpleItem("neko_injection", new Item.Properties().stacksTo(1));
+    public static final DeferredItem<NekoInjectionItem> INJECTION = ITEMS.register("neko_injection", NekoInjectionItem::new);
 
     public static final DeferredHolder<MobEffect, MobEffect> SHOCK = effect("injection_shock", MobEffectCategory.HARMFUL, 0xB769A2);
     public static final DeferredHolder<MobEffect, MobEffect> TRANSFORMING = effect("neko_transformation", MobEffectCategory.NEUTRAL, 0xD4A6DE);
@@ -60,6 +61,8 @@ public final class Content {
             () -> AttachmentType.builder(InjectionHandler.Session::new).build());
     public static final DeferredHolder<AttachmentType<?>, AttachmentType<Long>> INJECTION_STARTED = ATTACHMENTS.register("injection_started",
             () -> AttachmentType.builder(() -> -1L).sync(ByteBufCodecs.VAR_LONG).build());
+    public static final DeferredHolder<AttachmentType<?>, AttachmentType<Boolean>> FELINE_VOICE = ATTACHMENTS.register("feline_voice",
+            () -> AttachmentType.builder(() -> false).sync(ByteBufCodecs.BOOL).build());
 
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> TAB = TABS.register("nekogenix",
             () -> CreativeModeTab.builder().title(Component.translatable("itemGroup.nekogenix"))

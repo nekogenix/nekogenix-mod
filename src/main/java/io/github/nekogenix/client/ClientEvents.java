@@ -126,6 +126,7 @@ public final class ClientEvents {
 
         @SubscribeEvent
         public static void extensions(RegisterClientExtensionsEvent event) {
+            EffectDisplay.register(event);
             event.registerItem(new IClientItemExtensions() {
                 @Override
                 public HumanoidModel.ArmPose getArmPose(LivingEntity entity, InteractionHand hand, ItemStack stack) {
