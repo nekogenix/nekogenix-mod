@@ -1,0 +1,26 @@
+modLoader="javafml"
+loaderVersion="[4,)"
+license="PolyForm Noncommercial 1.0.0"
+
+[[mods]]
+modId="nekogenix"
+version="${mod_version}"
+displayName="Nekogenix"
+authors="Rudator and Wechirok"
+logoFile="icon.png"
+logoBlur=false
+description="Lets you transform into a cat and experience life from a neko's perspective."
+
+[[dependencies.nekogenix]]
+modId="neoforge"
+type="required"
+versionRange="[21.1.259,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.nekogenix]]
+modId="minecraft"
+type="required"
+versionRange="[1.21.1]"
+ordering="NONE"
+side="BOTH"

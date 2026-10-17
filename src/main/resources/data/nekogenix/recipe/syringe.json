@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "A",
+    "B",
+    "C"
+  ],
+  "key": {
+    "A": {
+      "item": "nekogenix:syringe_plunger"
+    },
+    "B": {
+      "item": "nekogenix:syringe_barrel"
+    },
+    "C": {
+      "item": "nekogenix:syringe_needle"
+    }
+  },
+  "result": {
+    "id": "nekogenix:syringe",
+    "count": 1
+  }
+}

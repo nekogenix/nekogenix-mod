@@ -1,0 +1,18 @@
+{
+  "itemGroup.nekogenix": "Nekogenix",
+  "item.nekogenix.syringe_needle": "Игла шприца",
+  "item.nekogenix.syringe_barrel": "Цилиндр шприца",
+  "item.nekogenix.syringe_plunger": "Поршень шприца",
+  "item.nekogenix.syringe": "Шприц",
+  "item.nekogenix.used_syringe": "Использованный шприц",
+  "item.nekogenix.cotton_swab": "Ватная палочка",
+  "item.nekogenix.cat_saliva_swab": "Мазок кошачьей слюны",
+  "item.nekogenix.bottle_of_cat_saliva": "Бутылочка кошачьей слюны",
+  "item.nekogenix.splash_bottle_of_cat_saliva": "Взрывная бутылочка кошачьей слюны",
+  "item.nekogenix.neko_injection": "Неко-инъекция",
+  "effect.nekogenix.injection_shock": "Реакция на инъекцию",
+  "effect.nekogenix.neko_transformation": "Превращение в неко",
+  "effect.nekogenix.feline_agility": "Кошачья ловкость",
+  "effect.nekogenix.feline_vision": "Кошачье зрение",
+  "effect.nekogenix.soft_paw_pads": "Мягкие подушечки лап"
+}

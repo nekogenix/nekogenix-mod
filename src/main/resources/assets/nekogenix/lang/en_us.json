@@ -1,0 +1,18 @@
+{
+  "itemGroup.nekogenix": "Nekogenix",
+  "item.nekogenix.syringe_needle": "Syringe Needle",
+  "item.nekogenix.syringe_barrel": "Syringe Barrel",
+  "item.nekogenix.syringe_plunger": "Syringe Plunger",
+  "item.nekogenix.syringe": "Syringe",
+  "item.nekogenix.used_syringe": "Used Syringe",
+  "item.nekogenix.cotton_swab": "Cotton Swab",
+  "item.nekogenix.cat_saliva_swab": "Cat Saliva Swab",
+  "item.nekogenix.bottle_of_cat_saliva": "Bottle of Cat Saliva",
+  "item.nekogenix.splash_bottle_of_cat_saliva": "Splash Bottle of Cat Saliva",
+  "item.nekogenix.neko_injection": "Neko Injection",
+  "effect.nekogenix.injection_shock": "Injection Shock",
+  "effect.nekogenix.neko_transformation": "Neko Transformation",
+  "effect.nekogenix.feline_agility": "Feline Agility",
+  "effect.nekogenix.feline_vision": "Feline Vision",
+  "effect.nekogenix.soft_paw_pads": "Soft Paw Pads"
+}
