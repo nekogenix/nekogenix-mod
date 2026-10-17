@@ -2,6 +2,7 @@ package io.github.nekogenix.gameplay;
 
 import io.github.nekogenix.Content;
 import io.github.nekogenix.Nekogenix;
+import io.github.nekogenix.VoiceSounds;
 import io.github.nekogenix.state.NekoState;
 import net.minecraft.core.Holder;
 import net.minecraft.sounds.SoundEvent;
@@ -49,7 +50,7 @@ public final class FelineSounds {
                 || sound == SoundEvents.PLAYER_SMALL_FALL || sound == SoundEvents.PLAYER_BIG_FALL) return SoundEvents.CAT_HURT;
         if (sound == SoundEvents.PLAYER_DEATH) return SoundEvents.CAT_DEATH;
         if (sound == SoundEvents.GENERIC_EAT || sound == SoundEvents.GENERIC_DRINK) return SoundEvents.CAT_EAT;
-        if (sound == SoundEvents.PLAYER_BURP || sound == SoundEvents.PLAYER_BREATH) return SoundEvents.CAT_PURREOW;
+        if (sound == SoundEvents.PLAYER_BURP) return SoundEvents.CAT_PURREOW;
         return null;
     }
 
@@ -60,13 +61,13 @@ public final class FelineSounds {
                 || !player.getData(Content.FELINE_VOICE) || player.tickCount % 120 != 0
                 || player.getRandom().nextBoolean()) return;
         SoundEvent sound;
-        if (player.getFoodData().getFoodLevel() < 10) sound = SoundEvents.CAT_BEG_FOR_FOOD;
-        else if (player.isSleeping() || player.isCrouching()) sound = SoundEvents.CAT_PURR;
+        if (player.getFoodData().getFoodLevel() < 10) sound = VoiceSounds.BEG.get();
+        else if (player.isSleeping() || player.isCrouching()) sound = VoiceSounds.PURR.get();
         else sound = switch (player.getRandom().nextInt(4)) {
-            case 0 -> SoundEvents.CAT_STRAY_AMBIENT;
-            case 1 -> SoundEvents.CAT_PURREOW;
-            case 2 -> SoundEvents.CAT_PURR;
-            default -> SoundEvents.CAT_AMBIENT;
+            case 0 -> VoiceSounds.STRAY_MEOW.get();
+            case 1 -> VoiceSounds.PURREOW.get();
+            case 2 -> VoiceSounds.PURR.get();
+            default -> VoiceSounds.MEOW.get();
         };
         play(player, sound, 0.5F);
     }

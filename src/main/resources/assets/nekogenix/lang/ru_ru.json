@@ -21,5 +21,6 @@
   "tooltip.nekogenix.vision": "Ночное зрение рядом с неосвещёнными местами (16 блоков)",
   "tooltip.nekogenix.paws": "-75% урона от падения",
   "tooltip.nekogenix.delayed": "Эффекты наступят через игровые сутки",
-  "tooltip.nekogenix.stage_ability": "В конце каждой — случайная способность"
+  "tooltip.nekogenix.stage_ability": "В конце каждой — случайная способность",
+  "options.nekogenix.neko_voice": "Неко голос"
 }

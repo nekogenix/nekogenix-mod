@@ -1,0 +1,22 @@
+{
+  "voice_meow": {
+    "subtitle": "subtitles.entity.cat.ambient",
+    "sounds": [{"name": "minecraft:entity.cat.ambient", "type": "event"}]
+  },
+  "voice_stray_meow": {
+    "subtitle": "subtitles.entity.cat.ambient",
+    "sounds": [{"name": "minecraft:entity.cat.stray_ambient", "type": "event"}]
+  },
+  "voice_beg": {
+    "subtitle": "subtitles.entity.cat.beg_for_food",
+    "sounds": [{"name": "minecraft:entity.cat.beg_for_food", "type": "event"}]
+  },
+  "voice_purr": {
+    "subtitle": "subtitles.entity.cat.purr",
+    "sounds": [{"name": "minecraft:entity.cat.purr", "type": "event"}]
+  },
+  "voice_purreow": {
+    "subtitle": "subtitles.entity.cat.ambient",
+    "sounds": [{"name": "minecraft:entity.cat.purreow", "type": "event"}]
+  }
+}
