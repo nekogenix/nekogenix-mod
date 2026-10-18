@@ -2,6 +2,7 @@ package io.github.nekogenix;
 
 import com.mojang.logging.LogUtils;
 import io.github.nekogenix.network.InjectionInput;
+import io.github.nekogenix.network.AirJumpInput;
 import io.github.nekogenix.config.ClientConfig;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
@@ -34,6 +35,8 @@ public final class Nekogenix {
     }
 
     private static void network(RegisterPayloadHandlersEvent event) {
+        event.registrar("1").playToServer(AirJumpInput.TYPE, AirJumpInput.STREAM_CODEC,
+                (payload, context) -> io.github.nekogenix.gameplay.FelineJump.jump(context.player()));
         event.registrar("1").playToServer(InjectionInput.TYPE, InjectionInput.STREAM_CODEC,
                 (payload, context) -> {
                     if (context.player() instanceof net.minecraft.server.level.ServerPlayer player) {

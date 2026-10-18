@@ -4,6 +4,8 @@ import io.github.nekogenix.Content;
 import io.github.nekogenix.Nekogenix;
 import io.github.nekogenix.VoiceSounds;
 import io.github.nekogenix.state.NekoState;
+import java.util.Map;
+import java.util.WeakHashMap;
 import net.minecraft.core.Holder;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -13,11 +15,13 @@ import net.minecraft.world.phys.AABB;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.PlayLevelSoundEvent;
-import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 @EventBusSubscriber(modid = Nekogenix.ID)
 public final class FelineSounds {
+    private static final Map<Player, Integer> LAST_HISS = new WeakHashMap<>();
     public static void sync(Player player) {
         boolean active = player.getData(Content.NEKO).phase() != NekoState.Phase.HUMAN;
         if (player.getData(Content.FELINE_VOICE) != active) player.setData(Content.FELINE_VOICE, active);
@@ -73,10 +77,14 @@ public final class FelineSounds {
     }
 
     @SubscribeEvent
-    public static void hiss(AttackEntityEvent event) {
-        Player player = event.getEntity();
-        if (!player.level().isClientSide && player.getData(Content.FELINE_VOICE)
-                && player.getAttackStrengthScale(0) >= 0.9F) play(player, SoundEvents.CAT_HISS, 0.6F);
+    public static void hiss(LivingDamageEvent.Post event) {
+        if (!(event.getSource().getEntity() instanceof Player player) || player.level().isClientSide
+                || !event.getSource().is(DamageTypes.PLAYER_ATTACK) || event.getNewDamage() <= 0
+                || !player.getData(Content.FELINE_VOICE)
+                || player.tickCount - LAST_HISS.getOrDefault(player, player.tickCount - 40) < 40
+                || player.getRandom().nextFloat() >= .3F) return;
+        LAST_HISS.put(player, player.tickCount);
+        play(player, SoundEvents.CAT_HISS, 0.6F);
     }
 
     private static void play(Player player, SoundEvent sound, float volume) {

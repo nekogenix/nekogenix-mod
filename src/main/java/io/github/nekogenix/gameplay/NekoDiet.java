@@ -5,6 +5,8 @@ import io.github.nekogenix.Content;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
@@ -14,6 +16,7 @@ import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.CakeBlock;
 import net.minecraft.world.level.block.CandleCakeBlock;
 import net.neoforged.bus.api.EventPriority;
@@ -27,11 +30,15 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 @EventBusSubscriber(modid = Nekogenix.ID)
 public final class NekoDiet {
     private record Rule(int nutrition, float saturationScale, Item cookedEquivalent) {}
-    private record Meal(Item item, int food, float saturation, long tick) {}
-    private record CakeMeal(int slices, int food, float saturation, long tick) {}
+    private record Meal(ItemStack stack, FoodProperties original, FoodProperties prepared) {
+        void restore(ItemStack target) {
+            if (target.get(DataComponents.FOOD) == prepared) target.set(DataComponents.FOOD, original);
+        }
+    }
+    private record CakeMeal(BlockPos pos, int bites, int slices, int food, float saturation, long tick) {}
     private static final Map<Item, Rule> RULES = rules();
-    private static final Map<ServerPlayer, Meal> MEALS = new WeakHashMap<>();
-    private static final Map<ServerPlayer, CakeMeal> CAKES = new WeakHashMap<>();
+    private static final Map<Player, Meal> MEALS = new WeakHashMap<>();
+    private static final Map<Player, CakeMeal> CAKES = new WeakHashMap<>();
 
     private static Map<Item, Rule> rules() {
         Map<Item, Rule> rules = new HashMap<>();
@@ -61,16 +68,60 @@ public final class NekoDiet {
         map.put(raw, new Rule(nutrition, 1, cooked));
     }
 
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void beforeEating(LivingEntityUseItemEvent.Tick event) {
-        if (event.getDuration() > 1 || !(event.getEntity() instanceof ServerPlayer player)
-                || !TransformationHandler.isNeko(player) || !RULES.containsKey(event.getItem().getItem())) return;
-        MEALS.put(player, new Meal(event.getItem().getItem(), player.getFoodData().getFoodLevel(),
-                player.getFoodData().getSaturationLevel(), player.level().getGameTime()));
+    private static boolean enabled(Player player) {
+        return player.level().isClientSide ? player.getData(Content.FELINE_DIET) : TransformationHandler.isNeko(player);
     }
 
-    @SubscribeEvent
+    public static FoodProperties food(Player player, ItemStack stack) {
+        FoodProperties food = stack.getFoodProperties(player);
+        Rule rule = RULES.get(stack.getItem());
+        if (!enabled(player) || rule == null || food == null) return food;
+        float saturation = food.saturation() * rule.saturationScale();
+        if (rule.cookedEquivalent() != null) {
+            FoodProperties cooked = rule.cookedEquivalent().getDefaultInstance().getFoodProperties(player);
+            if (cooked != null) saturation = cooked.saturation();
+        }
+        var effects = food.effects().stream().filter(possible -> {
+            var effect = possible.effect();
+            return !(stack.is(Items.SPIDER_EYE) && effect.is(MobEffects.POISON)
+                    || stack.is(Items.CHICKEN) && effect.is(MobEffects.HUNGER)
+                    && effect.getDuration() == 600 && effect.getAmplifier() == 0);
+        }).toList();
+        return new FoodProperties(rule.nutrition(), saturation, food.canAlwaysEat(), food.eatSeconds(), food.usingConvertsTo(), effects);
+    }
+
+    private static void prepare(Player player, ItemStack stack) {
+        if (MEALS.containsKey(player) || !enabled(player) || !RULES.containsKey(stack.getItem())) return;
+        FoodProperties original = stack.get(DataComponents.FOOD);
+        FoodProperties prepared = food(player, stack);
+        if (original == null || prepared == null) return;
+        MEALS.put(player, new Meal(stack, original, prepared));
+        stack.set(DataComponents.FOOD, prepared);
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void start(LivingEntityUseItemEvent.Start event) {
+        if (event.getEntity() instanceof Player player && player.level().isClientSide) prepare(player, event.getItem());
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void beforeEating(LivingEntityUseItemEvent.Tick event) {
+        // Supply native eating with the final values, before FoodData changes on either side.
+        if (event.getEntity() instanceof Player player && (player.level().isClientSide || event.getDuration() <= 1)) {
+            prepare(player, event.getItem());
+        }
+    }
+
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void finish(LivingEntityUseItemEvent.Finish event) {
+        if (event.getEntity() instanceof Player player) {
+            Meal meal = MEALS.remove(player);
+            if (meal != null) {
+                meal.restore(meal.stack());
+                meal.restore(event.getItem());
+                meal.restore(event.getResultStack());
+            }
+        }
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         ItemStack stack = event.getItem();
         if (stack.is(Items.MILK_BUCKET)) {
@@ -80,38 +131,9 @@ public final class NekoDiet {
             return;
         }
         if (!TransformationHandler.isNeko(player)) return;
-        Meal meal = MEALS.remove(player);
-        if (meal != null && meal.item() == stack.getItem()
-                && meal.tick() == player.level().getGameTime()) {
-            adjustMeal(player, stack, meal.food(), meal.saturation());
-        }
         if (stack.is(Items.COOKIE)) poison(player, 300, 0);
         else if (stack.is(Items.ROTTEN_FLESH)) poison(player, 160, 0);
         else if (stack.is(Items.POISONOUS_POTATO)) poison(player, 200, 1);
-    }
-
-    static void adjustMeal(ServerPlayer player, ItemStack stack, int beforeFood, float beforeSaturation) {
-        if (!TransformationHandler.isNeko(player)) return;
-        Rule rule = RULES.get(stack.getItem());
-        FoodProperties food = stack.getFoodProperties(player);
-        if (rule == null || food == null) return;
-        float saturation = food.saturation() * rule.saturationScale();
-        if (rule.cookedEquivalent() != null) {
-            FoodProperties cooked = rule.cookedEquivalent().getDefaultInstance().getFoodProperties(player);
-            if (cooked != null) saturation = cooked.saturation();
-        }
-        adjust(player, beforeFood, beforeSaturation, food.nutrition(), food.saturation(), rule.nutrition(), saturation);
-    }
-
-    @SubscribeEvent
-    public static void chickenHunger(MobEffectEvent.Applicable event) {
-        if (event.getEntity() instanceof ServerPlayer player && TransformationHandler.isNeko(player)
-                && player.isUsingItem() && player.getUseItem().is(Items.CHICKEN)
-                && player.getUseItemRemainingTicks() <= 1 && event.getEffectInstance().is(MobEffects.HUNGER)
-                && event.getEffectInstance().getDuration() == 600 && event.getEffectInstance().getAmplifier() == 0
-                && event.getEffectSource() == null) {
-            event.setResult(MobEffectEvent.Applicable.Result.DO_NOT_APPLY);
-        }
     }
 
     private static void poison(ServerPlayer player, int duration, int amplifier) {
@@ -131,29 +153,39 @@ public final class NekoDiet {
 
     @SubscribeEvent
     public static void cakeInteraction(PlayerInteractEvent.RightClickBlock event) {
-        if (!(event.getEntity() instanceof ServerPlayer player) || !TransformationHandler.isNeko(player)) return;
-        var block = event.getLevel().getBlockState(event.getPos()).getBlock();
+        Player player = event.getEntity();
+        if (!enabled(player)) return;
+        var state = event.getLevel().getBlockState(event.getPos());
+        var block = state.getBlock();
         if (!(block instanceof CakeBlock) && !(block instanceof CandleCakeBlock)) return;
         // Observe vanilla's successful slice consumption without replacing cake, candle or item interactions.
-        CAKES.putIfAbsent(player, new CakeMeal(player.getStats().getValue(Stats.CUSTOM, Stats.EAT_CAKE_SLICE),
+        CAKES.putIfAbsent(player, new CakeMeal(event.getPos().immutable(), state.hasProperty(CakeBlock.BITES) ? state.getValue(CakeBlock.BITES) : 0,
+                player instanceof ServerPlayer server ? server.getStats().getValue(Stats.CUSTOM, Stats.EAT_CAKE_SLICE) : 0,
                 player.getFoodData().getFoodLevel(), player.getFoodData().getSaturationLevel(), player.level().getGameTime()));
     }
 
     @SubscribeEvent
     public static void afterTick(PlayerTickEvent.Post event) {
-        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        Player player = event.getEntity();
         CakeMeal cake = CAKES.remove(player);
-        if (cake != null && TransformationHandler.isNeko(player)) {
-            int count = player.getStats().getValue(Stats.CUSTOM, Stats.EAT_CAKE_SLICE) - cake.slices();
+        if (cake != null && enabled(player)) {
+            var state = player.level().getBlockState(cake.pos());
+            int count = player instanceof ServerPlayer server ? server.getStats().getValue(Stats.CUSTOM, Stats.EAT_CAKE_SLICE) - cake.slices()
+                    : state.hasProperty(CakeBlock.BITES) ? state.getValue(CakeBlock.BITES) - cake.bites()
+                    : state.isAir() && cake.bites() == 6 ? 1 : 0;
             if (count > 0 && player.level().getGameTime() - cake.tick() <= 1) {
                 adjust(player, cake.food(), cake.saturation(), 2 * count, .4F * count, count, 0);
             }
         }
         Meal meal = MEALS.get(player);
-        if (meal != null && player.level().getGameTime() > meal.tick()) MEALS.remove(player);
+        if (meal != null && (!player.level().isClientSide || !player.isUsingItem()
+                || player.getUseItem() != meal.stack() || !enabled(player))) {
+            meal.restore(meal.stack());
+            MEALS.remove(player);
+        }
     }
 
-    private static void adjust(ServerPlayer player, int beforeFood, float beforeSat,
+    private static void adjust(Player player, int beforeFood, float beforeSat,
             int vanillaFood, float vanillaSat, int nekoFood, float nekoSat) {
         var data = player.getFoodData();
         int expectedFood = Math.min(20, beforeFood + vanillaFood);

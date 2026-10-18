@@ -22,6 +22,7 @@ final class ModTooltips {
         tooltip.add(CommonComponents.EMPTY);
         tooltip.add(Component.translatable("potion.whenDrank").withStyle(ChatFormatting.DARK_PURPLE));
         line(tooltip, "agility", ChatFormatting.BLUE);
+        line(tooltip, "double_jump", ChatFormatting.BLUE);
         line(tooltip, "vision", ChatFormatting.BLUE);
         line(tooltip, "paws", ChatFormatting.BLUE);
     }
