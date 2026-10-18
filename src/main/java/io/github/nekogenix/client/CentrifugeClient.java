@@ -2,6 +2,7 @@ package io.github.nekogenix.client;
 
 import io.github.nekogenix.Content;
 import io.github.nekogenix.Nekogenix;
+import io.github.nekogenix.pneumatic.PneumaticStandMenu;
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -37,8 +38,10 @@ public final class CentrifugeClient {
         var mc = Minecraft.getInstance();
         if (!(mc.screen instanceof PneumaticStandScreen screen)) return 0;
         var menu = screen.getMenu();
-        if (!menu.running() || menu.target() < 0 || !menu.getSlot(3).getItem().is(Content.CAT_NUCLEOCARD)) return 0;
-        return stack == menu.getSlot(card ? 3 : menu.target()).getItem() ? Math.min(7, (int) (menu.fraction() * 8)) : 0;
+        if (!menu.running() || !menu.getSlot(PneumaticStandMenu.CARD_SLOT).getItem().is(Content.CAT_NUCLEOCARD)) return 0;
+        boolean active = card ? stack == menu.getSlot(PneumaticStandMenu.CARD_SLOT).getItem()
+                : menu.filling(0) && stack == menu.getSlot(0).getItem() || menu.filling(1) && stack == menu.getSlot(1).getItem();
+        return active ? Math.min(7, (int) (menu.fraction() * 8)) : 0;
     }
 
     private CentrifugeClient() {}

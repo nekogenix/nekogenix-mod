@@ -23,6 +23,7 @@ public final class CentrifugeSmokeTest {
     public static void server(PlayerTickEvent.Post event) {
         if (!ENABLED || !(event.getEntity() instanceof net.minecraft.server.level.ServerPlayer player)) return;
         var level = player.serverLevel();
+        if (Boolean.getBoolean("nekogenix.pneumaticSmokeTest")) { pneumaticServer(player); return; }
         if (player.tickCount == 40) {
             level.setDayTime(6000);
             level.getGameRules().getRule(net.minecraft.world.level.GameRules.RULE_DAYLIGHT).set(false, player.server);
@@ -58,8 +59,30 @@ public final class CentrifugeSmokeTest {
         if (player.tickCount == 820) player.teleportTo(level, 10.5, -58.7, 6.2, 0, 43);
         if (player.tickCount == 870) {
             var stand = (PneumaticStandBlockEntity) level.getBlockEntity(BREWER);
-            for (int i = 0; i < 3; i++) stand.setItem(i, Content.SYRINGE.toStack());
+            for (int i : new int[] {0, 2}) stand.setItem(i, Content.SYRINGE.toStack());
             stand.setItem(3, player.getInventory().removeItem(8, 1));
+            stand.setItem(4, Items.WIND_CHARGE.getDefaultInstance());
+        }
+    }
+
+    private static void pneumaticServer(net.minecraft.server.level.ServerPlayer player) {
+        var level = player.serverLevel();
+        if (player.tickCount == 40) {
+            level.setDayTime(6000);
+            player.setGameMode(net.minecraft.world.level.GameType.CREATIVE);
+            player.getAbilities().flying = true;
+            player.onUpdateAbilities();
+            player.teleportTo(level, 10.5, -58.7, 6.2, 0, 43);
+            player.getInventory().setItem(0, Content.PNEUMATIC_ITEM.toStack());
+            player.getInventory().setItem(9, Content.PNEUMATIC_ITEM.toStack());
+            level.setBlockAndUpdate(BREWER, Blocks.AIR.defaultBlockState());
+            level.setBlockAndUpdate(BREWER.below(), Blocks.STONE.defaultBlockState());
+            level.setBlockAndUpdate(BREWER, Content.PNEUMATIC_STAND.get().defaultBlockState());
+        }
+        if (player.tickCount == 120) {
+            var stand = (PneumaticStandBlockEntity) level.getBlockEntity(BREWER);
+            for (int slot : new int[] {0, 2}) stand.setItem(slot, Content.SYRINGE.toStack());
+            stand.setItem(3, Content.CAT_NUCLEOCARD.toStack());
             stand.setItem(4, Items.WIND_CHARGE.getDefaultInstance());
         }
     }
@@ -83,6 +106,7 @@ public final class CentrifugeSmokeTest {
             if (!ENABLED) return;
             var mc = net.minecraft.client.Minecraft.getInstance();
             if (mc.player == null || mc.level == null) return;
+            if (Boolean.getBoolean("nekogenix.pneumaticSmokeTest")) { pneumaticClient(mc); return; }
             int age = mc.player.tickCount;
             if (age == 45) mc.options.fov().set(35);
             if (age == 60) {
@@ -145,29 +169,63 @@ public final class CentrifugeSmokeTest {
             if (age == 900) capture(mc, "pneumatic-menu-start.png");
             if (age == 1030 || age == 1150) {
                 var menu = (PneumaticStandMenu) mc.player.containerMenu;
-                var card = menu.getSlot(3).getItem();
+                var card = menu.getSlot(2).getItem();
                 var syringe = menu.getSlot(0).getItem();
                 var property = Content.id("brewing_progress");
                 float cardFrame = net.minecraft.client.renderer.item.ItemProperties.getProperty(card, property).call(card, mc.level, mc.player, 0);
                 float syringeFrame = net.minecraft.client.renderer.item.ItemProperties.getProperty(syringe, property).call(syringe, mc.level, mc.player, 0);
-                var untouched = menu.getSlot(1).getItem();
+                var second = menu.getSlot(1).getItem();
                 check(cardFrame > 0 && cardFrame == syringeFrame
-                                && net.minecraft.client.renderer.item.ItemProperties.getProperty(untouched, property).call(untouched, mc.level, mc.player, 0) == 0,
-                        "Card draining and exactly one syringe filling use the synchronized pneumatic timer");
+                                && net.minecraft.client.renderer.item.ItemProperties.getProperty(second, property).call(second, mc.level, mc.player, 0) == cardFrame,
+                        "Card draining and both syringes filling use the synchronized pneumatic timer");
                 capture(mc, age == 1030 ? "pneumatic-menu-half.png" : "pneumatic-menu-late.png");
             }
             if (age == 1320) {
                 var menu = mc.player.containerMenu;
                 check(menu instanceof PneumaticStandMenu && menu.getSlot(0).getItem().is(Content.INJECTION)
-                        && menu.getSlot(1).getItem().is(Content.SYRINGE) && menu.getSlot(2).getItem().is(Content.SYRINGE)
-                        && menu.getSlot(3).getItem().is(Content.BLANK_NUCLEOCARD) && brewSound,
-                        "Wind charge fills exactly one syringe returns blank card and plays a vanilla breeze sound");
+                        && menu.getSlot(1).getItem().is(Content.INJECTION) && menu.getSlot(2).getItem().is(Content.BLANK_NUCLEOCARD) && brewSound,
+                        "Wind charge fills both syringes returns blank card and plays a vanilla breeze sound");
                 capture(mc, "pneumatic-menu-complete.png");
                 Nekogenix.LOGGER.info("Nekogenix centrifuge smoke passed: gradual redstone extraction and pneumatic syringe filling with reusable blank card");
             }
             if (age == 1330) mc.player.closeContainer();
             if (age == 1340) capture(mc, "pneumatic-world-complete.png");
             if (age >= 1350) mc.stop();
+        }
+
+        private static void pneumaticClient(net.minecraft.client.Minecraft mc) {
+            int age = mc.player.tickCount;
+            if (age == 45) mc.options.fov().set(35);
+            if (age == 80 || age == 260) open(mc, BREWER);
+            if (age == 100) {
+                check(mc.screen instanceof io.github.nekogenix.client.PneumaticStandScreen, "Pneumatic menu opens normally");
+                check(mc.player.containerMenu.slots.size() == 40, "Only four machine slots are present");
+                capture(mc, "pneumatic-menu-empty.png");
+            }
+            if (age == 200 || age == 400) {
+                var menu = (PneumaticStandMenu) mc.player.containerMenu;
+                var card = menu.getSlot(PneumaticStandMenu.CARD_SLOT).getItem();
+                var property = Content.id("brewing_progress");
+                float frame = net.minecraft.client.renderer.item.ItemProperties.getProperty(card, property).call(card, mc.level, mc.player, 0);
+                check(frame > 0 && menu.filling(0) && menu.filling(1), "Both syringe slots participate in the cycle");
+                for (int slot = 0; slot < 2; slot++) {
+                    var syringe = menu.getSlot(slot).getItem();
+                    check(net.minecraft.client.renderer.item.ItemProperties.getProperty(syringe, property).call(syringe, mc.level, mc.player, 0) == frame,
+                            "Both syringe animations stay synchronized with the card");
+                }
+                capture(mc, age == 200 ? "pneumatic-menu-half.png" : "pneumatic-menu-late.png");
+            }
+            if (age == 240) mc.player.closeContainer();
+            if (age == 560) {
+                var menu = (PneumaticStandMenu) mc.player.containerMenu;
+                check(!menu.running() && menu.getSlot(0).getItem().is(Content.INJECTION) && menu.getSlot(1).getItem().is(Content.INJECTION)
+                                && menu.getSlot(PneumaticStandMenu.CARD_SLOT).getItem().is(Content.BLANK_NUCLEOCARD)
+                                && menu.getSlot(PneumaticStandMenu.FUEL_SLOT).getItem().isEmpty() && brewSound,
+                        "One card and charge produce two injections after closing and reopening the menu");
+                capture(mc, "pneumatic-menu-complete.png");
+                Nekogenix.LOGGER.info("Nekogenix pneumatic smoke passed: two slots, synchronized filling, two injections, blank card and vanilla sound");
+            }
+            if (age >= 580) mc.stop();
         }
 
         private static void open(net.minecraft.client.Minecraft mc, BlockPos pos) {

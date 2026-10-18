@@ -35,6 +35,6 @@
   "container.nekogenix.fuel_slot": "Редстоуновий пил: 64 на цикл",
   "tooltip.nekogenix.blank_nucleocard": "Обробіть із шістьма зразками слини в центрифузі",
   "tooltip.nekogenix.cat_nucleocard": "Помістіть над шприцом у пневматичній стійці",
-  "tooltip.nekogenix.nucleocard_return": "Стає порожньою після заповнення одного шприца",
+  "tooltip.nekogenix.nucleocard_return": "Стає порожньою після заповнення до двох шприців",
   "block.nekogenix.pneumatic_stand": "Пневматична стійка"
 }

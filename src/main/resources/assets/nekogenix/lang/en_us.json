@@ -34,6 +34,6 @@
   "container.nekogenix.fuel_slot": "Redstone dust: 64 per batch",
   "tooltip.nekogenix.blank_nucleocard": "Process with six saliva samples in a Centrifuge",
   "tooltip.nekogenix.cat_nucleocard": "Place above a Syringe in a Pneumatic Stand",
-  "tooltip.nekogenix.nucleocard_return": "Returns to a Blank Nucleocard after filling one Syringe",
+  "tooltip.nekogenix.nucleocard_return": "Returns to a Blank Nucleocard after filling up to two Syringes",
   "block.nekogenix.pneumatic_stand": "Pneumatic Stand"
 }

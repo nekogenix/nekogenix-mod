@@ -17,9 +17,9 @@ public final class PneumaticStandScreen extends AbstractContainerScreen<Pneumati
     public PneumaticStandScreen(PneumaticStandMenu menu, Inventory inventory, Component title) { super(menu, inventory, title); }
     @Override protected void renderBg(GuiGraphics graphics, float partial, int mouseX, int mouseY) {
         graphics.blit(TEXTURE, leftPos, topPos, 0, 0, imageWidth, imageHeight, imageWidth, imageHeight);
-        for (int index = 0; index < 5; index++) {
+        for (int index = 0; index < 4; index++) {
             var slot = menu.getSlot(index);
-            if (!slot.hasItem()) graphics.blit(index < 3 ? SYRINGE_HINT : index == 3 ? CARD_HINT : FUEL_HINT,
+            if (!slot.hasItem()) graphics.blit(index < 2 ? SYRINGE_HINT : index == PneumaticStandMenu.CARD_SLOT ? CARD_HINT : FUEL_HINT,
                     leftPos + slot.x, topPos + slot.y, 0, 0, 16, 16, 16, 16);
         }
         if (!menu.running()) return;

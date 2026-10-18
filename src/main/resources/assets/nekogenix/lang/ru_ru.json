@@ -34,6 +34,6 @@
   "container.nekogenix.fuel_slot": "Редстоуновая пыль: 64 на цикл",
   "tooltip.nekogenix.blank_nucleocard": "Обработайте с шестью образцами слюны в центрифуге",
   "tooltip.nekogenix.cat_nucleocard": "Поместите над шприцем в пневматической стойке",
-  "tooltip.nekogenix.nucleocard_return": "Становится пустой после заполнения одного шприца",
+  "tooltip.nekogenix.nucleocard_return": "Становится пустой после заполнения до двух шприцев",
   "block.nekogenix.pneumatic_stand": "Пневматическая стойка"
 }

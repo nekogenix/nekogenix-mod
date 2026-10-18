@@ -13,6 +13,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 public final class PneumaticStandMenu extends AbstractContainerMenu {
+    public static final int CARD_SLOT = 2;
+    public static final int FUEL_SLOT = 3;
     private final Container container;
     private final ContainerData data;
 
@@ -24,7 +26,6 @@ public final class PneumaticStandMenu extends AbstractContainerMenu {
         this.container = container;
         this.data = data;
         addMachineSlot(0, 56, 51);
-        addMachineSlot(1, 79, 58);
         addMachineSlot(2, 102, 51);
         addMachineSlot(3, 79, 17);
         addMachineSlot(4, 17, 17);
@@ -32,17 +33,17 @@ public final class PneumaticStandMenu extends AbstractContainerMenu {
         for (int col = 0; col < 9; col++) addSlot(new Slot(inventory, col, 8 + col * 18, 142));
         addDataSlots(data);
     }
-    private void addMachineSlot(int index, int x, int y) {
-        addSlot(new Slot(container, index, x, y) {
+    private void addMachineSlot(int inventorySlot, int x, int y) {
+        addSlot(new Slot(container, inventorySlot, x, y) {
             @Override public boolean mayPlace(ItemStack stack) {
-                return index < 3 ? stack.is(Content.SYRINGE) : index == 3 ? stack.is(Content.CAT_NUCLEOCARD) : stack.is(Items.WIND_CHARGE);
+                return inventorySlot < 3 ? stack.is(Content.SYRINGE) : inventorySlot == 3 ? stack.is(Content.CAT_NUCLEOCARD) : stack.is(Items.WIND_CHARGE);
             }
-            @Override public int getMaxStackSize() { return index == 4 ? 64 : 1; }
+            @Override public int getMaxStackSize() { return inventorySlot == 4 ? 64 : 1; }
         });
     }
     public boolean running() { return data.get(0) > 0; }
     public float fraction() { return data.get(0) / (float) PneumaticStandBlockEntity.PROCESS_TICKS; }
-    public int target() { return running() ? data.get(1) : -1; }
+    public boolean filling(int slot) { return running() && slot >= 0 && slot < 2 && (data.get(1) & (slot == 0 ? 1 : 4)) != 0; }
     @Override public boolean stillValid(Player player) { return container.stillValid(player); }
     @Override public ItemStack quickMoveStack(Player player, int index) {
         if (index < 0 || index >= slots.size()) return ItemStack.EMPTY;
@@ -51,11 +52,11 @@ public final class PneumaticStandMenu extends AbstractContainerMenu {
         ItemStack stack = slot.getItem();
         ItemStack original = stack.copy();
         boolean moved;
-        if (index < 5) moved = moveItemStackTo(stack, 5, 41, true);
-        else if (stack.is(Content.SYRINGE)) moved = moveItemStackTo(stack, 0, 3, false);
-        else if (stack.is(Content.CAT_NUCLEOCARD)) moved = moveItemStackTo(stack, 3, 4, false);
-        else if (stack.is(Items.WIND_CHARGE)) moved = moveItemStackTo(stack, 4, 5, false);
-        else moved = index < 32 ? moveItemStackTo(stack, 32, 41, false) : moveItemStackTo(stack, 5, 32, false);
+        if (index < 4) moved = moveItemStackTo(stack, 4, 40, true);
+        else if (stack.is(Content.SYRINGE)) moved = moveItemStackTo(stack, 0, 2, false);
+        else if (stack.is(Content.CAT_NUCLEOCARD)) moved = moveItemStackTo(stack, CARD_SLOT, FUEL_SLOT, false);
+        else if (stack.is(Items.WIND_CHARGE)) moved = moveItemStackTo(stack, FUEL_SLOT, 4, false);
+        else moved = index < 31 ? moveItemStackTo(stack, 31, 40, false) : moveItemStackTo(stack, 4, 31, false);
         if (!moved) return ItemStack.EMPTY;
         if (stack.isEmpty()) slot.setByPlayer(ItemStack.EMPTY); else slot.setChanged();
         if (stack.getCount() == original.getCount()) return ItemStack.EMPTY;
