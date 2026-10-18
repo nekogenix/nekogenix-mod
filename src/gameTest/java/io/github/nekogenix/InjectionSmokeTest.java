@@ -20,6 +20,23 @@ public final class InjectionSmokeTest {
     private static int returns;
     private static float previousStage;
     private static boolean sawIntermediate;
+    private static int returnSounds;
+    private static float lastReturnPitch;
+    private static long lastSoundReturn = -1;
+
+    @SubscribeEvent
+    public static void sound(net.neoforged.neoforge.event.PlayLevelSoundEvent event) {
+        if (!ENABLED || !event.getLevel().isClientSide || event.getSound() == null || !event.getSound().value().getLocation()
+                .equals(net.minecraft.sounds.SoundEvents.HONEY_BLOCK_SLIDE.getLocation())) return;
+        var player = Minecraft.getInstance().player;
+        if (player == null || player.getData(Content.INJECTION_RETURN).started() < 0) return;
+        long started = player.getData(Content.INJECTION_RETURN).started();
+        if (started != lastSoundReturn) { lastSoundReturn = started; lastReturnPitch = 0; }
+        float pitch = event.getNewPitch();
+        check(lastReturnPitch == 0 || pitch > lastReturnPitch, "Return sound pitch rises as the syringe retracts");
+        lastReturnPitch = pitch;
+        returnSounds++;
+    }
 
     @SubscribeEvent
     public static void tick(ClientTickEvent.Pre event) {
@@ -70,7 +87,8 @@ public final class InjectionSmokeTest {
         if (age == 249) net.minecraft.client.Screenshot.grab(mc.gameDirectory, "injection-return-prealpha5.png",
                 mc.getMainRenderTarget(), message -> {});
         if (age == 400) {
-            check(returns == 3 && sawIntermediate, "Early middle and late cancellations animate backwards");
+            check(returns == 3 && sawIntermediate && returnSounds >= 6,
+                    "Early middle and late cancellations animate backwards with return sounds");
             check(mc.player.getMainHandItem().is(Content.USED_SYRINGE) && mc.player.hasEffect(Content.SHOCK),
                     "Holding through completion still gives a used syringe and starts sickness");
             Nekogenix.LOGGER.info("Nekogenix injection smoke passed: three partial returns, descending filled textures, smooth hand motion and successful full injection");

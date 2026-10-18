@@ -6,6 +6,7 @@ import io.github.nekogenix.item.SalivaBottleItem;
 import io.github.nekogenix.item.NekoInjectionItem;
 import io.github.nekogenix.item.SalivaProjectile;
 import io.github.nekogenix.state.NekoState;
+import io.github.nekogenix.state.BreedingState;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -65,6 +66,10 @@ public final class Content {
             () -> AttachmentType.builder(() -> InjectionHandler.ReturnAnimation.NONE).sync(InjectionHandler.ReturnAnimation.STREAM_CODEC).build());
     public static final DeferredHolder<AttachmentType<?>, AttachmentType<Boolean>> FELINE_VOICE = ATTACHMENTS.register("feline_voice",
             () -> AttachmentType.builder(() -> false).sync(ByteBufCodecs.BOOL).build());
+    public static final DeferredHolder<AttachmentType<?>, AttachmentType<BreedingState>> BREEDING = ATTACHMENTS.register("neko_breeding",
+            () -> AttachmentType.serializable(BreedingState::new).build());
+    public static final DeferredHolder<AttachmentType<?>, AttachmentType<Integer>> FIRST_OCEAN_SOUND = ATTACHMENTS.register("first_ocean_sound",
+            () -> AttachmentType.builder(() -> -1).serialize(Codec.INT).build());
 
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> TAB = TABS.register("nekogenix",
             () -> CreativeModeTab.builder().title(Component.translatable("itemGroup.nekogenix"))

@@ -78,9 +78,14 @@ public final class InjectionHandler {
         if (!session.returning && session.elapsed < FORWARD_TICKS && (!session.held
                 || player.level().getGameTime() - session.lastInput > 30)) startReturn(player, session);
         if (session.returning) {
-            if (player.getData(Content.INJECTION_RETURN).remaining(player.level().getGameTime(), 0) <= 0) {
+            var animation = player.getData(Content.INJECTION_RETURN);
+            float remaining = animation.remaining(player.level().getGameTime(), 0);
+            if (remaining <= 0) {
                 cancel(player, session);
                 session.waitingForRelease = session.held;
+            } else if ((player.level().getGameTime() - animation.started()) % 4 == 0) {
+                sound(player, SoundEvents.HONEY_BLOCK_SLIDE, 0.35F * remaining,
+                        1.4F - animation.progress() * remaining / 160F);
             }
             return;
         }

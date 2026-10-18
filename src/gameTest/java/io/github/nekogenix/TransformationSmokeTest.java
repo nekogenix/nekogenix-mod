@@ -57,14 +57,17 @@ public final class TransformationSmokeTest {
     public static final class Client {
         private static int completed = -1;
         private static int ocean;
+        private static net.minecraft.resources.ResourceLocation firstOcean;
 
         @SubscribeEvent
         public static void sound(net.neoforged.neoforge.client.event.sound.PlaySoundEvent event) {
-            if (!ENABLED || event.getSound() == null || !event.getSound().getLocation()
-                    .equals(SoundEvents.AMBIENT_UNDERWATER_LOOP_ADDITIONS_ULTRA_RARE.getLocation())) return;
+            if (!ENABLED || event.getSound() == null || InjectionSounds.OCEAN.stream()
+                    .noneMatch(sound -> sound.getId().equals(event.getSound().getLocation()))) return;
             var player = net.minecraft.client.Minecraft.getInstance().player;
-            check(player != null && completed >= 0 && Math.abs(player.tickCount - completed - 200) <= 4,
-                    "Ocean cue arrives ten seconds after completion");
+            check(player != null && completed >= 0 && Math.abs(player.tickCount - completed - (ocean == 0 ? 200 : 260)) <= 4,
+                    "Ocean cues arrive ten and thirteen seconds after completion");
+            if (ocean == 0) firstOcean = event.getSound().getLocation();
+            else check(!firstOcean.equals(event.getSound().getLocation()), "Second ocean cue is different");
             ocean++;
         }
 
@@ -86,7 +89,7 @@ public final class TransformationSmokeTest {
                 check(extension.isVisibleInInventory(ordinary) && extension.isVisibleInGui(ordinary), "Ordinary nausea remains visible");
             }
             if (age == 340) {
-                check(ocean == 1, "Ocean cue plays exactly once");
+                check(ocean >= 1, "First ocean cue has played");
                 mc.options.guiScale().set(2);
                 mc.resizeDisplay();
                 mc.setScreen(new net.minecraft.client.gui.screens.Screen(net.minecraft.network.chat.Component.empty()) {
@@ -107,15 +110,16 @@ public final class TransformationSmokeTest {
             }
             if (age == 420) check(mc.player.getMainHandItem().is(Items.COD) && mc.player.getMainHandItem().getCount() == 1,
                     "Feeder inventory update arrives from the server");
+            if (age == 420) check(ocean == 2, "Both distinct ocean cues play exactly once");
             if (age == 435) mc.gameMode.useItem(mc.player, InteractionHand.MAIN_HAND);
             if (age == 480) {
                 check(mc.player.hasEffect(net.minecraft.world.effect.MobEffects.POISON) && mc.player.hasEffect(Content.SHOCK),
                         "Drinking milk poisons without curing sickness: " + mc.player.getActiveEffects() + "; held=" + mc.player.getMainHandItem());
                 mc.setScreen(new net.minecraft.client.gui.screens.inventory.InventoryScreen(mc.player));
-                Nekogenix.LOGGER.info("Nekogenix transformation smoke passed: sickness nausea hidden, ordinary nausea visible, timed ocean cue received once, feeding synchronized and milk poisonous");
+                Nekogenix.LOGGER.info("Nekogenix transformation smoke passed: sickness nausea hidden, ordinary nausea visible, distinct ocean cues at ten and thirteen seconds, feeding synchronized and milk poisonous");
             }
             if (age == 490) net.minecraft.client.Screenshot.grab(mc.gameDirectory, "sickness-prealpha4.png", mc.getMainRenderTarget(), message -> {});
-            if (age >= 510) mc.stop();
+            if (age >= 510 && !Boolean.getBoolean("nekogenix.breedingSmokeTest")) mc.stop();
         }
 
         private static void check(boolean passed, String message) {
