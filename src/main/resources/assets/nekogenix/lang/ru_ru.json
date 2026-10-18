@@ -31,8 +31,9 @@
   "container.nekogenix.samples": "Загрузите шесть образцов",
   "container.nekogenix.sample_slot": "Бутылочка кошачьей слюны",
   "container.nekogenix.card_slot": "Пустая нуклеокарта",
-  "container.nekogenix.fuel_slot": "Редстоуновая пыль: одна на цикл",
+  "container.nekogenix.fuel_slot": "Редстоуновая пыль: 64 на цикл",
   "tooltip.nekogenix.blank_nucleocard": "Обработайте с шестью образцами слюны в центрифуге",
-  "tooltip.nekogenix.cat_nucleocard": "Поместите над шприцем в варочной стойке",
-  "tooltip.nekogenix.nucleocard_return": "Становится пустой после заполнения одного шприца"
+  "tooltip.nekogenix.cat_nucleocard": "Поместите над шприцем в пневматической стойке",
+  "tooltip.nekogenix.nucleocard_return": "Становится пустой после заполнения одного шприца",
+  "block.nekogenix.pneumatic_stand": "Пневматическая стойка"
 }

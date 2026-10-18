@@ -1,0 +1,1161 @@
+{
+  "parent": "minecraft:block/block",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "particle": "nekogenix:block/pneumatic_stone",
+    "pneumatic_stone": "nekogenix:block/pneumatic_stone",
+    "pneumatic_metal": "nekogenix:block/pneumatic_metal",
+    "pneumatic_rod": "nekogenix:block/pneumatic_rod",
+    "pneumatic_tank": "nekogenix:block/pneumatic_tank",
+    "pneumatic_reader": "nekogenix:block/pneumatic_reader"
+  },
+  "elements": [
+    {
+      "name": "stone_foot_0",
+      "from": [
+        2,
+        0,
+        2
+      ],
+      "to": [
+        6,
+        2,
+        6
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            10,
+            14,
+            14,
+            16
+          ],
+          "texture": "#pneumatic_stone"
+        },
+        "south": {
+          "uv": [
+            2,
+            14,
+            6,
+            16
+          ],
+          "texture": "#pneumatic_stone"
+        },
+        "east": {
+          "uv": [
+            10,
+            14,
+            14,
+            16
+          ],
+          "texture": "#pneumatic_stone"
+        },
+        "west": {
+          "uv": [
+            2,
+            14,
+            6,
+            16
+          ],
+          "texture": "#pneumatic_stone"
+        },
+        "up": {
+          "uv": [
+            2,
+            2,
+            6,
+            6
+          ],
+          "texture": "#pneumatic_stone"
+        },
+        "down": {
+          "uv": [
+            2,
+            10,
+            6,
+            14
+          ],
+          "texture": "#pneumatic_stone"
+        }
+      }
+    },
+    {
+      "name": "syringe_seat_0",
+      "from": [
+        2,
+        2,
+        2
+      ],
+      "to": [
+        6,
+        3,
+        6
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            10,
+            13,
+            14,
+            14
+          ],
+          "texture": "#pneumatic_metal"
+        },
+        "south": {
+          "uv": [
+            2,
+            13,
+            6,
+            14
+          ],
+          "texture": "#pneumatic_metal"
+        },
+        "east": {
+          "uv": [
+            10,
+            13,
+            14,
+            14
+          ],
+          "texture": "#pneumatic_metal"
+        },
+        "west": {
+          "uv": [
+            2,
+            13,
+            6,
+            14
+          ],
+          "texture": "#pneumatic_metal"
+        },
+        "up": {
+          "uv": [
+            2,
+            2,
+            6,
+            6
+          ],
+          "texture": "#pneumatic_tank"
+        },
+        "down": {
+          "uv": [
+            2,
+            10,
+            6,
+            14
+          ],
+          "texture": "#pneumatic_metal"
+        }
+      }
+    },
+    {
+      "name": "stone_foot_1",
+      "from": [
+        10,
+        0,
+        2
+      ],
+      "to": [
+        14,
+        2,
+        6
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            2,
+            14,
+            6,
+            16
+          ],
+          "texture": "#pneumatic_stone"
+        },
+        "south": {
+          "uv": [
+            10,
+            14,
+            14,
+            16
+          ],
+          "texture": "#pneumatic_stone"
+        },
+        "east": {
+          "uv": [
+            10,
+            14,
+            14,
+            16
+          ],
+          "texture": "#pneumatic_stone"
+        },
+        "west": {
+          "uv": [
+            2,
+            14,
+            6,
+            16
+          ],
+          "texture": "#pneumatic_stone"
+        },
+        "up": {
+          "uv": [
+            10,
+            2,
+            14,
+            6
+          ],
+          "texture": "#pneumatic_stone"
+        },
+        "down": {
+          "uv": [
+            10,
+            10,
+            14,
+            14
+          ],
+          "texture": "#pneumatic_stone"
+        }
+      }
+    },
+    {
+      "name": "syringe_seat_1",
+      "from": [
+        10,
+        2,
+        2
+      ],
+      "to": [
+        14,
+        3,
+        6
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            2,
+            13,
+            6,
+            14
+          ],
+          "texture": "#pneumatic_metal"
+        },
+        "south": {
+          "uv": [
+            10,
+            13,
+            14,
+            14
+          ],
+          "texture": "#pneumatic_metal"
+        },
+        "east": {
+          "uv": [
+            10,
+            13,
+            14,
+            14
+          ],
+          "texture": "#pneumatic_metal"
+        },
+        "west": {
+          "uv": [
+            2,
+            13,
+            6,
+            14
+          ],
+          "texture": "#pneumatic_metal"
+        },
+        "up": {
+          "uv": [
+            10,
+            2,
+            14,
+            6
+          ],
+          "texture": "#pneumatic_tank"
+        },
+        "down": {
+          "uv": [
+            10,
+            10,
+            14,
+            14
+          ],
+          "texture": "#pneumatic_metal"
+        }
+      }
+    },
+    {
+      "name": "stone_foot_2",
+      "from": [
+        6,
+        0,
+        10
+      ],
+      "to": [
+        10,
+        2,
+        14
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            6,
+            14,
+            10,
+            16
+          ],
+          "texture": "#pneumatic_stone"
+        },
+        "south": {
+          "uv": [
+            6,
+            14,
+            10,
+            16
+          ],
+          "texture": "#pneumatic_stone"
+        },
+        "east": {
+          "uv": [
+            2,
+            14,
+            6,
+            16
+          ],
+          "texture": "#pneumatic_stone"
+        },
+        "west": {
+          "uv": [
+            10,
+            14,
+            14,
+            16
+          ],
+          "texture": "#pneumatic_stone"
+        },
+        "up": {
+          "uv": [
+            6,
+            10,
+            10,
+            14
+          ],
+          "texture": "#pneumatic_stone"
+        },
+        "down": {
+          "uv": [
+            6,
+            2,
+            10,
+            6
+          ],
+          "texture": "#pneumatic_stone"
+        }
+      }
+    },
+    {
+      "name": "syringe_seat_2",
+      "from": [
+        6,
+        2,
+        10
+      ],
+      "to": [
+        10,
+        3,
+        14
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            6,
+            13,
+            10,
+            14
+          ],
+          "texture": "#pneumatic_metal"
+        },
+        "south": {
+          "uv": [
+            6,
+            13,
+            10,
+            14
+          ],
+          "texture": "#pneumatic_metal"
+        },
+        "east": {
+          "uv": [
+            2,
+            13,
+            6,
+            14
+          ],
+          "texture": "#pneumatic_metal"
+        },
+        "west": {
+          "uv": [
+            10,
+            13,
+            14,
+            14
+          ],
+          "texture": "#pneumatic_metal"
+        },
+        "up": {
+          "uv": [
+            6,
+            10,
+            10,
+            14
+          ],
+          "texture": "#pneumatic_tank"
+        },
+        "down": {
+          "uv": [
+            6,
+            2,
+            10,
+            6
+          ],
+          "texture": "#pneumatic_metal"
+        }
+      }
+    },
+    {
+      "name": "center_base",
+      "from": [
+        6,
+        0,
+        6
+      ],
+      "to": [
+        10,
+        3,
+        10
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            6,
+            13,
+            10,
+            16
+          ],
+          "texture": "#pneumatic_stone"
+        },
+        "south": {
+          "uv": [
+            6,
+            13,
+            10,
+            16
+          ],
+          "texture": "#pneumatic_stone"
+        },
+        "east": {
+          "uv": [
+            6,
+            13,
+            10,
+            16
+          ],
+          "texture": "#pneumatic_stone"
+        },
+        "west": {
+          "uv": [
+            6,
+            13,
+            10,
+            16
+          ],
+          "texture": "#pneumatic_stone"
+        },
+        "up": {
+          "uv": [
+            6,
+            6,
+            10,
+            10
+          ],
+          "texture": "#pneumatic_stone"
+        },
+        "down": {
+          "uv": [
+            6,
+            6,
+            10,
+            10
+          ],
+          "texture": "#pneumatic_stone"
+        }
+      }
+    },
+    {
+      "name": "left_air_line",
+      "from": [
+        4,
+        2,
+        6
+      ],
+      "to": [
+        6,
+        3,
+        8
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            10,
+            13,
+            12,
+            14
+          ],
+          "texture": "#pneumatic_metal"
+        },
+        "south": {
+          "uv": [
+            4,
+            13,
+            6,
+            14
+          ],
+          "texture": "#pneumatic_metal"
+        },
+        "east": {
+          "uv": [
+            8,
+            13,
+            10,
+            14
+          ],
+          "texture": "#pneumatic_metal"
+        },
+        "west": {
+          "uv": [
+            6,
+            13,
+            8,
+            14
+          ],
+          "texture": "#pneumatic_metal"
+        },
+        "up": {
+          "uv": [
+            4,
+            6,
+            6,
+            8
+          ],
+          "texture": "#pneumatic_metal"
+        },
+        "down": {
+          "uv": [
+            4,
+            8,
+            6,
+            10
+          ],
+          "texture": "#pneumatic_metal"
+        }
+      }
+    },
+    {
+      "name": "right_air_line",
+      "from": [
+        10,
+        2,
+        6
+      ],
+      "to": [
+        12,
+        3,
+        8
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            4,
+            13,
+            6,
+            14
+          ],
+          "texture": "#pneumatic_metal"
+        },
+        "south": {
+          "uv": [
+            10,
+            13,
+            12,
+            14
+          ],
+          "texture": "#pneumatic_metal"
+        },
+        "east": {
+          "uv": [
+            8,
+            13,
+            10,
+            14
+          ],
+          "texture": "#pneumatic_metal"
+        },
+        "west": {
+          "uv": [
+            6,
+            13,
+            8,
+            14
+          ],
+          "texture": "#pneumatic_metal"
+        },
+        "up": {
+          "uv": [
+            10,
+            6,
+            12,
+            8
+          ],
+          "texture": "#pneumatic_metal"
+        },
+        "down": {
+          "uv": [
+            10,
+            8,
+            12,
+            10
+          ],
+          "texture": "#pneumatic_metal"
+        }
+      }
+    },
+    {
+      "name": "breeze_column",
+      "from": [
+        7,
+        3,
+        7
+      ],
+      "to": [
+        9,
+        14,
+        9
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            7,
+            2,
+            9,
+            13
+          ],
+          "texture": "#pneumatic_rod"
+        },
+        "south": {
+          "uv": [
+            7,
+            2,
+            9,
+            13
+          ],
+          "texture": "#pneumatic_rod"
+        },
+        "east": {
+          "uv": [
+            7,
+            2,
+            9,
+            13
+          ],
+          "texture": "#pneumatic_rod"
+        },
+        "west": {
+          "uv": [
+            7,
+            2,
+            9,
+            13
+          ],
+          "texture": "#pneumatic_rod"
+        },
+        "up": {
+          "uv": [
+            7,
+            7,
+            9,
+            9
+          ],
+          "texture": "#pneumatic_rod"
+        },
+        "down": {
+          "uv": [
+            7,
+            7,
+            9,
+            9
+          ],
+          "texture": "#pneumatic_rod"
+        }
+      }
+    },
+    {
+      "name": "air_chamber",
+      "from": [
+        5,
+        4,
+        5
+      ],
+      "to": [
+        11,
+        7,
+        11
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            5,
+            9,
+            11,
+            12
+          ],
+          "texture": "#pneumatic_metal"
+        },
+        "south": {
+          "uv": [
+            5,
+            9,
+            11,
+            12
+          ],
+          "texture": "#pneumatic_metal"
+        },
+        "east": {
+          "uv": [
+            5,
+            9,
+            11,
+            12
+          ],
+          "texture": "#pneumatic_metal"
+        },
+        "west": {
+          "uv": [
+            5,
+            9,
+            11,
+            12
+          ],
+          "texture": "#pneumatic_metal"
+        },
+        "up": {
+          "uv": [
+            5,
+            5,
+            11,
+            11
+          ],
+          "texture": "#pneumatic_metal"
+        },
+        "down": {
+          "uv": [
+            5,
+            5,
+            11,
+            11
+          ],
+          "texture": "#pneumatic_metal"
+        }
+      }
+    },
+    {
+      "name": "upper_collar",
+      "from": [
+        6,
+        10,
+        6
+      ],
+      "to": [
+        10,
+        11,
+        10
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            6,
+            5,
+            10,
+            6
+          ],
+          "texture": "#pneumatic_metal"
+        },
+        "south": {
+          "uv": [
+            6,
+            5,
+            10,
+            6
+          ],
+          "texture": "#pneumatic_metal"
+        },
+        "east": {
+          "uv": [
+            6,
+            5,
+            10,
+            6
+          ],
+          "texture": "#pneumatic_metal"
+        },
+        "west": {
+          "uv": [
+            6,
+            5,
+            10,
+            6
+          ],
+          "texture": "#pneumatic_metal"
+        },
+        "up": {
+          "uv": [
+            6,
+            6,
+            10,
+            10
+          ],
+          "texture": "#pneumatic_metal"
+        },
+        "down": {
+          "uv": [
+            6,
+            6,
+            10,
+            10
+          ],
+          "texture": "#pneumatic_metal"
+        }
+      }
+    },
+    {
+      "name": "column_cap",
+      "from": [
+        6,
+        14,
+        6
+      ],
+      "to": [
+        10,
+        15,
+        10
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            6,
+            1,
+            10,
+            2
+          ],
+          "texture": "#pneumatic_metal"
+        },
+        "south": {
+          "uv": [
+            6,
+            1,
+            10,
+            2
+          ],
+          "texture": "#pneumatic_metal"
+        },
+        "east": {
+          "uv": [
+            6,
+            1,
+            10,
+            2
+          ],
+          "texture": "#pneumatic_metal"
+        },
+        "west": {
+          "uv": [
+            6,
+            1,
+            10,
+            2
+          ],
+          "texture": "#pneumatic_metal"
+        },
+        "up": {
+          "uv": [
+            6,
+            6,
+            10,
+            10
+          ],
+          "texture": "#pneumatic_metal"
+        },
+        "down": {
+          "uv": [
+            6,
+            6,
+            10,
+            10
+          ],
+          "texture": "#pneumatic_metal"
+        }
+      }
+    },
+    {
+      "name": "card_reader",
+      "from": [
+        6,
+        7,
+        5
+      ],
+      "to": [
+        10,
+        9,
+        7
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            6,
+            7,
+            10,
+            9
+          ],
+          "texture": "#pneumatic_reader"
+        },
+        "south": {
+          "uv": [
+            6,
+            7,
+            10,
+            9
+          ],
+          "texture": "#pneumatic_reader"
+        },
+        "east": {
+          "uv": [
+            9,
+            7,
+            11,
+            9
+          ],
+          "texture": "#pneumatic_reader"
+        },
+        "west": {
+          "uv": [
+            5,
+            7,
+            7,
+            9
+          ],
+          "texture": "#pneumatic_reader"
+        },
+        "up": {
+          "uv": [
+            6,
+            5,
+            10,
+            7
+          ],
+          "texture": "#pneumatic_reader"
+        },
+        "down": {
+          "uv": [
+            6,
+            9,
+            10,
+            11
+          ],
+          "texture": "#pneumatic_reader"
+        }
+      }
+    },
+    {
+      "name": "pressure_tank",
+      "from": [
+        11,
+        3,
+        10
+      ],
+      "to": [
+        14,
+        10,
+        13
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            2,
+            6,
+            5,
+            13
+          ],
+          "texture": "#pneumatic_tank"
+        },
+        "south": {
+          "uv": [
+            11,
+            6,
+            14,
+            13
+          ],
+          "texture": "#pneumatic_tank"
+        },
+        "east": {
+          "uv": [
+            3,
+            6,
+            6,
+            13
+          ],
+          "texture": "#pneumatic_tank"
+        },
+        "west": {
+          "uv": [
+            10,
+            6,
+            13,
+            13
+          ],
+          "texture": "#pneumatic_tank"
+        },
+        "up": {
+          "uv": [
+            11,
+            10,
+            14,
+            13
+          ],
+          "texture": "#pneumatic_tank"
+        },
+        "down": {
+          "uv": [
+            11,
+            3,
+            14,
+            6
+          ],
+          "texture": "#pneumatic_tank"
+        }
+      }
+    },
+    {
+      "name": "tank_cap",
+      "from": [
+        11,
+        10,
+        10
+      ],
+      "to": [
+        14,
+        11,
+        13
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            2,
+            5,
+            5,
+            6
+          ],
+          "texture": "#pneumatic_metal"
+        },
+        "south": {
+          "uv": [
+            11,
+            5,
+            14,
+            6
+          ],
+          "texture": "#pneumatic_metal"
+        },
+        "east": {
+          "uv": [
+            3,
+            5,
+            6,
+            6
+          ],
+          "texture": "#pneumatic_metal"
+        },
+        "west": {
+          "uv": [
+            10,
+            5,
+            13,
+            6
+          ],
+          "texture": "#pneumatic_metal"
+        },
+        "up": {
+          "uv": [
+            11,
+            10,
+            14,
+            13
+          ],
+          "texture": "#pneumatic_metal"
+        },
+        "down": {
+          "uv": [
+            11,
+            3,
+            14,
+            6
+          ],
+          "texture": "#pneumatic_metal"
+        }
+      }
+    }
+  ],
+  "display": {
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.8,
+        0.8,
+        0.8
+      ]
+    },
+    "ground": {
+      "translation": [
+        0,
+        2,
+        0
+      ],
+      "scale": [
+        0.5,
+        0.5,
+        0.5
+      ]
+    },
+    "fixed": {
+      "rotation": [
+        0,
+        180,
+        0
+      ],
+      "scale": [
+        0.75,
+        0.75,
+        0.75
+      ]
+    }
+  }
+}

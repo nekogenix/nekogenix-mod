@@ -2,11 +2,12 @@ package io.github.nekogenix;
 
 import io.github.nekogenix.centrifuge.CentrifugeBlockEntity;
 import io.github.nekogenix.centrifuge.CentrifugeMenu;
+import io.github.nekogenix.pneumatic.PneumaticStandBlockEntity;
+import io.github.nekogenix.pneumatic.PneumaticStandMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.entity.BrewingStandBlockEntity;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
@@ -30,6 +31,7 @@ public final class CentrifugeSmokeTest {
             player.onUpdateAbilities();
             player.teleportTo(level, 8.5, -58.7, 6.2, 0, 43);
             player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+            level.setBlockAndUpdate(BREWER, Blocks.AIR.defaultBlockState());
             if (level.getBlockEntity(MACHINE) instanceof CentrifugeBlockEntity previous) previous.clearContent();
             level.setBlockAndUpdate(MACHINE, Blocks.AIR.defaultBlockState());
             level.setBlockAndUpdate(MACHINE.below(), Blocks.STONE.defaultBlockState());
@@ -49,12 +51,16 @@ public final class CentrifugeSmokeTest {
             var machine = (CentrifugeBlockEntity) level.getBlockEntity(MACHINE);
             ItemStack card = machine.removeItem(6, 1);
             check(card.is(Content.CAT_NUCLEOCARD), "Completed card can be removed");
+            player.getInventory().setItem(8, card);
             level.setBlockAndUpdate(BREWER.below(), Blocks.STONE.defaultBlockState());
-            level.setBlockAndUpdate(BREWER, Blocks.BREWING_STAND.defaultBlockState());
-            var stand = (BrewingStandBlockEntity) level.getBlockEntity(BREWER);
+            level.setBlockAndUpdate(BREWER, Content.PNEUMATIC_STAND.get().defaultBlockState());
+        }
+        if (player.tickCount == 820) player.teleportTo(level, 10.5, -58.7, 6.2, 0, 43);
+        if (player.tickCount == 870) {
+            var stand = (PneumaticStandBlockEntity) level.getBlockEntity(BREWER);
             for (int i = 0; i < 3; i++) stand.setItem(i, Content.SYRINGE.toStack());
-            stand.setItem(3, card);
-            stand.setItem(4, Items.BLAZE_POWDER.getDefaultInstance());
+            stand.setItem(3, player.getInventory().removeItem(8, 1));
+            stand.setItem(4, Items.WIND_CHARGE.getDefaultInstance());
         }
     }
 
@@ -69,7 +75,7 @@ public final class CentrifugeSmokeTest {
         @SubscribeEvent
         public static void sound(net.neoforged.neoforge.client.event.sound.PlaySoundEvent event) {
             if (ENABLED && event.getSound() != null
-                    && event.getSound().getLocation().equals(net.minecraft.sounds.SoundEvents.BREWING_STAND_BREW.getLocation())) brewSound = true;
+                    && event.getSound().getLocation().equals(net.minecraft.sounds.SoundEvents.BREEZE_SHOOT.getLocation())) brewSound = true;
         }
 
         @SubscribeEvent
@@ -114,6 +120,9 @@ public final class CentrifugeSmokeTest {
                 var menu = (CentrifugeMenu) mc.player.containerMenu;
                 check(menu.running() && menu.getSlot(0).getItem().is(Content.SALIVA_BOTTLE) && menu.getCarried().isEmpty(),
                         "Client cannot extract an active sample");
+                int dust = menu.getSlot(7).getItem().getCount();
+                check(age == 320 ? dust > 32 && dust < 64 : dust > 0 && dust < 32,
+                        "The visible redstone stack decreases throughout extraction");
                 capture(mc, age == 320 ? "centrifuge-menu-progress.png" : "centrifuge-menu-progress-late.png");
             }
             if (age == 780) {
@@ -121,15 +130,21 @@ public final class CentrifugeSmokeTest {
                 check(!menu.running() && menu.getSlot(6).getItem().is(Content.CAT_NUCLEOCARD), "Filled card appears in menu");
                 check(mc.level.getBlockEntity(MACHINE).getUpdateTag(mc.level.registryAccess()).getBoolean("Open"), "Completion reopens the lid for its viewer");
                 for (int i = 0; i < 6; i++) check(menu.getSlot(i).getItem().is(Items.GLASS_BOTTLE), "Empty bottle outputs arrive on client");
+                check(menu.getSlot(7).getItem().isEmpty(), "The complete card consumes the last dust");
                 capture(mc, "centrifuge-menu-complete.png");
                 Nekogenix.LOGGER.info("Nekogenix centrifuge cycle passed: real menu, locked samples, completed card, six empty bottles");
             }
             if (age == 790) mc.player.closeContainer();
             if (age == 805) capture(mc, "centrifuge-world-complete.png");
+            if (age == 830) capture(mc, "pneumatic-world-idle.png");
             if (age == 840) open(mc, BREWER);
-            if (age == 900) capture(mc, "centrifuge-brewing.png");
+            if (age == 850) {
+                check(mc.screen instanceof io.github.nekogenix.client.PneumaticStandScreen, "Pneumatic menu opens through normal block interaction");
+                capture(mc, "pneumatic-menu-empty.png");
+            }
+            if (age == 900) capture(mc, "pneumatic-menu-start.png");
             if (age == 1030 || age == 1150) {
-                var menu = (net.minecraft.world.inventory.BrewingStandMenu) mc.player.containerMenu;
+                var menu = (PneumaticStandMenu) mc.player.containerMenu;
                 var card = menu.getSlot(3).getItem();
                 var syringe = menu.getSlot(0).getItem();
                 var property = Content.id("brewing_progress");
@@ -138,19 +153,21 @@ public final class CentrifugeSmokeTest {
                 var untouched = menu.getSlot(1).getItem();
                 check(cardFrame > 0 && cardFrame == syringeFrame
                                 && net.minecraft.client.renderer.item.ItemProperties.getProperty(untouched, property).call(untouched, mc.level, mc.player, 0) == 0,
-                        "Card draining and exactly one syringe filling use the synchronized brewing timer");
-                capture(mc, age == 1030 ? "centrifuge-brewing-half.png" : "centrifuge-brewing-late.png");
+                        "Card draining and exactly one syringe filling use the synchronized pneumatic timer");
+                capture(mc, age == 1030 ? "pneumatic-menu-half.png" : "pneumatic-menu-late.png");
             }
-            if (age == 1250) {
+            if (age == 1320) {
                 var menu = mc.player.containerMenu;
-                check(menu instanceof net.minecraft.world.inventory.BrewingStandMenu && menu.getSlot(0).getItem().is(Content.INJECTION)
+                check(menu instanceof PneumaticStandMenu && menu.getSlot(0).getItem().is(Content.INJECTION)
                         && menu.getSlot(1).getItem().is(Content.SYRINGE) && menu.getSlot(2).getItem().is(Content.SYRINGE)
                         && menu.getSlot(3).getItem().is(Content.BLANK_NUCLEOCARD) && brewSound,
-                        "Brewing returns blank card fills exactly one syringe and plays vanilla sound");
-                capture(mc, "centrifuge-brewing-complete.png");
-                Nekogenix.LOGGER.info("Nekogenix centrifuge smoke passed: world inventory and menu synchronized, complete extraction and single syringe brewing with reusable blank card");
+                        "Wind charge fills exactly one syringe returns blank card and plays a vanilla breeze sound");
+                capture(mc, "pneumatic-menu-complete.png");
+                Nekogenix.LOGGER.info("Nekogenix centrifuge smoke passed: gradual redstone extraction and pneumatic syringe filling with reusable blank card");
             }
-            if (age >= 1280) mc.stop();
+            if (age == 1330) mc.player.closeContainer();
+            if (age == 1340) capture(mc, "pneumatic-world-complete.png");
+            if (age >= 1350) mc.stop();
         }
 
         private static void open(net.minecraft.client.Minecraft mc, BlockPos pos) {

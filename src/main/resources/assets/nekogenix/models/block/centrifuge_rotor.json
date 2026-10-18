@@ -12,7 +12,8 @@
     "centrifuge_glass": "nekogenix:block/centrifuge_glass",
     "centrifuge_vial": "nekogenix:block/centrifuge_vial",
     "centrifuge_sample": "nekogenix:block/centrifuge_sample",
-    "centrifuge_cork": "nekogenix:block/centrifuge_cork"
+    "centrifuge_cork": "nekogenix:block/centrifuge_cork",
+    "centrifuge_interior": "nekogenix:block/centrifuge_interior"
   },
   "elements": [
     {
@@ -30,55 +31,55 @@
       "faces": {
         "north": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            3,
+            12.5,
+            13,
+            13.5
           ],
           "texture": "#centrifuge_rotor"
         },
         "south": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            3,
+            12.5,
+            13,
+            13.5
           ],
           "texture": "#centrifuge_rotor"
         },
         "east": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            4,
+            12.5,
+            12,
+            13.5
           ],
           "texture": "#centrifuge_rotor"
         },
         "west": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            4,
+            12.5,
+            12,
+            13.5
           ],
           "texture": "#centrifuge_rotor"
         },
         "up": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            3,
+            4,
+            13,
+            12
           ],
           "texture": "#centrifuge_rotor"
         },
         "down": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            3,
+            4,
+            13,
+            12
           ],
           "texture": "#centrifuge_rotor"
         }
@@ -99,55 +100,55 @@
       "faces": {
         "north": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            4,
+            12.5,
+            12,
+            13.5
           ],
           "texture": "#centrifuge_rotor"
         },
         "south": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            4,
+            12.5,
+            12,
+            13.5
           ],
           "texture": "#centrifuge_rotor"
         },
         "east": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            12,
+            12.5,
+            13,
+            13.5
           ],
           "texture": "#centrifuge_rotor"
         },
         "west": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            3,
+            12.5,
+            4,
+            13.5
           ],
           "texture": "#centrifuge_rotor"
         },
         "up": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            4,
+            3,
+            12,
+            4
           ],
           "texture": "#centrifuge_rotor"
         },
         "down": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            4,
+            12,
+            12,
+            13
           ],
           "texture": "#centrifuge_rotor"
         }
@@ -168,55 +169,55 @@
       "faces": {
         "north": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            4,
+            12.5,
+            12,
+            13.5
           ],
           "texture": "#centrifuge_rotor"
         },
         "south": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            4,
+            12.5,
+            12,
+            13.5
           ],
           "texture": "#centrifuge_rotor"
         },
         "east": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            3,
+            12.5,
+            4,
+            13.5
           ],
           "texture": "#centrifuge_rotor"
         },
         "west": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            12,
+            12.5,
+            13,
+            13.5
           ],
           "texture": "#centrifuge_rotor"
         },
         "up": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            4,
+            12,
+            12,
+            13
           ],
           "texture": "#centrifuge_rotor"
         },
         "down": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            4,
+            3,
+            12,
+            4
           ],
           "texture": "#centrifuge_rotor"
         }
@@ -237,55 +238,55 @@
       "faces": {
         "north": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            6.5,
+            10.5,
+            9.5,
+            12.5
           ],
           "texture": "#centrifuge_rim"
         },
         "south": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            6.5,
+            10.5,
+            9.5,
+            12.5
           ],
           "texture": "#centrifuge_rim"
         },
         "east": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            6.5,
+            10.5,
+            9.5,
+            12.5
           ],
           "texture": "#centrifuge_rim"
         },
         "west": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            6.5,
+            10.5,
+            9.5,
+            12.5
           ],
           "texture": "#centrifuge_rim"
         },
         "up": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            6.5,
+            6.5,
+            9.5,
+            9.5
           ],
           "texture": "#centrifuge_rim"
         },
         "down": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            6.5,
+            6.5,
+            9.5,
+            9.5
           ],
           "texture": "#centrifuge_rim"
         }
@@ -306,55 +307,55 @@
       "faces": {
         "north": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            6.65,
+            11.5,
+            9.35,
+            12.5
           ],
           "texture": "#centrifuge_well"
         },
         "south": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            6.65,
+            11.5,
+            9.35,
+            12.5
           ],
           "texture": "#centrifuge_well"
         },
         "east": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            10.35,
+            11.5,
+            13.05,
+            12.5
           ],
           "texture": "#centrifuge_well"
         },
         "west": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            2.95,
+            11.5,
+            5.65,
+            12.5
           ],
           "texture": "#centrifuge_well"
         },
         "up": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            6.65,
+            2.95,
+            9.35,
+            5.65
           ],
           "texture": "#centrifuge_well"
         },
         "down": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            6.65,
+            10.35,
+            9.35,
+            13.05
           ],
           "texture": "#centrifuge_well"
         }
@@ -375,55 +376,55 @@
       "faces": {
         "north": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            3.44571,
+            11.5,
+            6.14571,
+            12.5
           ],
           "texture": "#centrifuge_well"
         },
         "south": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            9.85429,
+            11.5,
+            12.55429,
+            12.5
           ],
           "texture": "#centrifuge_well"
         },
         "east": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            8.5,
+            11.5,
+            11.2,
+            12.5
           ],
           "texture": "#centrifuge_well"
         },
         "west": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            4.8,
+            11.5,
+            7.5,
+            12.5
           ],
           "texture": "#centrifuge_well"
         },
         "up": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            9.85429,
+            4.8,
+            12.55429,
+            7.5
           ],
           "texture": "#centrifuge_well"
         },
         "down": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            9.85429,
+            8.5,
+            12.55429,
+            11.2
           ],
           "texture": "#centrifuge_well"
         }
@@ -444,55 +445,55 @@
       "faces": {
         "north": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            3.44571,
+            11.5,
+            6.14571,
+            12.5
           ],
           "texture": "#centrifuge_well"
         },
         "south": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            9.85429,
+            11.5,
+            12.55429,
+            12.5
           ],
           "texture": "#centrifuge_well"
         },
         "east": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            4.8,
+            11.5,
+            7.5,
+            12.5
           ],
           "texture": "#centrifuge_well"
         },
         "west": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            8.5,
+            11.5,
+            11.2,
+            12.5
           ],
           "texture": "#centrifuge_well"
         },
         "up": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            9.85429,
+            8.5,
+            12.55429,
+            11.2
           ],
           "texture": "#centrifuge_well"
         },
         "down": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            9.85429,
+            4.8,
+            12.55429,
+            7.5
           ],
           "texture": "#centrifuge_well"
         }
@@ -513,55 +514,55 @@
       "faces": {
         "north": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            6.65,
+            11.5,
+            9.35,
+            12.5
           ],
           "texture": "#centrifuge_well"
         },
         "south": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            6.65,
+            11.5,
+            9.35,
+            12.5
           ],
           "texture": "#centrifuge_well"
         },
         "east": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            2.95,
+            11.5,
+            5.65,
+            12.5
           ],
           "texture": "#centrifuge_well"
         },
         "west": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            10.35,
+            11.5,
+            13.05,
+            12.5
           ],
           "texture": "#centrifuge_well"
         },
         "up": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            6.65,
+            10.35,
+            9.35,
+            13.05
           ],
           "texture": "#centrifuge_well"
         },
         "down": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            6.65,
+            2.95,
+            9.35,
+            5.65
           ],
           "texture": "#centrifuge_well"
         }
@@ -582,55 +583,55 @@
       "faces": {
         "north": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            9.85429,
+            11.5,
+            12.55429,
+            12.5
           ],
           "texture": "#centrifuge_well"
         },
         "south": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            3.44571,
+            11.5,
+            6.14571,
+            12.5
           ],
           "texture": "#centrifuge_well"
         },
         "east": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            4.8,
+            11.5,
+            7.5,
+            12.5
           ],
           "texture": "#centrifuge_well"
         },
         "west": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            8.5,
+            11.5,
+            11.2,
+            12.5
           ],
           "texture": "#centrifuge_well"
         },
         "up": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            3.44571,
+            8.5,
+            6.14571,
+            11.2
           ],
           "texture": "#centrifuge_well"
         },
         "down": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            3.44571,
+            4.8,
+            6.14571,
+            7.5
           ],
           "texture": "#centrifuge_well"
         }
@@ -651,55 +652,55 @@
       "faces": {
         "north": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            9.85429,
+            11.5,
+            12.55429,
+            12.5
           ],
           "texture": "#centrifuge_well"
         },
         "south": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            3.44571,
+            11.5,
+            6.14571,
+            12.5
           ],
           "texture": "#centrifuge_well"
         },
         "east": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            8.5,
+            11.5,
+            11.2,
+            12.5
           ],
           "texture": "#centrifuge_well"
         },
         "west": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            4.8,
+            11.5,
+            7.5,
+            12.5
           ],
           "texture": "#centrifuge_well"
         },
         "up": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            3.44571,
+            4.8,
+            6.14571,
+            7.5
           ],
           "texture": "#centrifuge_well"
         },
         "down": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            3.44571,
+            8.5,
+            6.14571,
+            11.2
           ],
           "texture": "#centrifuge_well"
         }

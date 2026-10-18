@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "nekogenix:centrifuge"
+    "nekogenix:centrifuge",
+    "nekogenix:pneumatic_stand"
   ]
 }

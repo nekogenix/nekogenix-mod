@@ -11,6 +11,9 @@ import io.github.nekogenix.state.BreedingState;
 import io.github.nekogenix.centrifuge.CentrifugeBlock;
 import io.github.nekogenix.centrifuge.CentrifugeBlockEntity;
 import io.github.nekogenix.centrifuge.CentrifugeMenu;
+import io.github.nekogenix.pneumatic.PneumaticStandBlock;
+import io.github.nekogenix.pneumatic.PneumaticStandBlockEntity;
+import io.github.nekogenix.pneumatic.PneumaticStandMenu;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -65,6 +68,13 @@ public final class Content {
             () -> BlockEntityType.Builder.of(CentrifugeBlockEntity::new, CENTRIFUGE.get()).build(null));
     public static final DeferredHolder<MenuType<?>, MenuType<CentrifugeMenu>> CENTRIFUGE_MENU = MENUS.register("centrifuge",
             () -> new MenuType<>(CentrifugeMenu::new, FeatureFlags.VANILLA_SET));
+    public static final DeferredBlock<PneumaticStandBlock> PNEUMATIC_STAND = BLOCKS.registerBlock("pneumatic_stand", PneumaticStandBlock::new,
+            BlockBehaviour.Properties.of().strength(2.5F).sound(SoundType.METAL).requiresCorrectToolForDrops().noOcclusion());
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> PNEUMATIC_ITEM = ITEMS.registerSimpleBlockItem(PNEUMATIC_STAND);
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PneumaticStandBlockEntity>> PNEUMATIC_ENTITY = BLOCK_ENTITIES.register("pneumatic_stand",
+            () -> BlockEntityType.Builder.of(PneumaticStandBlockEntity::new, PNEUMATIC_STAND.get()).build(null));
+    public static final DeferredHolder<MenuType<?>, MenuType<PneumaticStandMenu>> PNEUMATIC_MENU = MENUS.register("pneumatic_stand",
+            () -> new MenuType<>(PneumaticStandMenu::new, FeatureFlags.VANILLA_SET));
 
     public static final DeferredHolder<MobEffect, MobEffect> SHOCK = effect("injection_shock", MobEffectCategory.HARMFUL, 0xB769A2);
     public static final DeferredHolder<MobEffect, MobEffect> TRANSFORMING = effect("neko_transformation", MobEffectCategory.NEUTRAL, 0xD4A6DE);

@@ -12,7 +12,8 @@
     "centrifuge_glass": "nekogenix:block/centrifuge_glass",
     "centrifuge_vial": "nekogenix:block/centrifuge_vial",
     "centrifuge_sample": "nekogenix:block/centrifuge_sample",
-    "centrifuge_cork": "nekogenix:block/centrifuge_cork"
+    "centrifuge_cork": "nekogenix:block/centrifuge_cork",
+    "centrifuge_interior": "nekogenix:block/centrifuge_interior"
   },
   "elements": [
     {
@@ -30,55 +31,55 @@
       "faces": {
         "north": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            7,
+            8.5,
+            9,
+            11.6
           ],
           "texture": "#centrifuge_vial"
         },
         "south": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            7,
+            8.5,
+            9,
+            11.6
           ],
           "texture": "#centrifuge_vial"
         },
         "east": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            7,
+            8.5,
+            9,
+            11.6
           ],
           "texture": "#centrifuge_vial"
         },
         "west": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            7,
+            8.5,
+            9,
+            11.6
           ],
           "texture": "#centrifuge_vial"
         },
         "up": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            7,
+            7,
+            9,
+            9
           ],
           "texture": "#centrifuge_vial"
         },
         "down": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            7,
+            7,
+            9,
+            9
           ],
           "texture": "#centrifuge_vial"
         }
@@ -99,55 +100,55 @@
       "faces": {
         "north": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            7.5,
+            7.6,
+            8.5,
+            8.5
           ],
           "texture": "#centrifuge_vial"
         },
         "south": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            7.5,
+            7.6,
+            8.5,
+            8.5
           ],
           "texture": "#centrifuge_vial"
         },
         "east": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            7.5,
+            7.6,
+            8.5,
+            8.5
           ],
           "texture": "#centrifuge_vial"
         },
         "west": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            7.5,
+            7.6,
+            8.5,
+            8.5
           ],
           "texture": "#centrifuge_vial"
         },
         "up": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            7.5,
+            7.5,
+            8.5,
+            8.5
           ],
           "texture": "#centrifuge_vial"
         },
         "down": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            7.5,
+            7.5,
+            8.5,
+            8.5
           ],
           "texture": "#centrifuge_vial"
         }

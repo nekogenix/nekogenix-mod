@@ -12,7 +12,8 @@
     "centrifuge_glass": "nekogenix:block/centrifuge_glass",
     "centrifuge_vial": "nekogenix:block/centrifuge_vial",
     "centrifuge_sample": "nekogenix:block/centrifuge_sample",
-    "centrifuge_cork": "nekogenix:block/centrifuge_cork"
+    "centrifuge_cork": "nekogenix:block/centrifuge_cork",
+    "centrifuge_interior": "nekogenix:block/centrifuge_interior"
   },
   "elements": [
     {
@@ -30,55 +31,55 @@
       "faces": {
         "north": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            7.25,
+            8.9,
+            8.75,
+            11.5
           ],
           "texture": "#centrifuge_sample"
         },
         "south": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            7.25,
+            8.9,
+            8.75,
+            11.5
           ],
           "texture": "#centrifuge_sample"
         },
         "east": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            7.25,
+            8.9,
+            8.75,
+            11.5
           ],
           "texture": "#centrifuge_sample"
         },
         "west": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            7.25,
+            8.9,
+            8.75,
+            11.5
           ],
           "texture": "#centrifuge_sample"
         },
         "up": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            7.25,
+            7.25,
+            8.75,
+            8.75
           ],
           "texture": "#centrifuge_sample"
         },
         "down": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            7.25,
+            7.25,
+            8.75,
+            8.75
           ],
           "texture": "#centrifuge_sample"
         }

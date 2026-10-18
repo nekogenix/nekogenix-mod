@@ -80,21 +80,25 @@ public final class CentrifugeBlockEntity extends BaseContainerBlockEntity implem
         }
         if (!machine.running()) {
             if (!machine.ready()) return;
-            machine.items.get(FUEL).shrink(REDSTONE_PER_CARD);
             machine.progress = 1;
             machine.updateLid();
             machine.sync();
-        } else if (++machine.progress >= PROCESS_TICKS) {
-            for (int slot = 0; slot < BOTTLES; slot++) machine.items.set(slot, Items.GLASS_BOTTLE.getDefaultInstance());
-            machine.items.set(CARD, Content.CAT_NUCLEOCARD.toStack());
-            machine.progress = 0;
-            machine.sound(SoundEvents.AMETHYST_BLOCK_CHIME, .8F, 1.2F);
-            machine.updateLid();
-            machine.sync();
         } else {
-            machine.setChanged();
-            if (machine.progress % 20 == 0) machine.sync();
-            if (machine.progress % 60 == 0) machine.sound(SoundEvents.BEACON_AMBIENT, .22F, .8F + machine.progress / 1500F);
+            int consumed = machine.progress * REDSTONE_PER_CARD / PROCESS_TICKS;
+            machine.progress++;
+            machine.items.get(FUEL).shrink(machine.progress * REDSTONE_PER_CARD / PROCESS_TICKS - consumed);
+            if (machine.progress >= PROCESS_TICKS) {
+                for (int slot = 0; slot < BOTTLES; slot++) machine.items.set(slot, Items.GLASS_BOTTLE.getDefaultInstance());
+                machine.items.set(CARD, Content.CAT_NUCLEOCARD.toStack());
+                machine.progress = 0;
+                machine.sound(SoundEvents.AMETHYST_BLOCK_CHIME, .8F, 1.2F);
+                machine.updateLid();
+                machine.sync();
+            } else {
+                machine.setChanged();
+                if (machine.progress % 20 == 0) machine.sync();
+                if (machine.progress % 60 == 0) machine.sound(SoundEvents.BEACON_AMBIENT, .22F, .8F + machine.progress / 1500F);
+            }
         }
     }
 

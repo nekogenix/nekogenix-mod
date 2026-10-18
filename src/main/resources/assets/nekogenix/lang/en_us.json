@@ -31,8 +31,9 @@
   "container.nekogenix.samples": "Load six saliva samples",
   "container.nekogenix.sample_slot": "Bottle of Cat Saliva",
   "container.nekogenix.card_slot": "Blank Nucleocard",
-  "container.nekogenix.fuel_slot": "Redstone dust: one per batch",
+  "container.nekogenix.fuel_slot": "Redstone dust: 64 per batch",
   "tooltip.nekogenix.blank_nucleocard": "Process with six saliva samples in a Centrifuge",
-  "tooltip.nekogenix.cat_nucleocard": "Place above a Syringe in a Brewing Stand",
-  "tooltip.nekogenix.nucleocard_return": "Returns to a Blank Nucleocard after filling one Syringe"
+  "tooltip.nekogenix.cat_nucleocard": "Place above a Syringe in a Pneumatic Stand",
+  "tooltip.nekogenix.nucleocard_return": "Returns to a Blank Nucleocard after filling one Syringe",
+  "block.nekogenix.pneumatic_stand": "Pneumatic Stand"
 }

@@ -9,9 +9,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BrewingStandBlockEntity;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
@@ -25,6 +23,7 @@ public final class CentrifugeTests {
         BlockPos pos = helper.absolutePos(new BlockPos(2, 2, 2));
         level.setBlockAndUpdate(pos, Content.CENTRIFUGE.get().defaultBlockState());
         var machine = (CentrifugeBlockEntity) level.getBlockEntity(pos);
+        var player = GameplayTests.player(helper);
         for (int i = 0; i < 5; i++) machine.setItem(i, Content.SALIVA_BOTTLE.toStack());
         machine.setItem(6, Content.BLANK_NUCLEOCARD.toStack());
         helper.runAfterDelay(5, () -> {
@@ -41,8 +40,7 @@ public final class CentrifugeTests {
             machine.setItem(7, new ItemStack(Items.REDSTONE, 64));
         });
         helper.runAfterDelay(20, () -> {
-            helper.assertTrue(machine.running() && machine.getItem(7).isEmpty(), "One full stack is consumed when processing starts");
-            var player = GameplayTests.player(helper);
+            helper.assertTrue(machine.running() && machine.getItem(7).getCount() == 64, "Fuel remains available at the beginning of processing");
             player.teleportTo(pos.getX() + .5, pos.getY() + 1, pos.getZ() + .5);
             player.openMenu(machine);
             var menu = (CentrifugeMenu) player.containerMenu;
@@ -64,8 +62,10 @@ public final class CentrifugeTests {
             int progress = machine.progress();
             var saved = machine.saveWithFullMetadata(level.registryAccess());
             var restored = (CentrifugeBlockEntity) BlockEntity.loadStatic(pos, machine.getBlockState(), saved, level.registryAccess());
-            helper.assertTrue(restored != null && restored.progress() == progress && restored.getItem(7).isEmpty(),
-                    "Saved block retains progress and the already consumed fuel");
+            helper.assertTrue(restored != null && restored.progress() == progress
+                            && restored.getItem(7).getCount() == machine.getItem(7).getCount()
+                            && restored.getItem(7).getCount() > 0 && restored.getItem(7).getCount() < 64,
+                    "Saved block retains progress and the partially consumed stack");
             level.removeBlockEntity(pos);
             level.setBlockEntity(restored);
         });
@@ -82,6 +82,27 @@ public final class CentrifugeTests {
             helper.assertItemEntityCountIs(Content.CAT_NUCLEOCARD.get(), new BlockPos(2, 2, 2), 2, 1);
             helper.succeed();
         });
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void lastDustFinishesTheCard(GameTestHelper helper) {
+        var level = helper.getLevel();
+        BlockPos pos = helper.absolutePos(new BlockPos(2, 2, 2));
+        level.setBlockAndUpdate(pos, Content.CENTRIFUGE.get().defaultBlockState());
+        var machine = (CentrifugeBlockEntity) level.getBlockEntity(pos);
+        for (int slot = 0; slot < 6; slot++) machine.setItem(slot, Content.SALIVA_BOTTLE.toStack());
+        machine.setItem(6, Content.BLANK_NUCLEOCARD.toStack());
+        machine.setItem(7, new ItemStack(Items.REDSTONE, 64));
+        for (int tick = 1; tick <= 599; tick++) {
+            CentrifugeBlockEntity.tick(level, pos, machine.getBlockState(), machine);
+            if (tick == 300) helper.assertTrue(machine.getItem(7).getCount() == 32, "Half a stack remains halfway through extraction");
+        }
+        helper.assertTrue(machine.getItem(7).getCount() == 1 && machine.getItem(6).is(Content.BLANK_NUCLEOCARD),
+                "The last dust remains until the card is complete");
+        CentrifugeBlockEntity.tick(level, pos, machine.getBlockState(), machine);
+        helper.assertTrue(machine.getItem(7).isEmpty() && machine.getItem(6).is(Content.CAT_NUCLEOCARD),
+                "The last dust and the finished card change together");
+        helper.succeed();
     }
 
     @GameTest(template = "empty", timeoutTicks = 40)
@@ -110,29 +131,4 @@ public final class CentrifugeTests {
         });
     }
 
-    @GameTest(template = "empty", timeoutTicks = 900)
-    public static void brewingFillsOnlyOneSyringeAndReturnsCard(GameTestHelper helper) {
-        var level = helper.getLevel();
-        BlockPos pos = helper.absolutePos(new BlockPos(2, 2, 2));
-        level.setBlockAndUpdate(pos, Blocks.BREWING_STAND.defaultBlockState());
-        var stand = (BrewingStandBlockEntity) level.getBlockEntity(pos);
-        for (int i = 0; i < 3; i++) stand.setItem(i, Content.SYRINGE.toStack());
-        stand.setItem(3, Content.CAT_NUCLEOCARD.toStack());
-        stand.setItem(4, Items.BLAZE_POWDER.getDefaultInstance());
-        helper.runAfterDelay(420, () -> {
-            helper.assertTrue(stand.getItem(0).is(Content.INJECTION) && stand.getItem(1).is(Content.SYRINGE)
-                    && stand.getItem(2).is(Content.SYRINGE), "One card fills exactly one of three syringe slots");
-            helper.assertTrue(stand.getItem(3).is(Content.BLANK_NUCLEOCARD), "The used DNA card becomes a blank card");
-        });
-        helper.runAfterDelay(450, () -> {
-            helper.assertTrue(stand.getItem(1).is(Content.SYRINGE), "The returned blank card cannot fill another syringe");
-            stand.setItem(3, Content.CAT_NUCLEOCARD.toStack());
-        });
-        helper.runAfterDelay(870, () -> {
-            helper.assertTrue(stand.getItem(0).is(Content.INJECTION) && stand.getItem(1).is(Content.INJECTION)
-                    && stand.getItem(2).is(Content.SYRINGE) && stand.getItem(3).is(Content.BLANK_NUCLEOCARD),
-                    "A second filled card processes only the next available syringe");
-            helper.succeed();
-        });
-    }
 }
