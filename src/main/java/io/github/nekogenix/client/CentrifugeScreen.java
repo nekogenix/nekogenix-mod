@@ -15,6 +15,9 @@ public final class CentrifugeScreen extends AbstractContainerScreen<CentrifugeMe
     private static final ResourceLocation FULL_SAMPLE = Content.id("textures/item/bottle_of_cat_saliva.png");
     private static final ResourceLocation BLANK_CARD = Content.id("textures/item/blank_nucleocard.png");
     private static final ResourceLocation FULL_CARD = Content.id("textures/item/cat_nucleocard.png");
+    private static final ResourceLocation SAMPLE_HINT = Content.id("textures/gui/centrifuge_sample_slot.png");
+    private static final ResourceLocation CARD_HINT = Content.id("textures/gui/centrifuge_card_slot.png");
+    private static final ResourceLocation FUEL_HINT = Content.id("textures/gui/centrifuge_fuel_slot.png");
 
     public CentrifugeScreen(CentrifugeMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
@@ -26,6 +29,11 @@ public final class CentrifugeScreen extends AbstractContainerScreen<CentrifugeMe
     @Override
     protected void renderBg(GuiGraphics graphics, float partial, int mouseX, int mouseY) {
         graphics.blit(TEXTURE, leftPos, topPos, 0, 0, imageWidth, imageHeight, imageWidth, imageHeight);
+        for (int index = 0; index < 8; index++) {
+            var slot = menu.getSlot(index);
+            if (!slot.hasItem()) sprite(graphics, index < 6 ? SAMPLE_HINT : index == 6 ? CARD_HINT : FUEL_HINT,
+                    leftPos + slot.x, topPos + slot.y);
+        }
         float fraction = menu.fraction();
         // A small illuminated helix fills alongside the card below the rotor.
         for (int row = 0; row < 14; row++) {
@@ -33,27 +41,20 @@ public final class CentrifugeScreen extends AbstractContainerScreen<CentrifugeMe
             int x = 88 + (int) (Math.sin(phase) * 9);
             int opposite = 176 - x;
             int color = row >= 14 * (1 - fraction) ? 0xffd4a6cf : 0xff526775;
-            graphics.fill(leftPos + Math.min(x, opposite), topPos + 56 + row * 2,
-                    leftPos + Math.max(x, opposite) + 2, topPos + 57 + row * 2, 0xff667985);
-            graphics.fill(leftPos + x, topPos + 56 + row * 2, leftPos + x + 2, topPos + 58 + row * 2, color);
-            graphics.fill(leftPos + opposite, topPos + 56 + row * 2, leftPos + opposite + 2, topPos + 58 + row * 2, color);
+            graphics.fill(leftPos + Math.min(x, opposite), topPos + 62 + row * 2,
+                    leftPos + Math.max(x, opposite) + 2, topPos + 63 + row * 2, 0xff667985);
+            graphics.fill(leftPos + x, topPos + 62 + row * 2, leftPos + x + 2, topPos + 64 + row * 2, color);
+            graphics.fill(leftPos + opposite, topPos + 62 + row * 2, leftPos + opposite + 2, topPos + 64 + row * 2, color);
         }
     }
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partial) {
         super.render(graphics, mouseX, mouseY, partial);
-        Component status;
-        if (menu.running()) status = Component.translatable("container.nekogenix.extracting", Math.round(menu.fraction() * 100));
-        else if (menu.getSlot(6).getItem().is(Content.CAT_NUCLEOCARD)) status = Component.translatable("container.nekogenix.ready");
-        else status = Component.translatable("container.nekogenix.samples");
-        graphics.drawCenteredString(font, status, leftPos + 88, topPos + 126, 0xff303c4b);
         renderTooltip(graphics, mouseX, mouseY);
-        if (hoveredSlot != null && !hoveredSlot.hasItem()) {
-            String key = hoveredSlot.index < 6 ? "sample_slot" : hoveredSlot.index == 6 ? "card_slot" : hoveredSlot.index == 7 ? "fuel_slot" : null;
-            if (key != null) graphics.renderTooltip(font, Component.translatable("container.nekogenix." + key), mouseX, mouseY);
-        }
     }
+
+    @Override protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {}
 
     @Override
     protected void renderSlotContents(GuiGraphics graphics, ItemStack item, net.minecraft.world.inventory.Slot slot, String count) {

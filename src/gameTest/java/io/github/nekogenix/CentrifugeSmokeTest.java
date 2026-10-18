@@ -37,12 +37,14 @@ public final class CentrifugeSmokeTest {
             var machine = (CentrifugeBlockEntity) level.getBlockEntity(MACHINE);
             for (int i : new int[] {0, 2, 4}) machine.setItem(i, Content.SALIVA_BOTTLE.toStack());
             machine.setItem(6, Content.BLANK_NUCLEOCARD.toStack());
-            machine.setItem(7, new ItemStack(Items.REDSTONE, 2));
+            machine.setItem(7, new ItemStack(Items.REDSTONE, 64));
         }
         if (player.tickCount == 140) {
             var machine = (CentrifugeBlockEntity) level.getBlockEntity(MACHINE);
             for (int i : new int[] {1, 3, 5}) machine.setItem(i, Content.SALIVA_BOTTLE.toStack());
         }
+        if (player.tickCount == 160) player.teleportTo(level, 6.2, -58.7, 8.5, -90, 43);
+        if (player.tickCount == 190) player.teleportTo(level, 8.5, -58.7, 6.2, 0, 43);
         if (player.tickCount == 810) {
             var machine = (CentrifugeBlockEntity) level.getBlockEntity(MACHINE);
             ItemStack card = machine.removeItem(6, 1);
@@ -84,10 +86,18 @@ public final class CentrifugeSmokeTest {
                 capture(mc, "centrifuge-world-idle.png");
             }
             if (age == 80 || age == 200) open(mc, MACHINE);
-            if (age == 100) { check(mc.screen instanceof io.github.nekogenix.client.CentrifugeScreen, "Registered menu opens through normal interaction"); capture(mc, "centrifuge-menu-idle.png"); }
+            if (age == 100) {
+                check(mc.screen instanceof io.github.nekogenix.client.CentrifugeScreen, "Registered menu opens through normal interaction");
+                check(mc.level.getBlockEntity(MACHINE).getUpdateTag(mc.level.registryAccess()).getBoolean("Open"), "Opening the menu opens the idle lid");
+                capture(mc, "centrifuge-menu-idle.png");
+            }
             if (age == 120) mc.player.closeContainer();
             if (age == 130) capture(mc, "centrifuge-world-open.png");
             if (age == 180) capture(mc, "centrifuge-world-running.png");
+            if (age == 130) {
+                var machine = (CentrifugeBlockEntity) mc.level.getBlockEntity(MACHINE);
+                check(!machine.getUpdateTag(mc.level.registryAccess()).getBoolean("Open"), "Closing menu closes the idle lid");
+            }
             if (age == 240) {
                 if (Boolean.getBoolean("nekogenix.centrifugePreview")) {
                     capture(mc, "centrifuge-menu-preview.png");
@@ -97,6 +107,7 @@ public final class CentrifugeSmokeTest {
                 }
                 var menu = (CentrifugeMenu) mc.player.containerMenu;
                 check(menu.running(), "Processing state is synchronized to the open menu");
+                check(!mc.level.getBlockEntity(MACHINE).getUpdateTag(mc.level.registryAccess()).getBoolean("Open"), "Processing keeps the lid closed even with a viewer");
                 mc.gameMode.handleInventoryMouseClick(menu.containerId, 0, 0, net.minecraft.world.inventory.ClickType.QUICK_MOVE, mc.player);
             }
             if (age == 320 || age == 520) {
@@ -108,6 +119,7 @@ public final class CentrifugeSmokeTest {
             if (age == 780) {
                 var menu = (CentrifugeMenu) mc.player.containerMenu;
                 check(!menu.running() && menu.getSlot(6).getItem().is(Content.CAT_NUCLEOCARD), "Filled card appears in menu");
+                check(mc.level.getBlockEntity(MACHINE).getUpdateTag(mc.level.registryAccess()).getBoolean("Open"), "Completion reopens the lid for its viewer");
                 for (int i = 0; i < 6; i++) check(menu.getSlot(i).getItem().is(Items.GLASS_BOTTLE), "Empty bottle outputs arrive on client");
                 capture(mc, "centrifuge-menu-complete.png");
                 Nekogenix.LOGGER.info("Nekogenix centrifuge cycle passed: real menu, locked samples, completed card, six empty bottles");
@@ -116,6 +128,19 @@ public final class CentrifugeSmokeTest {
             if (age == 805) capture(mc, "centrifuge-world-complete.png");
             if (age == 840) open(mc, BREWER);
             if (age == 900) capture(mc, "centrifuge-brewing.png");
+            if (age == 1030 || age == 1150) {
+                var menu = (net.minecraft.world.inventory.BrewingStandMenu) mc.player.containerMenu;
+                var card = menu.getSlot(3).getItem();
+                var syringe = menu.getSlot(0).getItem();
+                var property = Content.id("brewing_progress");
+                float cardFrame = net.minecraft.client.renderer.item.ItemProperties.getProperty(card, property).call(card, mc.level, mc.player, 0);
+                float syringeFrame = net.minecraft.client.renderer.item.ItemProperties.getProperty(syringe, property).call(syringe, mc.level, mc.player, 0);
+                var untouched = menu.getSlot(1).getItem();
+                check(cardFrame > 0 && cardFrame == syringeFrame
+                                && net.minecraft.client.renderer.item.ItemProperties.getProperty(untouched, property).call(untouched, mc.level, mc.player, 0) == 0,
+                        "Card draining and exactly one syringe filling use the synchronized brewing timer");
+                capture(mc, age == 1030 ? "centrifuge-brewing-half.png" : "centrifuge-brewing-late.png");
+            }
             if (age == 1250) {
                 var menu = mc.player.containerMenu;
                 check(menu instanceof net.minecraft.world.inventory.BrewingStandMenu && menu.getSlot(0).getItem().is(Content.INJECTION)

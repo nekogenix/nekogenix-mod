@@ -23,6 +23,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
+import net.minecraft.world.level.block.entity.ContainerOpenersCounter;
 import net.minecraft.world.level.block.state.BlockState;
 
 public final class CentrifugeBlockEntity extends BaseContainerBlockEntity implements WorldlyContainer {
@@ -31,6 +32,7 @@ public final class CentrifugeBlockEntity extends BaseContainerBlockEntity implem
     public static final int FUEL = 7;
     public static final int SIZE = 8;
     public static final int PROCESS_TICKS = 600;
+    public static final int REDSTONE_PER_CARD = 64;
     private static final int[] SLOTS = {0, 1, 2, 3, 4, 5, CARD, FUEL};
     private NonNullList<ItemStack> items = NonNullList.withSize(SIZE, ItemStack.EMPTY);
     private int progress;
@@ -38,6 +40,18 @@ public final class CentrifugeBlockEntity extends BaseContainerBlockEntity implem
     private float lid, oldLid;
     private float rotor, oldRotor, speed;
     private float displayProgress;
+    private final ContainerOpenersCounter openers = new ContainerOpenersCounter() {
+        @Override protected void onOpen(Level level, BlockPos pos, BlockState state) {}
+        @Override protected void onClose(Level level, BlockPos pos, BlockState state) {}
+        @Override protected void openerCountChanged(Level level, BlockPos pos, BlockState state, int previous, int current) {
+            boolean wasOpen = open;
+            updateLid();
+            if (wasOpen != open) sync();
+        }
+        @Override protected boolean isOwnContainer(Player player) {
+            return player.containerMenu instanceof CentrifugeMenu menu && menu.isContainer(CentrifugeBlockEntity.this);
+        }
+    };
     private final ContainerData data = new ContainerData() {
         @Override public int get(int index) { return progress; }
         @Override public void set(int index, int value) { progress = value; }
@@ -66,18 +80,16 @@ public final class CentrifugeBlockEntity extends BaseContainerBlockEntity implem
         }
         if (!machine.running()) {
             if (!machine.ready()) return;
-            machine.items.get(FUEL).shrink(1);
+            machine.items.get(FUEL).shrink(REDSTONE_PER_CARD);
             machine.progress = 1;
-            machine.open = false;
-            machine.sound(SoundEvents.IRON_TRAPDOOR_CLOSE, .7F, .8F);
+            machine.updateLid();
             machine.sync();
         } else if (++machine.progress >= PROCESS_TICKS) {
             for (int slot = 0; slot < BOTTLES; slot++) machine.items.set(slot, Items.GLASS_BOTTLE.getDefaultInstance());
             machine.items.set(CARD, Content.CAT_NUCLEOCARD.toStack());
             machine.progress = 0;
-            machine.open = true;
             machine.sound(SoundEvents.AMETHYST_BLOCK_CHIME, .8F, 1.2F);
-            machine.sound(SoundEvents.IRON_TRAPDOOR_OPEN, .7F, 1F);
+            machine.updateLid();
             machine.sync();
         } else {
             machine.setChanged();
@@ -87,7 +99,8 @@ public final class CentrifugeBlockEntity extends BaseContainerBlockEntity implem
     }
 
     private boolean ready() {
-        if (!getItem(CARD).is(Content.BLANK_NUCLEOCARD) || !getItem(FUEL).is(Items.REDSTONE)) return false;
+        if (!getItem(CARD).is(Content.BLANK_NUCLEOCARD) || !getItem(FUEL).is(Items.REDSTONE)
+                || getItem(FUEL).getCount() < REDSTONE_PER_CARD) return false;
         for (int slot = 0; slot < BOTTLES; slot++) if (!getItem(slot).is(Content.SALIVA_BOTTLE) || getItem(slot).getCount() != 1) return false;
         return true;
     }
@@ -96,11 +109,27 @@ public final class CentrifugeBlockEntity extends BaseContainerBlockEntity implem
     private void sync() { super.setChanged(); level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3); }
 
     @Override public void startOpen(Player player) {
-        if (level != null && !level.isClientSide && !player.isSpectator() && !running() && !open) {
-            open = true;
-            sound(SoundEvents.IRON_TRAPDOOR_OPEN, .6F, 1F);
-            sync();
+        if (level != null && !level.isClientSide && !isRemoved() && !player.isSpectator()) {
+            openers.incrementOpeners(player, level, worldPosition, getBlockState());
         }
+    }
+    @Override public void stopOpen(Player player) {
+        if (level != null && !level.isClientSide && !isRemoved() && !player.isSpectator()) {
+            openers.decrementOpeners(player, level, worldPosition, getBlockState());
+        }
+    }
+    public void recheckOpen() {
+        if (!isRemoved()) openers.recheckOpeners(level, worldPosition, getBlockState());
+    }
+    @Override public void onLoad() {
+        super.onLoad();
+        if (level != null && !level.isClientSide) recheckOpen();
+    }
+    private void updateLid() {
+        boolean target = !running() && openers.getOpenerCount() > 0;
+        if (open == target) return;
+        open = target;
+        sound(open ? SoundEvents.IRON_TRAPDOOR_OPEN : SoundEvents.IRON_TRAPDOOR_CLOSE, .6F, open ? 1F : .8F);
     }
     @Override public void setChanged() {
         super.setChanged();

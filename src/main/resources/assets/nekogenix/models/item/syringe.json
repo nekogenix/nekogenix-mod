@@ -2,5 +2,49 @@
   "parent": "minecraft:item/generated",
   "textures": {
     "layer0": "nekogenix:item/syringe"
-  }
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "nekogenix:brewing_progress": 1
+      },
+      "model": "nekogenix:item/syringe_filling_1"
+    },
+    {
+      "predicate": {
+        "nekogenix:brewing_progress": 2
+      },
+      "model": "nekogenix:item/syringe_filling_2"
+    },
+    {
+      "predicate": {
+        "nekogenix:brewing_progress": 3
+      },
+      "model": "nekogenix:item/syringe_filling_3"
+    },
+    {
+      "predicate": {
+        "nekogenix:brewing_progress": 4
+      },
+      "model": "nekogenix:item/syringe_filling_4"
+    },
+    {
+      "predicate": {
+        "nekogenix:brewing_progress": 5
+      },
+      "model": "nekogenix:item/syringe_filling_5"
+    },
+    {
+      "predicate": {
+        "nekogenix:brewing_progress": 6
+      },
+      "model": "nekogenix:item/syringe_filling_6"
+    },
+    {
+      "predicate": {
+        "nekogenix:brewing_progress": 7
+      },
+      "model": "nekogenix:item/syringe_filling_7"
+    }
+  ]
 }

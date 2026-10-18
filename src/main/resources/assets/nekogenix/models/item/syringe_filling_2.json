@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "nekogenix:item/syringe_filling_2"
+  }
+}

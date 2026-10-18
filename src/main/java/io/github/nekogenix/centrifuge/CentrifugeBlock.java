@@ -4,6 +4,8 @@ import com.mojang.serialization.MapCodec;
 import io.github.nekogenix.Content;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -59,6 +61,9 @@ public final class CentrifugeBlock extends BaseEntityBlock {
     }
 
     @Override public BlockEntity newBlockEntity(BlockPos pos, BlockState state) { return new CentrifugeBlockEntity(pos, state); }
+    @Override protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+        if (level.getBlockEntity(pos) instanceof CentrifugeBlockEntity machine) machine.recheckOpen();
+    }
     @Override public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
         return createTickerHelper(type, Content.CENTRIFUGE_ENTITY.get(), CentrifugeBlockEntity::tick);
     }

@@ -85,11 +85,80 @@
       }
     },
     {
-      "name": "rotor_plate_b",
+      "name": "rotor_plate_back",
       "from": [
         4,
         2.5,
         3
+      ],
+      "to": [
+        12,
+        3.5,
+        4
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_rotor"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_rotor"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_rotor"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_rotor"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_rotor"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_rotor"
+        }
+      }
+    },
+    {
+      "name": "rotor_plate_front",
+      "from": [
+        4,
+        2.5,
+        12
       ],
       "to": [
         12,

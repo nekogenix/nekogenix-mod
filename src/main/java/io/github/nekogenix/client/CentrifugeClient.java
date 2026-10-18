@@ -40,8 +40,33 @@ public final class CentrifugeClient {
         @SubscribeEvent public static void renderers(EntityRenderersEvent.RegisterRenderers event) { event.registerBlockEntityRenderer(Content.CENTRIFUGE_ENTITY.get(), CentrifugeRenderer::new); }
         @SubscribeEvent public static void models(ModelEvent.RegisterAdditional event) {
             for (var model : new net.minecraft.client.resources.model.ModelResourceLocation[] {
-                    CentrifugeRenderer.LID, CentrifugeRenderer.ROTOR, CentrifugeRenderer.VIAL, CentrifugeRenderer.LIQUID, CentrifugeRenderer.CORK}) event.register(model);
+                    CentrifugeRenderer.LID, CentrifugeRenderer.GLASS, CentrifugeRenderer.ROTOR, CentrifugeRenderer.VIAL, CentrifugeRenderer.LIQUID, CentrifugeRenderer.CORK}) event.register(model);
         }
+        @SubscribeEvent public static void setup(net.neoforged.fml.event.lifecycle.FMLClientSetupEvent event) {
+            event.enqueueWork(() -> {
+                var property = Content.id("brewing_progress");
+                net.minecraft.client.renderer.item.ItemProperties.register(Content.CAT_NUCLEOCARD.get(), property,
+                        (stack, level, entity, seed) -> brewingFrame(stack, true));
+                net.minecraft.client.renderer.item.ItemProperties.register(Content.SYRINGE.get(), property,
+                        (stack, level, entity, seed) -> brewingFrame(stack, false));
+            });
+        }
+    }
+
+    private static float brewingFrame(net.minecraft.world.item.ItemStack stack, boolean card) {
+        var mc = Minecraft.getInstance();
+        if (!(mc.screen instanceof net.minecraft.client.gui.screens.inventory.BrewingStandScreen screen)) return 0;
+        var menu = screen.getMenu();
+        int remaining = menu.getBrewingTicks();
+        if (remaining <= 0 || !menu.getSlot(3).getItem().is(Content.CAT_NUCLEOCARD)) return 0;
+        for (int slot = 0; slot < 3; slot++) {
+            var syringe = menu.getSlot(slot).getItem();
+            if (syringe.is(Content.SYRINGE)) {
+                return stack == (card ? menu.getSlot(3).getItem() : syringe)
+                        ? Math.min(8, (400 - remaining) / 50) : 0;
+            }
+        }
+        return 0;
     }
 
     private CentrifugeClient() {}

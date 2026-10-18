@@ -14,7 +14,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 public final class CentrifugeMenu extends AbstractContainerMenu {
-    public static final int[][] BOTTLE_POSITIONS = {{80, 24}, {114, 43}, {114, 81}, {80, 100}, {46, 81}, {46, 43}};
+    public static final int[][] BOTTLE_POSITIONS = {{80, 30}, {114, 49}, {114, 87}, {80, 106}, {46, 87}, {46, 49}};
     private final Container container;
     private final ContainerData data;
 
@@ -46,6 +46,7 @@ public final class CentrifugeMenu extends AbstractContainerMenu {
     }
 
     public boolean running() { return data.get(0) > 0; }
+    public boolean isContainer(Container target) { return container == target; }
     public float fraction() { return data.get(0) / (float) CentrifugeBlockEntity.PROCESS_TICKS; }
     @Override public boolean stillValid(Player player) { return container.stillValid(player); }
     @Override public void clicked(int index, int button, ClickType type, Player player) { if (!running()) super.clicked(index, button, type, player); }

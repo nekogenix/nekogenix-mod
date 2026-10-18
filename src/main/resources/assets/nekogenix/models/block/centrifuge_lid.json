@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:block/block",
-  "render_type": "minecraft:translucent",
+  "render_type": "minecraft:cutout",
   "textures": {
     "particle": "nekogenix:block/centrifuge_side",
     "centrifuge_side": "nekogenix:block/centrifuge_side",
@@ -292,80 +292,11 @@
       }
     },
     {
-      "name": "glass",
-      "from": [
-        2,
-        10,
-        2
-      ],
-      "to": [
-        14,
-        10.25,
-        14
-      ],
-      "faces": {
-        "north": {
-          "uv": [
-            0,
-            0,
-            16,
-            16
-          ],
-          "texture": "#centrifuge_glass"
-        },
-        "south": {
-          "uv": [
-            0,
-            0,
-            16,
-            16
-          ],
-          "texture": "#centrifuge_glass"
-        },
-        "east": {
-          "uv": [
-            0,
-            0,
-            16,
-            16
-          ],
-          "texture": "#centrifuge_glass"
-        },
-        "west": {
-          "uv": [
-            0,
-            0,
-            16,
-            16
-          ],
-          "texture": "#centrifuge_glass"
-        },
-        "up": {
-          "uv": [
-            0,
-            0,
-            16,
-            16
-          ],
-          "texture": "#centrifuge_glass"
-        },
-        "down": {
-          "uv": [
-            0,
-            0,
-            16,
-            16
-          ],
-          "texture": "#centrifuge_glass"
-        }
-      }
-    },
-    {
       "name": "hinge_left",
       "from": [
         3,
         9,
-        14
+        15
       ],
       "to": [
         5,
@@ -434,7 +365,7 @@
       "from": [
         11,
         9,
-        14
+        15
       ],
       "to": [
         13,

@@ -14,6 +14,7 @@ import net.minecraft.client.resources.model.ModelResourceLocation;
 
 public final class CentrifugeRenderer implements BlockEntityRenderer<CentrifugeBlockEntity> {
     public static final ModelResourceLocation LID = model("lid");
+    public static final ModelResourceLocation GLASS = model("glass");
     public static final ModelResourceLocation ROTOR = model("rotor");
     public static final ModelResourceLocation VIAL = model("vial");
     public static final ModelResourceLocation LIQUID = model("liquid");
@@ -28,6 +29,7 @@ public final class CentrifugeRenderer implements BlockEntityRenderer<CentrifugeB
         pose.translate(.5, 0, .5);
         pose.mulPose(Axis.YP.rotationDegrees(180 - machine.getBlockState().getValue(CentrifugeBlock.FACING).toYRot()));
         pose.translate(-.5, 0, -.5);
+        lid(machine, partial, LID, RenderType.cutout(), pose, buffers, light, overlay);
         pose.pushPose();
         pose.translate(.5, 0, .5);
         pose.mulPose(Axis.YP.rotationDegrees(machine.rotation(partial)));
@@ -59,12 +61,17 @@ public final class CentrifugeRenderer implements BlockEntityRenderer<CentrifugeB
             pose.popPose();
         }
         pose.popPose();
+        lid(machine, partial, GLASS, RenderType.translucent(), pose, buffers, light, overlay);
+        pose.popPose();
+    }
+
+    private static void lid(CentrifugeBlockEntity machine, float partial, ModelResourceLocation part, RenderType type,
+            PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
         pose.pushPose();
         pose.translate(.5, 10 / 16F, 14 / 16F);
         pose.mulPose(Axis.XP.rotationDegrees(machine.lid(partial) * 80));
         pose.translate(-.5, -10 / 16F, -14 / 16F);
-        draw(LID, RenderType.translucent(), pose, buffers, light, overlay);
-        pose.popPose();
+        draw(part, type, pose, buffers, light, overlay);
         pose.popPose();
     }
 

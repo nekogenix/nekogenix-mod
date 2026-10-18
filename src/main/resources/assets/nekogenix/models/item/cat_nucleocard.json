@@ -2,5 +2,49 @@
   "parent": "minecraft:item/generated",
   "textures": {
     "layer0": "nekogenix:item/cat_nucleocard"
-  }
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "nekogenix:brewing_progress": 1
+      },
+      "model": "nekogenix:item/cat_nucleocard_drained_1"
+    },
+    {
+      "predicate": {
+        "nekogenix:brewing_progress": 2
+      },
+      "model": "nekogenix:item/cat_nucleocard_drained_2"
+    },
+    {
+      "predicate": {
+        "nekogenix:brewing_progress": 3
+      },
+      "model": "nekogenix:item/cat_nucleocard_drained_3"
+    },
+    {
+      "predicate": {
+        "nekogenix:brewing_progress": 4
+      },
+      "model": "nekogenix:item/cat_nucleocard_drained_4"
+    },
+    {
+      "predicate": {
+        "nekogenix:brewing_progress": 5
+      },
+      "model": "nekogenix:item/cat_nucleocard_drained_5"
+    },
+    {
+      "predicate": {
+        "nekogenix:brewing_progress": 6
+      },
+      "model": "nekogenix:item/cat_nucleocard_drained_6"
+    },
+    {
+      "predicate": {
+        "nekogenix:brewing_progress": 7
+      },
+      "model": "nekogenix:item/cat_nucleocard_drained_7"
+    }
+  ]
 }
