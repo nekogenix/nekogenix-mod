@@ -27,6 +27,7 @@ public final class RuntimeSmokeTest {
         if (!ENABLED || Boolean.getBoolean("nekogenix.voiceSmokeTest") || Boolean.getBoolean("nekogenix.transformationSmokeTest")
                 || Boolean.getBoolean("nekogenix.injectionSmokeTest")
                 || Boolean.getBoolean("nekogenix.centrifugeSmokeTest")
+                || Boolean.getBoolean("nekogenix.cauldronSmokeTest")
                 || !(event.getEntity() instanceof net.minecraft.server.level.ServerPlayer player)) return;
         if (player.tickCount == 340) {
             player.serverLevel().setDayTime(6000);
@@ -74,7 +75,8 @@ public final class RuntimeSmokeTest {
             mc.options.pauseOnLostFocus = false;
             mc.getTutorial().setStep(net.minecraft.client.tutorial.TutorialSteps.NONE);
             if (mc.player == null || mc.level == null) return;
-            if (Boolean.getBoolean("nekogenix.injectionSmokeTest") || Boolean.getBoolean("nekogenix.centrifugeSmokeTest")) return;
+            if (Boolean.getBoolean("nekogenix.injectionSmokeTest") || Boolean.getBoolean("nekogenix.centrifugeSmokeTest")
+                    || Boolean.getBoolean("nekogenix.cauldronSmokeTest")) return;
             int age = mc.player.tickCount;
             mc.options.keyAttack.setDown(age >= 40 && age < 140);
             if (age == 90) net.minecraft.client.Screenshot.grab(mc.gameDirectory, "injection-smoke.png", mc.getMainRenderTarget(), message -> {});
