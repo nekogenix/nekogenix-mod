@@ -18,6 +18,7 @@ public final class Nekogenix {
     public Nekogenix(IEventBus bus, ModContainer container) {
         Content.register(bus);
         VoiceSounds.register(bus);
+        InjectionSounds.register(bus);
         container.registerConfig(ModConfig.Type.CLIENT, ClientConfig.SPEC);
         bus.addListener(Nekogenix::network);
     }

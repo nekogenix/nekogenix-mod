@@ -1,4 +1,9 @@
 {
+  "ocean_animal": {"sounds": ["minecraft:ambient/underwater/additions/animal2"]},
+  "ocean_dark_one": {"sounds": ["minecraft:ambient/underwater/additions/dark1"]},
+  "ocean_dark_two": {"sounds": [{"name": "minecraft:ambient/underwater/additions/dark2", "volume": 0.7}]},
+  "ocean_dark_three": {"sounds": ["minecraft:ambient/underwater/additions/dark3"]},
+  "ocean_dark_four": {"sounds": ["minecraft:ambient/underwater/additions/dark4"]},
   "voice_meow": {
     "subtitle": "subtitles.entity.cat.ambient",
     "sounds": [{"name": "minecraft:entity.cat.ambient", "type": "event"}]

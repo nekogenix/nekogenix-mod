@@ -110,6 +110,8 @@ public final class TransformationTests {
             int expected = phase == 4 ? 5 : 2;
             helper.assertTrue(target.getFoodData().getFoodLevel() == expected, "Feeding restores phase-appropriate cod nutrition");
             helper.assertTrue(feeder.getMainHandItem().getCount() == 1, "Feeding consumes one fish");
+            if (phase < 4) helper.assertFalse(target.hasData(Content.BREEDING) && target.getData(Content.BREEDING).inLove(),
+                    "Feeding does not start breeding before full transformation");
         }
         target.getFoodData().setFoodLevel(20);
         interact(feeder, target);

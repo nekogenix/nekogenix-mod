@@ -2,6 +2,7 @@ package io.github.nekogenix.gameplay;
 
 import io.github.nekogenix.Content;
 import io.github.nekogenix.Nekogenix;
+import io.github.nekogenix.InjectionSounds;
 import io.github.nekogenix.state.NekoState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -42,7 +43,17 @@ public final class TransformationHandler {
             InjectionHandler.sound(player, SoundEvents.AMETHYST_BLOCK_CHIME, 0.8F, 0.9F);
         }
         if (state.phase() == NekoState.Phase.SHOCK && state.elapsed() == 200) {
-            player.playNotifySound(SoundEvents.AMBIENT_UNDERWATER_LOOP_ADDITIONS_ULTRA_RARE, SoundSource.AMBIENT, 1F, 1F);
+            int first = player.getRandom().nextInt(InjectionSounds.OCEAN.size());
+            player.setData(Content.FIRST_OCEAN_SOUND, first);
+            player.playNotifySound(InjectionSounds.OCEAN.get(first).get(), SoundSource.AMBIENT, 1F, 1F);
+        }
+        if (state.phase() == NekoState.Phase.SHOCK && state.elapsed() == 260) {
+            int first = player.getData(Content.FIRST_OCEAN_SOUND);
+            if (first >= 0 && first < InjectionSounds.OCEAN.size()) {
+                int second = player.getRandom().nextInt(InjectionSounds.OCEAN.size() - 1);
+                if (second >= first) second++;
+                player.playNotifySound(InjectionSounds.OCEAN.get(second).get(), SoundSource.AMBIENT, 1F, 1F);
+            }
         }
         boolean agility = state.has(NekoState.AGILITY);
         modifier(player.getAttribute(Attributes.MOVEMENT_SPEED), "feline_sprint", agility && player.isSprinting());
