@@ -4,6 +4,9 @@ import io.github.nekogenix.Content;
 import io.github.nekogenix.Nekogenix;
 import io.github.nekogenix.state.NekoState;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -19,6 +22,17 @@ public final class InjectionHandler {
     public static final int RETURN_TICKS = 12;
     public static final int TOTAL_TICKS = FORWARD_TICKS + RETURN_TICKS;
 
+    public record ReturnAnimation(long started, int progress) {
+        public static final ReturnAnimation NONE = new ReturnAnimation(-1, 0);
+        public static final StreamCodec<RegistryFriendlyByteBuf, ReturnAnimation> STREAM_CODEC = StreamCodec.composite(
+                ByteBufCodecs.VAR_LONG, ReturnAnimation::started,
+                ByteBufCodecs.VAR_INT, ReturnAnimation::progress, ReturnAnimation::new);
+
+        public float remaining(long now, float partial) {
+            return started < 0 ? 0 : net.minecraft.util.Mth.clamp(1 - (now - started + partial) / RETURN_TICKS, 0, 1);
+        }
+    }
+
     public static final class Session {
         private ItemStack stack = ItemStack.EMPTY;
         private int slot;
@@ -26,6 +40,7 @@ public final class InjectionHandler {
         private long lastInput;
         private boolean held;
         private boolean active;
+        private boolean returning;
         private boolean waitingForRelease;
     }
 
@@ -35,7 +50,7 @@ public final class InjectionHandler {
         session.lastInput = player.level().getGameTime();
         if (!held) {
             session.waitingForRelease = false;
-            if (session.active && session.elapsed < FORWARD_TICKS) cancel(player, session);
+            if (session.active && !session.returning && session.elapsed < FORWARD_TICKS) startReturn(player, session);
             return;
         }
         if (session.active || session.waitingForRelease || !validPlayer(player)
@@ -45,6 +60,7 @@ public final class InjectionHandler {
         session.slot = player.getInventory().selected;
         session.elapsed = 0;
         session.active = true;
+        session.returning = false;
         player.setData(Content.INJECTION_STARTED, player.level().getGameTime());
         sound(player, SoundEvents.AMETHYST_BLOCK_CHIME, 0.45F, 1.4F);
     }
@@ -55,10 +71,17 @@ public final class InjectionHandler {
         Session session = player.getData(Content.INJECTION_SESSION);
         if (!session.active) return;
         if (!validPlayer(player) || player.getInventory().selected != session.slot
-                || player.getMainHandItem() != session.stack || !session.stack.is(Content.INJECTION)
-                || (session.elapsed < FORWARD_TICKS && (!session.held
-                    || player.level().getGameTime() - session.lastInput > 30))) {
+                || player.getMainHandItem() != session.stack || !session.stack.is(Content.INJECTION)) {
             cancel(player, session);
+            return;
+        }
+        if (!session.returning && session.elapsed < FORWARD_TICKS && (!session.held
+                || player.level().getGameTime() - session.lastInput > 30)) startReturn(player, session);
+        if (session.returning) {
+            if (player.getData(Content.INJECTION_RETURN).remaining(player.level().getGameTime(), 0) <= 0) {
+                cancel(player, session);
+                session.waitingForRelease = session.held;
+            }
             return;
         }
         session.elapsed++;
@@ -84,10 +107,19 @@ public final class InjectionHandler {
         return player.isAlive() && !player.isSpectator() && !player.isUsingItem();
     }
 
+    private static void startReturn(ServerPlayer player, Session session) {
+        session.returning = true;
+        long now = player.level().getGameTime();
+        int progress = (int) Math.clamp(now - player.getData(Content.INJECTION_STARTED), 0, FORWARD_TICKS - 1);
+        player.setData(Content.INJECTION_RETURN, new ReturnAnimation(now, progress));
+    }
+
     private static void cancel(ServerPlayer player, Session session) {
         session.active = false;
+        session.returning = false;
         session.stack = ItemStack.EMPTY;
         player.setData(Content.INJECTION_STARTED, -1L);
+        player.setData(Content.INJECTION_RETURN, ReturnAnimation.NONE);
     }
 
     static void sound(ServerPlayer player, net.minecraft.sounds.SoundEvent sound, float volume, float pitch) {

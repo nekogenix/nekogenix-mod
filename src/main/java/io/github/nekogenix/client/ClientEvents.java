@@ -38,6 +38,11 @@ public final class ClientEvents {
 
     private static float elapsed(LivingEntity entity, float partial) {
         if (entity == null || !entity.hasData(Content.INJECTION_STARTED)) return -1;
+        var returning = entity.getData(Content.INJECTION_RETURN);
+        if (returning.started() >= 0) {
+            float remaining = returning.remaining(entity.level().getGameTime(), partial);
+            return remaining > 0 ? returning.progress() * remaining : -1;
+        }
         long start = entity.getData(Content.INJECTION_STARTED);
         return start < 0 ? -1 : entity.level().getGameTime() - start + partial;
     }
@@ -142,11 +147,19 @@ public final class ClientEvents {
                     float approach = Mth.clamp(age / 10F, 0, 1);
                     float retreat = age < 80 ? 1 : 1 - (age - 80) / 12F;
                     float pressure = Mth.sin(age * .48F) * .025F;
+                    float tremor = Mth.cos(age * .48F) * 2;
+                    var returning = player.getData(Content.INJECTION_RETURN);
+                    if (returning.started() >= 0) {
+                        retreat = returning.remaining(player.level().getGameTime(), partial);
+                        approach = Mth.clamp(returning.progress() / 10F, 0, 1);
+                        pressure *= retreat;
+                        tremor *= retreat;
+                    }
                     pose.translate(side * (.56F - .32F * approach * retreat), -.52F + .29F * approach * retreat + pressure,
                             -.72F + .25F * approach * retreat);
                     pose.mulPose(Axis.YP.rotationDegrees(side * (45F + 35F * approach * retreat)));
                     pose.mulPose(Axis.ZP.rotationDegrees(side * (-28F * approach * retreat)));
-                    pose.mulPose(Axis.XP.rotationDegrees(-20F * approach * retreat + Mth.cos(age * .48F) * 2));
+                    pose.mulPose(Axis.XP.rotationDegrees(-20F * approach * retreat + tremor));
                     return true;
                 }
             }, Content.INJECTION.get());

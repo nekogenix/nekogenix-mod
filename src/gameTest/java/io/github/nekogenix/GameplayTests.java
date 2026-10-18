@@ -66,7 +66,7 @@ public final class GameplayTests {
         helper.succeed();
     }
 
-    @GameTest(template = "empty", timeoutTicks = 160)
+    @GameTest(template = "empty", timeoutTicks = 180)
     public static void injectionCancellationAndCompletion(GameTestHelper helper) {
         ServerPlayer player = player(helper);
         ItemStack injection = Content.INJECTION.toStack();
@@ -76,15 +76,29 @@ public final class GameplayTests {
             InjectionHandler.input(player, false);
             helper.assertTrue(player.getMainHandItem() == injection, "Interrupted injection is not consumed");
             helper.assertTrue(player.getData(Content.NEKO).phase() == NekoState.Phase.HUMAN, "Cancellation does not transform");
-            InjectionHandler.input(player, true);
+            helper.assertTrue(player.getData(Content.INJECTION_RETURN).started() >= 0,
+                    "Releasing starts a synchronized return instead of clearing the animation");
         });
-        for (int tick : new int[] {40, 60, 80, 100}) {
+        helper.runAfterDelay(25, () -> {
+            InjectionHandler.input(player, false);
+            helper.assertTrue(player.getData(Content.INJECTION_STARTED) >= 0,
+                    "Repeated release does not interrupt the return animation");
+        });
+        helper.runAfterDelay(34, () -> {
+            helper.assertTrue(player.getData(Content.INJECTION_STARTED) == -1
+                    && player.getData(Content.INJECTION_RETURN).started() == -1,
+                    "The cancelled animation finishes and clears its transient state");
+            helper.assertTrue(player.getMainHandItem() == injection && player.getHealth() == 20F
+                    && player.getData(Content.NEKO).phase() == NekoState.Phase.HUMAN,
+                    "Returning to a full syringe does not consume it or apply injection effects");
+        });
+        for (int tick : new int[] {35, 55, 75, 95, 115}) {
             helper.runAfterDelay(tick, () -> InjectionHandler.input(player, true));
         }
-        helper.runAfterDelay(105, () -> {
+        helper.runAfterDelay(120, () -> {
             helper.assertTrue(player.getMainHandItem().is(Content.INJECTION), "Reverse animation precedes used syringe");
         });
-        helper.runAfterDelay(116, () -> {
+        helper.runAfterDelay(132, () -> {
             helper.assertTrue(player.getMainHandItem().is(Content.USED_SYRINGE), "Completed injection becomes used syringe");
             helper.assertTrue(player.getData(Content.NEKO).phase() == NekoState.Phase.SHOCK, "Injection starts shock");
             helper.assertTrue(player.getHealth() == 19F, "Injection deals exactly one health point");
