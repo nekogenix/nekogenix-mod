@@ -1,0 +1,571 @@
+{
+  "parent": "minecraft:block/block",
+  "render_type": "minecraft:translucent",
+  "textures": {
+    "particle": "nekogenix:block/centrifuge_side",
+    "centrifuge_side": "nekogenix:block/centrifuge_side",
+    "centrifuge_front": "nekogenix:block/centrifuge_front",
+    "centrifuge_back": "nekogenix:block/centrifuge_back",
+    "centrifuge_rim": "nekogenix:block/centrifuge_rim",
+    "centrifuge_well": "nekogenix:block/centrifuge_well",
+    "centrifuge_rotor": "nekogenix:block/centrifuge_rotor",
+    "centrifuge_glass": "nekogenix:block/centrifuge_glass",
+    "centrifuge_vial": "nekogenix:block/centrifuge_vial",
+    "centrifuge_sample": "nekogenix:block/centrifuge_sample",
+    "centrifuge_cork": "nekogenix:block/centrifuge_cork"
+  },
+  "elements": [
+    {
+      "name": "lid_front",
+      "from": [
+        1,
+        9.5,
+        1
+      ],
+      "to": [
+        15,
+        11,
+        2
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_rim"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_rim"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_rim"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_rim"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_rim"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_rim"
+        }
+      }
+    },
+    {
+      "name": "lid_back",
+      "from": [
+        1,
+        9.5,
+        14
+      ],
+      "to": [
+        15,
+        11,
+        15
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_rim"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_rim"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_rim"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_rim"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_rim"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_rim"
+        }
+      }
+    },
+    {
+      "name": "lid_left",
+      "from": [
+        1,
+        9.5,
+        2
+      ],
+      "to": [
+        2,
+        11,
+        14
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_rim"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_rim"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_rim"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_rim"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_rim"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_rim"
+        }
+      }
+    },
+    {
+      "name": "lid_right",
+      "from": [
+        14,
+        9.5,
+        2
+      ],
+      "to": [
+        15,
+        11,
+        14
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_rim"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_rim"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_rim"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_rim"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_rim"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_rim"
+        }
+      }
+    },
+    {
+      "name": "glass",
+      "from": [
+        2,
+        10,
+        2
+      ],
+      "to": [
+        14,
+        10.25,
+        14
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_glass"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_glass"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_glass"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_glass"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_glass"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_glass"
+        }
+      }
+    },
+    {
+      "name": "hinge_left",
+      "from": [
+        3,
+        9,
+        14
+      ],
+      "to": [
+        5,
+        10.5,
+        15.5
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_well"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_well"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_well"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_well"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_well"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_well"
+        }
+      }
+    },
+    {
+      "name": "hinge_right",
+      "from": [
+        11,
+        9,
+        14
+      ],
+      "to": [
+        13,
+        10.5,
+        15.5
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_well"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_well"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_well"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_well"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_well"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_well"
+        }
+      }
+    },
+    {
+      "name": "latch",
+      "from": [
+        7,
+        8.5,
+        0.75
+      ],
+      "to": [
+        9,
+        10.5,
+        1.25
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_rotor"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_rotor"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_rotor"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_rotor"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_rotor"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#centrifuge_rotor"
+        }
+      }
+    }
+  ]
+}

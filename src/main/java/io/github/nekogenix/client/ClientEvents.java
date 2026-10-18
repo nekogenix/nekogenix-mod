@@ -85,7 +85,7 @@ public final class ClientEvents {
             var tab = Content.TAB.get();
             boolean icon = tab.getIconItem().is(Content.INJECTION);
             int count = tab.getDisplayItems().size();
-            if (icon && count == 10) {
+            if (icon && count == Content.itemCount()) {
                 Nekogenix.LOGGER.info("Nekogenix client joined world {}; creative tab contains {} items with Neko Injection icon",
                         mc.level.dimension().location(), count);
                 loggedJoin = true;
