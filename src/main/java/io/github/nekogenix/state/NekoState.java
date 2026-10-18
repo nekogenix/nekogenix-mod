@@ -24,6 +24,7 @@ public final class NekoState implements INBTSerializable<CompoundTag> {
     public Phase phase() { return phase; }
     public int elapsed() { return elapsed; }
     public boolean isNeko() { return phase == Phase.NEKO; }
+    public boolean isTransforming() { return phase == Phase.SHOCK || phase == Phase.TRANSFORMING; }
     public boolean has(int ability) { return (abilities & ability) != 0; }
     public int stage() { return phase == Phase.TRANSFORMING ? Math.min(2, elapsed / DAY) : 0; }
     public int stageRemaining() { return DAY - elapsed % DAY; }
@@ -33,7 +34,7 @@ public final class NekoState implements INBTSerializable<CompoundTag> {
         phase = Phase.SHOCK;
         elapsed = 0;
         abilities = 0;
-        lives = 9;
+        lives = 0;
         return true;
     }
 
@@ -55,7 +56,10 @@ public final class NekoState implements INBTSerializable<CompoundTag> {
                     break;
                 }
             }
-            if (elapsed >= 3 * DAY) phase = Phase.NEKO;
+            if (elapsed >= 3 * DAY) {
+                phase = Phase.NEKO;
+                lives = 9;
+            }
             return true;
         }
         return false;
@@ -63,9 +67,17 @@ public final class NekoState implements INBTSerializable<CompoundTag> {
 
     public boolean loseLife() {
         if (!isNeko() || --lives > 0) return false;
+        reset();
+        return true;
+    }
+
+    public void cancelTransformation() {
+        if (isTransforming()) reset();
+    }
+
+    private void reset() {
         phase = Phase.HUMAN;
         elapsed = abilities = lives = 0;
-        return true;
     }
 
     @Override
@@ -84,7 +96,7 @@ public final class NekoState implements INBTSerializable<CompoundTag> {
         phase = Phase.values()[Mth.clamp(tag.getInt("phase"), 0, Phase.values().length - 1)];
         elapsed = Mth.clamp(tag.getInt("elapsed"), 0, 3 * DAY);
         abilities = tag.getInt("abilities") & 7;
-        lives = Mth.clamp(tag.getInt("lives"), 0, 9);
+        lives = isNeko() ? Mth.clamp(tag.getInt("lives"), 0, 9) : 0;
         visionOwned = tag.getBoolean("vision_owned");
     }
 }

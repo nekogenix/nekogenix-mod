@@ -29,6 +29,20 @@ final class EffectDisplay implements IClientMobEffectExtensions {
                 public boolean isVisibleInGui(MobEffectInstance instance) { return visible(); }
             }, MobEffects.NIGHT_VISION);
         }
+        if (!event.isMobEffectRegistered(MobEffects.CONFUSION.value())) {
+            event.registerMobEffect(new IClientMobEffectExtensions() {
+                private boolean visible(MobEffectInstance instance) {
+                    var player = Minecraft.getInstance().player;
+                    return player == null || !player.hasEffect(Content.SHOCK) || instance.isVisible() || instance.showIcon();
+                }
+
+                @Override
+                public boolean isVisibleInInventory(MobEffectInstance instance) { return visible(instance); }
+
+                @Override
+                public boolean isVisibleInGui(MobEffectInstance instance) { return visible(instance); }
+            }, MobEffects.CONFUSION);
+        }
     }
 
     @Override

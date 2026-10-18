@@ -1,6 +1,7 @@
 package io.github.nekogenix.gameplay;
 
 import io.github.nekogenix.Nekogenix;
+import io.github.nekogenix.Content;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -73,26 +74,44 @@ public final class NekoDiet {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         ItemStack stack = event.getItem();
         if (stack.is(Items.MILK_BUCKET)) {
-            if (TransformationHandler.isNeko(player)) player.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 200, 0));
+            if (player.getData(Content.NEKO).isTransforming()) poison(player, 600, 0);
+            else if (TransformationHandler.isNeko(player)) player.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 200, 0));
             TransformationHandler.refreshEffects(player);
             return;
         }
         if (!TransformationHandler.isNeko(player)) return;
         Meal meal = MEALS.remove(player);
-        Rule rule = RULES.get(stack.getItem());
-        FoodProperties food = stack.getFoodProperties(player);
-        if (rule != null && food != null && meal != null && meal.item() == stack.getItem()
+        if (meal != null && meal.item() == stack.getItem()
                 && meal.tick() == player.level().getGameTime()) {
-            float saturation = food.saturation() * rule.saturationScale();
-            if (rule.cookedEquivalent() != null) {
-                FoodProperties cooked = rule.cookedEquivalent().getDefaultInstance().getFoodProperties(player);
-                if (cooked != null) saturation = cooked.saturation();
-            }
-            adjust(player, meal.food(), meal.saturation(), food.nutrition(), food.saturation(), rule.nutrition(), saturation);
+            adjustMeal(player, stack, meal.food(), meal.saturation());
         }
         if (stack.is(Items.COOKIE)) poison(player, 300, 0);
         else if (stack.is(Items.ROTTEN_FLESH)) poison(player, 160, 0);
         else if (stack.is(Items.POISONOUS_POTATO)) poison(player, 200, 1);
+    }
+
+    static void adjustMeal(ServerPlayer player, ItemStack stack, int beforeFood, float beforeSaturation) {
+        if (!TransformationHandler.isNeko(player)) return;
+        Rule rule = RULES.get(stack.getItem());
+        FoodProperties food = stack.getFoodProperties(player);
+        if (rule == null || food == null) return;
+        float saturation = food.saturation() * rule.saturationScale();
+        if (rule.cookedEquivalent() != null) {
+            FoodProperties cooked = rule.cookedEquivalent().getDefaultInstance().getFoodProperties(player);
+            if (cooked != null) saturation = cooked.saturation();
+        }
+        adjust(player, beforeFood, beforeSaturation, food.nutrition(), food.saturation(), rule.nutrition(), saturation);
+    }
+
+    @SubscribeEvent
+    public static void chickenHunger(MobEffectEvent.Applicable event) {
+        if (event.getEntity() instanceof ServerPlayer player && TransformationHandler.isNeko(player)
+                && player.isUsingItem() && player.getUseItem().is(Items.CHICKEN)
+                && player.getUseItemRemainingTicks() <= 1 && event.getEffectInstance().is(MobEffects.HUNGER)
+                && event.getEffectInstance().getDuration() == 600 && event.getEffectInstance().getAmplifier() == 0
+                && event.getEffectSource() == null) {
+            event.setResult(MobEffectEvent.Applicable.Result.DO_NOT_APPLY);
+        }
     }
 
     private static void poison(ServerPlayer player, int duration, int amplifier) {
