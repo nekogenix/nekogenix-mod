@@ -24,7 +24,7 @@ public final class RuntimeSmokeTest {
 
     @SubscribeEvent
     public static void stage(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
-        if (!ENABLED || Boolean.getBoolean("nekogenix.voiceSmokeTest")
+        if (!ENABLED || Boolean.getBoolean("nekogenix.voiceSmokeTest") || Boolean.getBoolean("nekogenix.transformationSmokeTest")
                 || !(event.getEntity() instanceof net.minecraft.server.level.ServerPlayer player)) return;
         if (player.tickCount == 340) {
             player.serverLevel().setDayTime(6000);
@@ -84,7 +84,7 @@ public final class RuntimeSmokeTest {
                     Nekogenix.LOGGER.error("Nekogenix runtime smoke failed: held={}, shock={}", mc.player.getMainHandItem(), mc.player.hasEffect(Content.SHOCK));
                 }
             }
-            if (Boolean.getBoolean("nekogenix.voiceSmokeTest")) return;
+            if (Boolean.getBoolean("nekogenix.voiceSmokeTest") || Boolean.getBoolean("nekogenix.transformationSmokeTest")) return;
             if (age == 300) {
                 var effect = mc.player.getEffect(Content.TRANSFORMING);
                 var vision = mc.player.getEffect(net.minecraft.world.effect.MobEffects.NIGHT_VISION);

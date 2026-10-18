@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -39,6 +40,9 @@ public final class TransformationHandler {
         if (state.tick(player.getRandom())) {
             refreshEffects(player);
             InjectionHandler.sound(player, SoundEvents.AMETHYST_BLOCK_CHIME, 0.8F, 0.9F);
+        }
+        if (state.phase() == NekoState.Phase.SHOCK && state.elapsed() == 200) {
+            player.playNotifySound(SoundEvents.AMBIENT_UNDERWATER_LOOP_ADDITIONS_ULTRA_RARE, SoundSource.AMBIENT, 1F, 1F);
         }
         boolean agility = state.has(NekoState.AGILITY);
         modifier(player.getAttribute(Attributes.MOVEMENT_SPEED), "feline_sprint", agility && player.isSprinting());
@@ -147,8 +151,20 @@ public final class TransformationHandler {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void death(LivingDeathEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player && !player.serverLevel().getLevelData().isHardcore()) {
-            player.getData(Content.NEKO).loseLife();
+        if (event.getEntity() instanceof ServerPlayer player) {
+            NekoState state = player.getData(Content.NEKO);
+            boolean wasFeline = state.phase() != NekoState.Phase.HUMAN;
+            boolean sickness = state.phase() == NekoState.Phase.SHOCK;
+            if (state.isTransforming()) state.cancelTransformation();
+            else if (!player.serverLevel().getLevelData().isHardcore()) state.loseLife();
+            if (wasFeline && state.phase() == NekoState.Phase.HUMAN) {
+                var nausea = player.getEffect(MobEffects.CONFUSION);
+                if (sickness && nausea != null && !nausea.isVisible() && !nausea.showIcon()) player.removeEffect(MobEffects.CONFUSION);
+                refreshEffects(player);
+                vision(player, state);
+                modifier(player.getAttribute(Attributes.MOVEMENT_SPEED), "feline_sprint", false);
+                modifier(player.getAttribute(Attributes.SNEAKING_SPEED), "feline_sneak", false);
+            }
         }
     }
 

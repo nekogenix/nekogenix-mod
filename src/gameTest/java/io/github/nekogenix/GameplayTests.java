@@ -283,7 +283,7 @@ public final class GameplayTests {
         player.startUsingItem(InteractionHand.MAIN_HAND);
     }
 
-    private static ServerPlayer player(GameTestHelper helper) {
+    static ServerPlayer player(GameTestHelper helper) {
         var cookie = CommonListenerCookie.createInitial(new GameProfile(UUID.randomUUID(), "neko-test"), false);
         ServerPlayer player = new ServerPlayer(helper.getLevel().getServer(), helper.getLevel(), cookie.gameProfile(), cookie.clientInformation());
         Connection connection = new Connection(PacketFlow.SERVERBOUND);
@@ -302,5 +302,5 @@ public final class GameplayTests {
         return player;
     }
 
-    private static void remove(ServerPlayer player) { player.server.getPlayerList().remove(player); }
+    static void remove(ServerPlayer player) { player.server.getPlayerList().remove(player); }
 }
