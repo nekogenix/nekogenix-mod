@@ -2,6 +2,7 @@ package io.github.nekogenix;
 
 import com.mojang.serialization.Codec;
 import io.github.nekogenix.gameplay.InjectionHandler;
+import io.github.nekogenix.gameplay.FelineJump;
 import io.github.nekogenix.item.SalivaBottleItem;
 import io.github.nekogenix.item.NekoInjectionItem;
 import io.github.nekogenix.item.NucleocardItem;
@@ -98,6 +99,10 @@ public final class Content {
             () -> AttachmentType.builder(() -> InjectionHandler.ReturnAnimation.NONE).sync(InjectionHandler.ReturnAnimation.STREAM_CODEC).build());
     public static final DeferredHolder<AttachmentType<?>, AttachmentType<Boolean>> FELINE_VOICE = ATTACHMENTS.register("feline_voice",
             () -> AttachmentType.builder(() -> false).sync(ByteBufCodecs.BOOL).build());
+    public static final DeferredHolder<AttachmentType<?>, AttachmentType<Boolean>> FELINE_DIET = ATTACHMENTS.register("feline_diet",
+            () -> AttachmentType.builder(() -> false).sync(ByteBufCodecs.BOOL).build());
+    public static final DeferredHolder<AttachmentType<?>, AttachmentType<FelineJump.Session>> FELINE_JUMP = ATTACHMENTS.register("feline_jump",
+            () -> AttachmentType.builder(FelineJump.Session::new).build());
     public static final DeferredHolder<AttachmentType<?>, AttachmentType<BreedingState>> BREEDING = ATTACHMENTS.register("neko_breeding",
             () -> AttachmentType.serializable(BreedingState::new).build());
     public static final DeferredHolder<AttachmentType<?>, AttachmentType<Integer>> FIRST_OCEAN_SOUND = ATTACHMENTS.register("first_ocean_sound",

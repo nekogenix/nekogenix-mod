@@ -65,15 +65,7 @@ public final class ClientEvents {
     public static void tick(ClientTickEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.level == null) { held = false; return; }
-        if (mc.player.hasEffect(Content.SHOCK)) {
-            mc.player.spinningEffectIntensity = 1.5F;
-            mc.player.oSpinningEffectIntensity = 1.5F;
-            shockWasActive = true;
-        } else if (shockWasActive) {
-            mc.player.spinningEffectIntensity = mc.player.hasEffect(net.minecraft.world.effect.MobEffects.CONFUSION) ? 1F : 0F;
-            mc.player.oSpinningEffectIntensity = mc.player.spinningEffectIntensity;
-            shockWasActive = false;
-        }
+        sicknessDistortion(mc);
         boolean down = mc.screen == null && mc.player.isAlive() && !mc.player.isSpectator()
                 && mc.player.getMainHandItem().is(Content.INJECTION) && mc.options.keyAttack.isDown();
         if (down != held || down && ++ticks % 20 == 0) {
@@ -97,6 +89,28 @@ public final class ClientEvents {
     }
 
     @SubscribeEvent
+    public static void frame(net.neoforged.neoforge.client.event.RenderFrameEvent.Pre event) {
+        var mc = Minecraft.getInstance();
+        if (mc.player != null) sicknessDistortion(mc);
+    }
+
+    private static void sicknessDistortion(Minecraft mc) {
+        float intensity;
+        if (mc.player.hasEffect(Content.SHOCK)) {
+            shockWasActive = true;
+            // Reduced distortion uses scaled camera movement instead of the green nausea overlay.
+            intensity = mc.options.screenEffectScale().get() < 1 ? 0F : 1.5F;
+        } else if (shockWasActive) {
+            var nausea = mc.player.getEffect(net.minecraft.world.effect.MobEffects.CONFUSION);
+            // The hidden nausea can outlive the sickness marker by a frame, including at duration zero.
+            boolean lingering = nausea != null && !nausea.isVisible() && !nausea.showIcon();
+            intensity = lingering || nausea == null ? 0F : 1F;
+            if (!lingering) shockWasActive = false;
+        } else return;
+        mc.player.spinningEffectIntensity = mc.player.oSpinningEffectIntensity = intensity;
+    }
+
+    @SubscribeEvent
     public static void logout(ClientPlayerNetworkEvent.LoggingOut event) {
         held = loggedJoin = shockWasActive = false;
         ticks = 0;
@@ -106,10 +120,11 @@ public final class ClientEvents {
     public static void camera(ViewportEvent.ComputeCameraAngles event) {
         var player = Minecraft.getInstance().player;
         if (player == null || !player.hasEffect(Content.SHOCK)) return;
+        float scale = Minecraft.getInstance().options.screenEffectScale().get().floatValue();
         float time = player.tickCount + (float) event.getPartialTick();
-        event.setYaw(event.getYaw() + Mth.sin(time * .73F) * 2.2F + Mth.sin(time * .17F) * 3.0F);
-        event.setPitch(event.getPitch() + Mth.cos(time * .59F) * 2.5F);
-        event.setRoll(event.getRoll() + Mth.sin(time * .19F) * 8.0F + Mth.cos(time * .89F) * 1.8F);
+        event.setYaw(event.getYaw() + (Mth.sin(time * .73F) * 2.2F + Mth.sin(time * .17F) * 3.0F) * scale);
+        event.setPitch(event.getPitch() + Mth.cos(time * .59F) * 2.5F * scale);
+        event.setRoll(event.getRoll() + (Mth.sin(time * .19F) * 8.0F + Mth.cos(time * .89F) * 1.8F) * scale);
     }
 
     @EventBusSubscriber(modid = Nekogenix.ID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)

@@ -30,14 +30,11 @@ public final class PlayerFeeding {
         if (!(target instanceof ServerPlayer player) || !(player.getFoodData().needsFood() || NekoBreeding.canFeed(player))
                 || player.isUsingItem() || !feeder.canInteractWithEntity(player, 0)) return;
         var offered = event.getItemStack();
-        var food = offered.getFoodProperties(player);
+        var food = NekoDiet.food(player, offered);
         if (food == null) return;
-        int beforeFood = player.getFoodData().getFoodLevel();
-        float beforeSaturation = player.getFoodData().getSaturationLevel();
         var meal = offered.copyWithCount(1);
         var result = player.eat(player.level(), meal, food);
         if (!player.hasInfiniteMaterials() && !result.isEmpty() && !player.addItem(result)) player.drop(result, false);
-        NekoDiet.adjustMeal(player, offered, beforeFood, beforeSaturation);
         NekoBreeding.feed(player, feeder.getUUID());
         player.serverLevel().sendParticles(new ItemParticleOption(ParticleTypes.ITEM, offered.copyWithCount(1)),
                 player.getX(), player.getEyeY() - 0.2, player.getZ(), 6, 0.15, 0.1, 0.15, 0.02);

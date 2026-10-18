@@ -64,6 +64,7 @@ public final class TransformationHandler {
 
     public static void refreshEffects(ServerPlayer player) {
         NekoState state = player.getData(Content.NEKO);
+        if (player.getData(Content.FELINE_DIET) != state.isNeko()) player.setData(Content.FELINE_DIET, state.isNeko());
         marker(player, Content.SHOCK, state.phase() == NekoState.Phase.SHOCK,
                 NekoState.SHOCK_DURATION - state.elapsed());
         if (state.phase() == NekoState.Phase.SHOCK && !player.hasEffect(MobEffects.CONFUSION)) {
