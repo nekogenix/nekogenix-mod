@@ -22,5 +22,18 @@
   "tooltip.nekogenix.paws": "-75% урона от падения",
   "tooltip.nekogenix.delayed": "Эффекты наступят через 20 минут",
   "tooltip.nekogenix.stage_ability": "В конце каждой — случайная способность",
-  "options.nekogenix.neko_voice": "Неко голос"
+  "options.nekogenix.neko_voice": "Неко голос",
+  "block.nekogenix.centrifuge": "Центрифуга",
+  "item.nekogenix.blank_nucleocard": "Пустая нуклеокарта",
+  "item.nekogenix.cat_nucleocard": "Нуклеокарта кошки",
+  "container.nekogenix.extracting": "Выделение ДНК: %s%%",
+  "container.nekogenix.ready": "Нуклеокарта готова",
+  "container.nekogenix.samples": "Загрузите шесть образцов",
+  "container.nekogenix.sample_slot": "Бутылочка кошачьей слюны",
+  "container.nekogenix.card_slot": "Пустая нуклеокарта",
+  "container.nekogenix.fuel_slot": "Редстоуновая пыль: 64 на цикл",
+  "tooltip.nekogenix.blank_nucleocard": "Обработайте с шестью образцами слюны в центрифуге",
+  "tooltip.nekogenix.cat_nucleocard": "Поместите над шприцем в пневматической стойке",
+  "tooltip.nekogenix.nucleocard_return": "Становится пустой после заполнения до двух шприцев",
+  "block.nekogenix.pneumatic_stand": "Пневматическая стойка"
 }

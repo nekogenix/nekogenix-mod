@@ -4,9 +4,16 @@ import com.mojang.serialization.Codec;
 import io.github.nekogenix.gameplay.InjectionHandler;
 import io.github.nekogenix.item.SalivaBottleItem;
 import io.github.nekogenix.item.NekoInjectionItem;
+import io.github.nekogenix.item.NucleocardItem;
 import io.github.nekogenix.item.SalivaProjectile;
 import io.github.nekogenix.state.NekoState;
 import io.github.nekogenix.state.BreedingState;
+import io.github.nekogenix.centrifuge.CentrifugeBlock;
+import io.github.nekogenix.centrifuge.CentrifugeBlockEntity;
+import io.github.nekogenix.centrifuge.CentrifugeMenu;
+import io.github.nekogenix.pneumatic.PneumaticStandBlock;
+import io.github.nekogenix.pneumatic.PneumaticStandBlockEntity;
+import io.github.nekogenix.pneumatic.PneumaticStandMenu;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -17,6 +24,12 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.flag.FeatureFlags;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -26,6 +39,9 @@ import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 public final class Content {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(Nekogenix.ID);
+    private static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(Nekogenix.ID);
+    private static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, Nekogenix.ID);
+    private static final DeferredRegister<MenuType<?>> MENUS = DeferredRegister.create(Registries.MENU, Nekogenix.ID);
     private static final DeferredRegister<MobEffect> EFFECTS = DeferredRegister.create(Registries.MOB_EFFECT, Nekogenix.ID);
     private static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(Registries.ENTITY_TYPE, Nekogenix.ID);
     private static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, Nekogenix.ID);
@@ -43,6 +59,22 @@ public final class Content {
     public static final DeferredItem<SalivaBottleItem> SPLASH_SALIVA = ITEMS.register("splash_bottle_of_cat_saliva",
             () -> new SalivaBottleItem(true));
     public static final DeferredItem<NekoInjectionItem> INJECTION = ITEMS.register("neko_injection", NekoInjectionItem::new);
+    public static final DeferredItem<NucleocardItem> BLANK_NUCLEOCARD = ITEMS.register("blank_nucleocard", () -> new NucleocardItem(false));
+    public static final DeferredItem<NucleocardItem> CAT_NUCLEOCARD = ITEMS.register("cat_nucleocard", () -> new NucleocardItem(true));
+    public static final DeferredBlock<CentrifugeBlock> CENTRIFUGE = BLOCKS.registerBlock("centrifuge", CentrifugeBlock::new,
+            BlockBehaviour.Properties.of().strength(3.5F).sound(SoundType.METAL).requiresCorrectToolForDrops().noOcclusion());
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> CENTRIFUGE_ITEM = ITEMS.registerSimpleBlockItem(CENTRIFUGE);
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<CentrifugeBlockEntity>> CENTRIFUGE_ENTITY = BLOCK_ENTITIES.register("centrifuge",
+            () -> BlockEntityType.Builder.of(CentrifugeBlockEntity::new, CENTRIFUGE.get()).build(null));
+    public static final DeferredHolder<MenuType<?>, MenuType<CentrifugeMenu>> CENTRIFUGE_MENU = MENUS.register("centrifuge",
+            () -> new MenuType<>(CentrifugeMenu::new, FeatureFlags.VANILLA_SET));
+    public static final DeferredBlock<PneumaticStandBlock> PNEUMATIC_STAND = BLOCKS.registerBlock("pneumatic_stand", PneumaticStandBlock::new,
+            BlockBehaviour.Properties.of().strength(2.5F).sound(SoundType.METAL).requiresCorrectToolForDrops().noOcclusion());
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> PNEUMATIC_ITEM = ITEMS.registerSimpleBlockItem(PNEUMATIC_STAND);
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PneumaticStandBlockEntity>> PNEUMATIC_ENTITY = BLOCK_ENTITIES.register("pneumatic_stand",
+            () -> BlockEntityType.Builder.of(PneumaticStandBlockEntity::new, PNEUMATIC_STAND.get()).build(null));
+    public static final DeferredHolder<MenuType<?>, MenuType<PneumaticStandMenu>> PNEUMATIC_MENU = MENUS.register("pneumatic_stand",
+            () -> new MenuType<>(PneumaticStandMenu::new, FeatureFlags.VANILLA_SET));
 
     public static final DeferredHolder<MobEffect, MobEffect> SHOCK = effect("injection_shock", MobEffectCategory.HARMFUL, 0xB769A2);
     public static final DeferredHolder<MobEffect, MobEffect> TRANSFORMING = effect("neko_transformation", MobEffectCategory.NEUTRAL, 0xD4A6DE);
@@ -85,8 +117,13 @@ public final class Content {
         return ResourceLocation.fromNamespaceAndPath(Nekogenix.ID, path);
     }
 
+    public static int itemCount() { return ITEMS.getEntries().size(); }
+
     static void register(IEventBus bus) {
         ITEMS.register(bus);
+        BLOCKS.register(bus);
+        BLOCK_ENTITIES.register(bus);
+        MENUS.register(bus);
         EFFECTS.register(bus);
         ENTITIES.register(bus);
         ATTACHMENTS.register(bus);

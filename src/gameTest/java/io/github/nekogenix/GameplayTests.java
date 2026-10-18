@@ -152,9 +152,10 @@ public final class GameplayTests {
     public static void heatedCauldronCleansOnlyOne(GameTestHelper helper) {
         BlockPos full = new BlockPos(1, 2, 1);
         BlockPos partial = new BlockPos(4, 2, 1);
-        for (BlockPos pos : new BlockPos[] {full, partial}) {
+        BlockPos cooled = new BlockPos(1, 2, 4);
+        for (BlockPos pos : new BlockPos[] {full, partial, cooled}) {
             helper.setBlock(pos.below(), Blocks.MAGMA_BLOCK);
-            helper.setBlock(pos, Blocks.WATER_CAULDRON.defaultBlockState().setValue(LayeredCauldronBlock.LEVEL, pos.equals(full) ? 3 : 2));
+            helper.setBlock(pos, Blocks.WATER_CAULDRON.defaultBlockState().setValue(LayeredCauldronBlock.LEVEL, pos.equals(partial) ? 2 : 3));
             BlockPos absolute = helper.absolutePos(pos);
             for (int i = 0; i < 2; i++) {
                 ItemEntity dirty = new ItemEntity(helper.getLevel(), absolute.getX() + .5, absolute.getY() + .5, absolute.getZ() + .5, Content.USED_SYRINGE.toStack());
@@ -163,6 +164,21 @@ public final class GameplayTests {
                 helper.getLevel().addFreshEntity(dirty);
             }
         }
+        helper.runAfterDelay(50, () -> {
+            helper.assertBlockProperty(full, LayeredCauldronBlock.LEVEL, 3);
+            helper.assertItemEntityCountIs(Content.SYRINGE.get(), full, 1.2, 0);
+        });
+        helper.runAfterDelay(90, () -> {
+            helper.assertBlockProperty(full, LayeredCauldronBlock.LEVEL, 2);
+            helper.assertBlockProperty(cooled, LayeredCauldronBlock.LEVEL, 2);
+            helper.setBlock(cooled.below(), Blocks.STONE);
+        });
+        helper.runAfterDelay(160, () -> {
+            helper.assertBlockProperty(full, LayeredCauldronBlock.LEVEL, 1);
+            helper.assertBlockProperty(partial, LayeredCauldronBlock.LEVEL, 1);
+            helper.assertItemEntityCountIs(Content.SYRINGE.get(), full, 1.2, 0);
+        });
+        helper.runAfterDelay(199, () -> helper.assertBlockPresent(Blocks.WATER_CAULDRON, full));
         helper.runAfterDelay(225, () -> {
             helper.assertBlockPresent(Blocks.CAULDRON, full);
             helper.assertBlockPresent(Blocks.CAULDRON, partial);
@@ -170,6 +186,9 @@ public final class GameplayTests {
             helper.assertItemEntityCountIs(Content.USED_SYRINGE.get(), full, 1.2, 1);
             helper.assertItemEntityCountIs(Content.SYRINGE.get(), partial, 1.2, 0);
             helper.assertItemEntityCountIs(Content.USED_SYRINGE.get(), partial, 1.2, 2);
+            helper.assertBlockProperty(cooled, LayeredCauldronBlock.LEVEL, 2);
+            helper.assertItemEntityCountIs(Content.SYRINGE.get(), cooled, 1.2, 0);
+            helper.assertItemEntityCountIs(Content.USED_SYRINGE.get(), cooled, 1.2, 2);
             helper.succeed();
         });
     }

@@ -23,7 +23,8 @@ import net.neoforged.neoforge.event.tick.LevelTickEvent;
 
 @EventBusSubscriber(modid = Nekogenix.ID)
 public final class CauldronCleaning {
-    private record Cycle(long finish, BlockState water) {}
+    private static final int DURATION = 200;
+    private record Cycle(long started, BlockState water, int initialLevel) {}
     private static final Map<ServerLevel, Map<BlockPos, Cycle>> CYCLES = new WeakHashMap<>();
 
     public static boolean heated(BlockState state) {
@@ -39,7 +40,7 @@ public final class CauldronCleaning {
         BlockState water = level.getBlockState(pos);
         if (water.is(Blocks.WATER_CAULDRON) && heated(level.getBlockState(pos.below()))) {
             CYCLES.computeIfAbsent(level, key -> new HashMap<>()).computeIfAbsent(pos.immutable(),
-                    key -> new Cycle(level.getGameTime() + 200, water));
+                    key -> new Cycle(level.getGameTime(), water, water.getValue(LayeredCauldronBlock.LEVEL)));
         }
     }
 
@@ -58,31 +59,47 @@ public final class CauldronCleaning {
                 iterator.remove();
                 continue;
             }
-            if (level.getGameTime() % 20 == 0) {
-                level.sendParticles(ParticleTypes.BUBBLE_POP, pos.getX() + 0.5, pos.getY() + 0.9,
-                        pos.getZ() + 0.5, 3, 0.2, 0.05, 0.2, 0.01);
+            long elapsed = level.getGameTime() - cycle.started();
+            int remaining = cycle.initialLevel() - (int) (Math.min(elapsed, DURATION) * cycle.initialLevel() / DURATION);
+            if (remaining == 0) {
+                if (cycle.initialLevel() == 3) {
+                    var items = level.getEntitiesOfClass(ItemEntity.class, new AABB(pos),
+                            item -> item.isAlive() && item.getItem().is(Content.USED_SYRINGE));
+                    if (!items.isEmpty()) {
+                        ItemEntity dirty = items.getFirst();
+                        dirty.getItem().shrink(1);
+                        if (dirty.getItem().isEmpty()) dirty.discard();
+                        ItemEntity clean = new ItemEntity(level, pos.getX() + 0.5, pos.getY() + 0.9,
+                                pos.getZ() + 0.5, Content.SYRINGE.toStack());
+                        clean.setDeltaMovement(0, 0.1, 0);
+                        clean.setDefaultPickUpDelay();
+                        level.addFreshEntity(clean);
+                    }
+                }
+                level.setBlockAndUpdate(pos, Blocks.CAULDRON.defaultBlockState());
+                level.sendParticles(ParticleTypes.CLOUD, pos.getX() + 0.5, pos.getY() + 1,
+                        pos.getZ() + 0.5, 12, 0.25, 0.15, 0.25, 0.02);
+                level.playSound(null, pos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.8F, 1.2F);
+                iterator.remove();
+                continue;
+            }
+            if (remaining != cycle.water().getValue(LayeredCauldronBlock.LEVEL)) {
+                BlockState water = cycle.water().setValue(LayeredCauldronBlock.LEVEL, remaining);
+                level.setBlockAndUpdate(pos, water);
+                entry.setValue(new Cycle(cycle.started(), water, cycle.initialLevel()));
+            }
+            double surface = pos.getY() + (6 + 3 * remaining) / 16.0;
+            if (elapsed % 4 == 0) {
+                level.sendParticles(ParticleTypes.BUBBLE_POP, pos.getX() + 0.5, surface,
+                        pos.getZ() + 0.5, 4, 0.18, 0.01, 0.18, 0.01);
+            }
+            if (elapsed % 10 == 0) {
+                level.sendParticles(ParticleTypes.CLOUD, pos.getX() + 0.5, surface + 0.05,
+                        pos.getZ() + 0.5, 1, 0.15, 0.01, 0.15, 0.005);
+            }
+            if (elapsed % 20 == 0) {
                 level.playSound(null, pos, SoundEvents.BUBBLE_COLUMN_BUBBLE_POP, SoundSource.BLOCKS, 0.4F, 1F);
             }
-            if (level.getGameTime() < cycle.finish()) continue;
-            if (cycle.water().getValue(LayeredCauldronBlock.LEVEL) == 3) {
-                var items = level.getEntitiesOfClass(ItemEntity.class, new AABB(pos),
-                        item -> item.isAlive() && item.getItem().is(Content.USED_SYRINGE));
-                if (!items.isEmpty()) {
-                    ItemEntity dirty = items.getFirst();
-                    dirty.getItem().shrink(1);
-                    if (dirty.getItem().isEmpty()) dirty.discard();
-                    ItemEntity clean = new ItemEntity(level, pos.getX() + 0.5, pos.getY() + 0.9,
-                            pos.getZ() + 0.5, Content.SYRINGE.toStack());
-                    clean.setDeltaMovement(0, 0.1, 0);
-                    clean.setDefaultPickUpDelay();
-                    level.addFreshEntity(clean);
-                }
-            }
-            level.setBlockAndUpdate(pos, Blocks.CAULDRON.defaultBlockState());
-            level.sendParticles(ParticleTypes.CLOUD, pos.getX() + 0.5, pos.getY() + 1,
-                    pos.getZ() + 0.5, 12, 0.25, 0.15, 0.25, 0.02);
-            level.playSound(null, pos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.8F, 1.2F);
-            iterator.remove();
         }
     }
 

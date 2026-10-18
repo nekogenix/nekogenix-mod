@@ -1,0 +1,20 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "nekogenix:block/pneumatic_stand",
+      "y": 0
+    },
+    "facing=east": {
+      "model": "nekogenix:block/pneumatic_stand",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "nekogenix:block/pneumatic_stand",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "nekogenix:block/pneumatic_stand",
+      "y": 270
+    }
+  }
+}

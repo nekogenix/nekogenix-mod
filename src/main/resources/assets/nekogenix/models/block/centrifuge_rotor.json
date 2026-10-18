@@ -1,0 +1,710 @@
+{
+  "parent": "minecraft:block/block",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "particle": "nekogenix:block/centrifuge_side",
+    "centrifuge_side": "nekogenix:block/centrifuge_side",
+    "centrifuge_front": "nekogenix:block/centrifuge_front",
+    "centrifuge_back": "nekogenix:block/centrifuge_back",
+    "centrifuge_rim": "nekogenix:block/centrifuge_rim",
+    "centrifuge_well": "nekogenix:block/centrifuge_well",
+    "centrifuge_rotor": "nekogenix:block/centrifuge_rotor",
+    "centrifuge_glass": "nekogenix:block/centrifuge_glass",
+    "centrifuge_vial": "nekogenix:block/centrifuge_vial",
+    "centrifuge_sample": "nekogenix:block/centrifuge_sample",
+    "centrifuge_cork": "nekogenix:block/centrifuge_cork",
+    "centrifuge_interior": "nekogenix:block/centrifuge_interior"
+  },
+  "elements": [
+    {
+      "name": "rotor_plate_a",
+      "from": [
+        3,
+        2.5,
+        4
+      ],
+      "to": [
+        13,
+        3.5,
+        12
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            3,
+            12.5,
+            13,
+            13.5
+          ],
+          "texture": "#centrifuge_rotor"
+        },
+        "south": {
+          "uv": [
+            3,
+            12.5,
+            13,
+            13.5
+          ],
+          "texture": "#centrifuge_rotor"
+        },
+        "east": {
+          "uv": [
+            4,
+            12.5,
+            12,
+            13.5
+          ],
+          "texture": "#centrifuge_rotor"
+        },
+        "west": {
+          "uv": [
+            4,
+            12.5,
+            12,
+            13.5
+          ],
+          "texture": "#centrifuge_rotor"
+        },
+        "up": {
+          "uv": [
+            3,
+            4,
+            13,
+            12
+          ],
+          "texture": "#centrifuge_rotor"
+        },
+        "down": {
+          "uv": [
+            3,
+            4,
+            13,
+            12
+          ],
+          "texture": "#centrifuge_rotor"
+        }
+      }
+    },
+    {
+      "name": "rotor_plate_back",
+      "from": [
+        4,
+        2.5,
+        3
+      ],
+      "to": [
+        12,
+        3.5,
+        4
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            4,
+            12.5,
+            12,
+            13.5
+          ],
+          "texture": "#centrifuge_rotor"
+        },
+        "south": {
+          "uv": [
+            4,
+            12.5,
+            12,
+            13.5
+          ],
+          "texture": "#centrifuge_rotor"
+        },
+        "east": {
+          "uv": [
+            12,
+            12.5,
+            13,
+            13.5
+          ],
+          "texture": "#centrifuge_rotor"
+        },
+        "west": {
+          "uv": [
+            3,
+            12.5,
+            4,
+            13.5
+          ],
+          "texture": "#centrifuge_rotor"
+        },
+        "up": {
+          "uv": [
+            4,
+            3,
+            12,
+            4
+          ],
+          "texture": "#centrifuge_rotor"
+        },
+        "down": {
+          "uv": [
+            4,
+            12,
+            12,
+            13
+          ],
+          "texture": "#centrifuge_rotor"
+        }
+      }
+    },
+    {
+      "name": "rotor_plate_front",
+      "from": [
+        4,
+        2.5,
+        12
+      ],
+      "to": [
+        12,
+        3.5,
+        13
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            4,
+            12.5,
+            12,
+            13.5
+          ],
+          "texture": "#centrifuge_rotor"
+        },
+        "south": {
+          "uv": [
+            4,
+            12.5,
+            12,
+            13.5
+          ],
+          "texture": "#centrifuge_rotor"
+        },
+        "east": {
+          "uv": [
+            3,
+            12.5,
+            4,
+            13.5
+          ],
+          "texture": "#centrifuge_rotor"
+        },
+        "west": {
+          "uv": [
+            12,
+            12.5,
+            13,
+            13.5
+          ],
+          "texture": "#centrifuge_rotor"
+        },
+        "up": {
+          "uv": [
+            4,
+            12,
+            12,
+            13
+          ],
+          "texture": "#centrifuge_rotor"
+        },
+        "down": {
+          "uv": [
+            4,
+            3,
+            12,
+            4
+          ],
+          "texture": "#centrifuge_rotor"
+        }
+      }
+    },
+    {
+      "name": "hub",
+      "from": [
+        6.5,
+        3.5,
+        6.5
+      ],
+      "to": [
+        9.5,
+        5.5,
+        9.5
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            6.5,
+            10.5,
+            9.5,
+            12.5
+          ],
+          "texture": "#centrifuge_rim"
+        },
+        "south": {
+          "uv": [
+            6.5,
+            10.5,
+            9.5,
+            12.5
+          ],
+          "texture": "#centrifuge_rim"
+        },
+        "east": {
+          "uv": [
+            6.5,
+            10.5,
+            9.5,
+            12.5
+          ],
+          "texture": "#centrifuge_rim"
+        },
+        "west": {
+          "uv": [
+            6.5,
+            10.5,
+            9.5,
+            12.5
+          ],
+          "texture": "#centrifuge_rim"
+        },
+        "up": {
+          "uv": [
+            6.5,
+            6.5,
+            9.5,
+            9.5
+          ],
+          "texture": "#centrifuge_rim"
+        },
+        "down": {
+          "uv": [
+            6.5,
+            6.5,
+            9.5,
+            9.5
+          ],
+          "texture": "#centrifuge_rim"
+        }
+      }
+    },
+    {
+      "name": "holder_0",
+      "from": [
+        6.65,
+        3.5,
+        2.95
+      ],
+      "to": [
+        9.35,
+        4.5,
+        5.6499999999999995
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            6.65,
+            11.5,
+            9.35,
+            12.5
+          ],
+          "texture": "#centrifuge_well"
+        },
+        "south": {
+          "uv": [
+            6.65,
+            11.5,
+            9.35,
+            12.5
+          ],
+          "texture": "#centrifuge_well"
+        },
+        "east": {
+          "uv": [
+            10.35,
+            11.5,
+            13.05,
+            12.5
+          ],
+          "texture": "#centrifuge_well"
+        },
+        "west": {
+          "uv": [
+            2.95,
+            11.5,
+            5.65,
+            12.5
+          ],
+          "texture": "#centrifuge_well"
+        },
+        "up": {
+          "uv": [
+            6.65,
+            2.95,
+            9.35,
+            5.65
+          ],
+          "texture": "#centrifuge_well"
+        },
+        "down": {
+          "uv": [
+            6.65,
+            10.35,
+            9.35,
+            13.05
+          ],
+          "texture": "#centrifuge_well"
+        }
+      }
+    },
+    {
+      "name": "holder_1",
+      "from": [
+        9.854293994002424,
+        3.5,
+        4.8
+      ],
+      "to": [
+        12.554293994002423,
+        4.5,
+        7.499999999999999
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            3.44571,
+            11.5,
+            6.14571,
+            12.5
+          ],
+          "texture": "#centrifuge_well"
+        },
+        "south": {
+          "uv": [
+            9.85429,
+            11.5,
+            12.55429,
+            12.5
+          ],
+          "texture": "#centrifuge_well"
+        },
+        "east": {
+          "uv": [
+            8.5,
+            11.5,
+            11.2,
+            12.5
+          ],
+          "texture": "#centrifuge_well"
+        },
+        "west": {
+          "uv": [
+            4.8,
+            11.5,
+            7.5,
+            12.5
+          ],
+          "texture": "#centrifuge_well"
+        },
+        "up": {
+          "uv": [
+            9.85429,
+            4.8,
+            12.55429,
+            7.5
+          ],
+          "texture": "#centrifuge_well"
+        },
+        "down": {
+          "uv": [
+            9.85429,
+            8.5,
+            12.55429,
+            11.2
+          ],
+          "texture": "#centrifuge_well"
+        }
+      }
+    },
+    {
+      "name": "holder_2",
+      "from": [
+        9.854293994002424,
+        3.5,
+        8.5
+      ],
+      "to": [
+        12.554293994002423,
+        4.5,
+        11.2
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            3.44571,
+            11.5,
+            6.14571,
+            12.5
+          ],
+          "texture": "#centrifuge_well"
+        },
+        "south": {
+          "uv": [
+            9.85429,
+            11.5,
+            12.55429,
+            12.5
+          ],
+          "texture": "#centrifuge_well"
+        },
+        "east": {
+          "uv": [
+            4.8,
+            11.5,
+            7.5,
+            12.5
+          ],
+          "texture": "#centrifuge_well"
+        },
+        "west": {
+          "uv": [
+            8.5,
+            11.5,
+            11.2,
+            12.5
+          ],
+          "texture": "#centrifuge_well"
+        },
+        "up": {
+          "uv": [
+            9.85429,
+            8.5,
+            12.55429,
+            11.2
+          ],
+          "texture": "#centrifuge_well"
+        },
+        "down": {
+          "uv": [
+            9.85429,
+            4.8,
+            12.55429,
+            7.5
+          ],
+          "texture": "#centrifuge_well"
+        }
+      }
+    },
+    {
+      "name": "holder_3",
+      "from": [
+        6.650000000000001,
+        3.5,
+        10.350000000000001
+      ],
+      "to": [
+        9.35,
+        4.5,
+        13.05
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            6.65,
+            11.5,
+            9.35,
+            12.5
+          ],
+          "texture": "#centrifuge_well"
+        },
+        "south": {
+          "uv": [
+            6.65,
+            11.5,
+            9.35,
+            12.5
+          ],
+          "texture": "#centrifuge_well"
+        },
+        "east": {
+          "uv": [
+            2.95,
+            11.5,
+            5.65,
+            12.5
+          ],
+          "texture": "#centrifuge_well"
+        },
+        "west": {
+          "uv": [
+            10.35,
+            11.5,
+            13.05,
+            12.5
+          ],
+          "texture": "#centrifuge_well"
+        },
+        "up": {
+          "uv": [
+            6.65,
+            10.35,
+            9.35,
+            13.05
+          ],
+          "texture": "#centrifuge_well"
+        },
+        "down": {
+          "uv": [
+            6.65,
+            2.95,
+            9.35,
+            5.65
+          ],
+          "texture": "#centrifuge_well"
+        }
+      }
+    },
+    {
+      "name": "holder_4",
+      "from": [
+        3.445706005997578,
+        3.5,
+        8.500000000000002
+      ],
+      "to": [
+        6.145706005997577,
+        4.5,
+        11.200000000000001
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            9.85429,
+            11.5,
+            12.55429,
+            12.5
+          ],
+          "texture": "#centrifuge_well"
+        },
+        "south": {
+          "uv": [
+            3.44571,
+            11.5,
+            6.14571,
+            12.5
+          ],
+          "texture": "#centrifuge_well"
+        },
+        "east": {
+          "uv": [
+            4.8,
+            11.5,
+            7.5,
+            12.5
+          ],
+          "texture": "#centrifuge_well"
+        },
+        "west": {
+          "uv": [
+            8.5,
+            11.5,
+            11.2,
+            12.5
+          ],
+          "texture": "#centrifuge_well"
+        },
+        "up": {
+          "uv": [
+            3.44571,
+            8.5,
+            6.14571,
+            11.2
+          ],
+          "texture": "#centrifuge_well"
+        },
+        "down": {
+          "uv": [
+            3.44571,
+            4.8,
+            6.14571,
+            7.5
+          ],
+          "texture": "#centrifuge_well"
+        }
+      }
+    },
+    {
+      "name": "holder_5",
+      "from": [
+        3.4457060059975775,
+        3.5,
+        4.8
+      ],
+      "to": [
+        6.145706005997576,
+        4.5,
+        7.499999999999999
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            9.85429,
+            11.5,
+            12.55429,
+            12.5
+          ],
+          "texture": "#centrifuge_well"
+        },
+        "south": {
+          "uv": [
+            3.44571,
+            11.5,
+            6.14571,
+            12.5
+          ],
+          "texture": "#centrifuge_well"
+        },
+        "east": {
+          "uv": [
+            8.5,
+            11.5,
+            11.2,
+            12.5
+          ],
+          "texture": "#centrifuge_well"
+        },
+        "west": {
+          "uv": [
+            4.8,
+            11.5,
+            7.5,
+            12.5
+          ],
+          "texture": "#centrifuge_well"
+        },
+        "up": {
+          "uv": [
+            3.44571,
+            4.8,
+            6.14571,
+            7.5
+          ],
+          "texture": "#centrifuge_well"
+        },
+        "down": {
+          "uv": [
+            3.44571,
+            8.5,
+            6.14571,
+            11.2
+          ],
+          "texture": "#centrifuge_well"
+        }
+      }
+    }
+  ]
+}

@@ -21,6 +21,16 @@ public final class Nekogenix {
         InjectionSounds.register(bus);
         container.registerConfig(ModConfig.Type.CLIENT, ClientConfig.SPEC);
         bus.addListener(Nekogenix::network);
+        bus.addListener((net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent event) -> {
+            event.registerBlockEntity(net.neoforged.neoforge.capabilities.Capabilities.ItemHandler.BLOCK,
+                    Content.CENTRIFUGE_ENTITY.get(), (machine, side) ->
+                            new net.neoforged.neoforge.items.wrapper.SidedInvWrapper(machine,
+                                    side == null ? net.minecraft.core.Direction.DOWN : side));
+            event.registerBlockEntity(net.neoforged.neoforge.capabilities.Capabilities.ItemHandler.BLOCK,
+                    Content.PNEUMATIC_ENTITY.get(), (stand, side) ->
+                            new net.neoforged.neoforge.items.wrapper.SidedInvWrapper(stand,
+                                    side == null ? net.minecraft.core.Direction.DOWN : side));
+        });
     }
 
     private static void network(RegisterPayloadHandlersEvent event) {

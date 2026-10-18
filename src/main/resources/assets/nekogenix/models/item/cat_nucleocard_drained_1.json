@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "nekogenix:item/cat_nucleocard_drained_1"
+  }
+}
