@@ -32,16 +32,13 @@ public final class CameraTargeting {
         EntityHitResult entity = ProjectileUtil.getEntityHitResult(player, origin, end,
                 new AABB(origin, end).inflate(1), target -> !target.isSpectator() && target.isPickable(), distance);
         HitResult result = block;
-        if (entity != null && origin.distanceToSqr(entity.getLocation()) < distance
-                && eye.distanceToSqr(entity.getLocation()) < entityRange * entityRange
-                && mc.level.clip(new ClipContext(eye, entity.getLocation(), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player)).getType() == HitResult.Type.MISS) {
+        double allowedRange = blockRange;
+        if (entity != null && origin.distanceToSqr(entity.getLocation()) < distance) {
             result = entity;
-        } else if (block.getType() != HitResult.Type.MISS) {
-            var obstruction = mc.level.clip(new ClipContext(eye, block.getLocation(), ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player));
-            if (eye.distanceToSqr(block.getLocation()) >= blockRange * blockRange
-                    || obstruction.getType() != HitResult.Type.MISS && !obstruction.getBlockPos().equals(block.getBlockPos())) {
-                result = BlockHitResult.miss(block.getLocation(), Direction.getNearest(direction.x, direction.y, direction.z), BlockPos.containing(block.getLocation()));
-            }
+            allowedRange = entityRange;
+        }
+        if (origin.distanceToSqr(result.getLocation()) >= allowedRange * allowedRange) {
+            result = BlockHitResult.miss(result.getLocation(), Direction.getNearest(direction.x, direction.y, direction.z), BlockPos.containing(result.getLocation()));
         }
         mc.hitResult = result;
         mc.crosshairPickEntity = result instanceof EntityHitResult hit ? hit.getEntity() : null;

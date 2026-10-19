@@ -8,6 +8,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
@@ -24,6 +25,16 @@ public final class CameraProjectiles {
         var view = player.getData(Content.CAMERA_VIEW);
         view.height = Mth.clamp(height, .08F, (float)(1.62 * player.getScale()));
         view.tick = player.tickCount;
+    }
+
+    public static Vec3 interactionEye(Player player) {
+        if (!(player instanceof ServerPlayer) || !player.isAlive() || player.isSpectator() || player.isSleeping()
+                || !player.hasData(Content.CAMERA_VIEW)) return player.getEyePosition();
+        var view = player.getData(Content.CAMERA_VIEW);
+        long age = (long)player.tickCount - view.tick;
+        if (age < 0 || age > 40) return player.getEyePosition();
+        double height = Math.min(view.height, CameraGeometry.ceiling(player, player.position(), view.height));
+        return player.position().add(0, height, 0);
     }
 
     @SubscribeEvent
