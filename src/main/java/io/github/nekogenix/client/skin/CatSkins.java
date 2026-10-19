@@ -48,13 +48,16 @@ public final class CatSkins {
     private static int ticks;
     private static long checkingUntil, nextSend;
     private static String message = "license_required";
+    private static Component importError;
 
     public static List<SkinLibrary.Entry> entries() { return entries; }
     public static CatSkin selected() { return selected; }
     public static boolean loaded() { return loaded; }
     public static boolean licensed() { return licensed; }
     public static boolean checking() { return checking; }
-    public static Component message() { return Component.translatable("skins.nekogenix." + message); }
+    public static Component message() { return importError != null ? importError : Component.translatable("skins.nekogenix." + message); }
+    public static void importFailed(String reason) { importFailed(Component.translatable("skins.nekogenix." + reason)); }
+    private static void importFailed(Component reason) { Minecraft.getInstance().execute(() -> importError = reason); }
 
     private static Path directory() { return Minecraft.getInstance().gameDirectory.toPath().resolve("nekogenix/cat_skins"); }
     public static void load() {
@@ -115,6 +118,7 @@ public final class CatSkins {
 
     public static void apply(CatSkin skin) {
         if (!licensed || !loaded) return;
+        importError = null;
         work(() -> {
             try {
                 library.select(skin);
@@ -124,19 +128,29 @@ public final class CatSkins {
     }
 
     public static void importFile(Path path, java.util.function.Consumer<CatSkin> done) {
+        importError = null;
         load();
         work(() -> {
+            if (library == null) { importFailed("storage_failed"); return; }
+            byte[] bytes;
             try {
-                if (library == null || !Files.isRegularFile(path) || Files.size(path) > CatSkin.MAX_BYTES) throw new java.io.IOException("skin_size");
+                if (!Files.isRegularFile(path)) throw new java.io.IOException("missing_file");
+                try (var input = Files.newInputStream(path)) { bytes = input.readNBytes(CatSkin.MAX_BYTES + 1); }
+            } catch (java.io.IOException | SecurityException e) { importFailed("file_read_failed"); return; }
+            try {
                 String name = path.getFileName().toString().replaceFirst("(?i)\\.png$", "");
-                var added = library.add(name, Files.readAllBytes(path)); var items = library.entries();
-                Minecraft.getInstance().execute(() -> { entries = items; message = "imported"; done.accept(added.skin()); });
-            } catch (Exception e) { fail(e instanceof java.io.IOException && "library_full".equals(e.getMessage()) ? "library_full" : "invalid_png"); }
+                var added = library.add(name, bytes); var items = library.entries();
+                Minecraft.getInstance().execute(() -> { importError = null; entries = items; message = "imported"; done.accept(added.skin()); });
+            } catch (CatSkin.InvalidImageException e) {
+                importFailed(e.width >= 0 ? Component.translatable("skins.nekogenix.wrong_dimensions", e.width, e.height)
+                        : Component.translatable("skins.nekogenix.invalid_png"));
+            } catch (java.io.IOException e) { importFailed("library_full".equals(e.getMessage()) ? "library_full" : "storage_failed"); }
         });
     }
 
     public static void remove(CatSkin skin) {
         if (!loaded || !skin.variant().equals("custom")) return;
+        importError = null;
         work(() -> {
             try {
                 library.remove(skin); var items = library.entries(); var active = library.selected();

@@ -27,6 +27,12 @@ public final class CatSkinTests {
             try { CatSkin.normalize(invalid); } catch (java.io.IOException e) { rejected = true; }
             helper.assertTrue(rejected, "Wrong dimensions, invisible, oversized and malformed images are rejected");
         }
+        try {
+            CatSkin.normalize(png(250, 32, -1));
+            throw new IllegalStateException("A texture sheet cannot be imported as a single cat skin");
+        } catch (CatSkin.InvalidImageException e) {
+            helper.assertTrue(e.width == 250 && e.height == 32, "A rejected skin reports its actual dimensions");
+        }
         var buffer = new net.minecraft.network.RegistryFriendlyByteBuf(io.netty.buffer.Unpooled.buffer(), helper.getLevel().registryAccess());
         try {
             SkinPackets.Apply.CODEC.encode(buffer, new SkinPackets.Apply(skin));
@@ -75,6 +81,13 @@ public final class CatSkinTests {
             helper.assertTrue(library.entries().size() == 1, "Importing the same PNG does not duplicate it");
             library.select(skin.skin()); library = new SkinLibrary(directory);
             helper.assertTrue(library.selected().hash().equals(skin.skin().hash()), "The selected custom skin is restored on another launch");
+            try {
+                library.add("Invalid sheet", png(250, 32, -1));
+                throw new IllegalStateException("Invalid import accepted");
+            } catch (CatSkin.InvalidImageException expected) {
+                helper.assertTrue(library.entries().size() == 1 && library.selected().hash().equals(skin.skin().hash()),
+                        "Rejecting an invalid import preserves the existing library and selected skin");
+            }
             library.remove(skin.skin());
             helper.assertTrue(library.entries().isEmpty() && library.selected().variant().equals("default"), "Deleting the active custom skin restores Automatic");
             helper.succeed();

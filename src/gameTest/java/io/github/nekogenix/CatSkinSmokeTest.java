@@ -24,6 +24,7 @@ public final class CatSkinSmokeTest {
         private static java.nio.file.Path imported;
         private static CatSkin testSkin;
         private static int menuTicks = -1;
+        private static int previousSkins;
 
         @SubscribeEvent public static void status(net.neoforged.neoforge.client.event.ClientTickEvent.Pre event) {
             if (!ENABLED) return;
@@ -52,23 +53,35 @@ public final class CatSkinSmokeTest {
                 }
                 check(found && mc.screen instanceof CatSkinScreen, "Cat Skin opens from native Skin Customization");
             }
-            if (age == 80) capture = "cat-skins-library.png";
+            if (age == 65 && System.getProperty("nekogenix.rejectedCatSkin") != null) {
+                previousSkins = CatSkins.entries().size();
+                ((CatSkinScreen)mc.screen).onFilesDrop(java.util.List.of(java.nio.file.Path.of(System.getProperty("nekogenix.rejectedCatSkin"))));
+            }
+            if (age == 80) {
+                if (System.getProperty("nekogenix.rejectedCatSkin") != null) {
+                    check(CatSkins.entries().size() == previousSkins && CatSkins.message().getString().contains("250"), "The rejected file reports its width without changing the library");
+                }
+                capture = "cat-skins-library.png";
+            }
             if (age == 90) {
                 try {
                     imported = java.nio.file.Files.createTempFile("nekogenix-skin-preview-", ".png");
-                    var image = new java.awt.image.BufferedImage(64, 32, java.awt.image.BufferedImage.TYPE_INT_ARGB);
-                    for (int y = 0; y < 32; y++) for (int x = 0; x < 64; x++) image.setRGB(x, y, ((x + y) / 4 % 2 == 0 ? 0xffa968b0 : 0xffe6b8c3));
-                    javax.imageio.ImageIO.write(image, "PNG", imported.toFile());
+                    try (var resource = mc.getResourceManager().open(net.minecraft.resources.ResourceLocation.withDefaultNamespace("textures/entity/cat/ragdoll.png"))) {
+                        java.nio.file.Files.write(imported, resource.readAllBytes());
+                    }
                     ((CatSkinScreen)mc.screen).onFilesDrop(java.util.List.of(imported));
                 } catch (java.io.IOException e) { throw new IllegalStateException(e); }
             }
             if (age == 120) {
                 testSkin = CatSkins.entries().stream().filter(e -> e.name().startsWith("nekogenix-skin-preview-")).map(io.github.nekogenix.client.skin.SkinLibrary.Entry::skin).findFirst().orElseThrow();
                 check(testSkin.variant().equals("custom"), "A PNG imports into the library without affecting the official player skin");
+                previousSkins = CatSkins.entries().size();
+                CatSkins.importFile(imported, skin -> {});
                 capture = "cat-skins-custom.png";
                 ((CatSkinScreen)mc.screen).mouseDragged(50, 100, 0, 40, 0);
             }
             if (age == 130) {
+                check(CatSkins.entries().size() == previousSkins, "Reimporting the same file does not duplicate it");
                 mc.options.guiScale().set(4); mc.resizeDisplay(); capture = "cat-skins-small.png";
             }
             if (age == 160) {

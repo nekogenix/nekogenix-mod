@@ -16,6 +16,14 @@ public final class CatSkin {
             "calico", "persian", "ragdoll", "white", "jellie", "all_black");
     public static final CatSkin DEFAULT = new CatSkin("default", new byte[0]);
 
+    public static final class InvalidImageException extends IOException {
+        public final int width, height;
+        private InvalidImageException(String reason) { this(reason, -1, -1); }
+        private InvalidImageException(String reason, int width, int height) {
+            super(reason); this.width = width; this.height = height;
+        }
+    }
+
     private final String variant;
     private final byte[] png;
     private final String hash;
@@ -40,24 +48,28 @@ public final class CatSkin {
     }
 
     public static byte[] normalize(byte[] bytes) throws IOException {
-        if (bytes.length == 0 || bytes.length > MAX_BYTES) throw new IOException("skin_size");
+        if (bytes.length == 0 || bytes.length > MAX_BYTES) throw new InvalidImageException("skin_size");
         try (var input = new MemoryCacheImageInputStream(new ByteArrayInputStream(bytes))) {
             var readers = ImageIO.getImageReaders(input);
-            if (!readers.hasNext()) throw new IOException("skin_format");
+            if (!readers.hasNext()) throw new InvalidImageException("skin_format");
             var reader = readers.next();
             try {
                 reader.setInput(input);
-                if (!reader.getFormatName().equalsIgnoreCase("png") || reader.getWidth(0) != 64 || reader.getHeight(0) != 32)
-                    throw new IOException("skin_dimensions");
+                if (!reader.getFormatName().equalsIgnoreCase("png")) throw new InvalidImageException("skin_format");
+                int width = reader.getWidth(0), height = reader.getHeight(0);
+                if (width != 64 || height != 32) throw new InvalidImageException("skin_dimensions", width, height);
                 var image = reader.read(0);
                 boolean visible = false;
                 for (int y = 0; y < 32; y++) for (int x = 0; x < 64; x++) visible |= (image.getRGB(x, y) >>> 24) != 0;
-                if (!visible) throw new IOException("skin_empty");
+                if (!visible) throw new InvalidImageException("skin_empty");
                 var output = new ByteArrayOutputStream();
                 ImageIO.write(image, "PNG", output);
-                if (output.size() > MAX_BYTES) throw new IOException("skin_size");
+                if (output.size() > MAX_BYTES) throw new InvalidImageException("skin_size");
                 return output.toByteArray();
             } finally { reader.dispose(); }
-        } catch (RuntimeException e) { throw new IOException("skin_format", e); }
+        } catch (IOException | RuntimeException e) {
+            if (e instanceof InvalidImageException invalid) throw invalid;
+            var invalid = new InvalidImageException("skin_format"); invalid.initCause(e); throw invalid;
+        }
     }
 }

@@ -170,19 +170,30 @@ public final class CatSkinScreen extends Screen {
         return true;
     }
     @Override public void onFilesDrop(List<Path> paths) {
-        if (!paths.isEmpty()) CatSkins.importFile(paths.getFirst(), skin -> { choice = skin; waitingForLibrary = false; refresh(); });
+        if (!paths.isEmpty()) CatSkins.importFile(paths.getFirst(), skin -> {
+            choice = skin; waitingForLibrary = false; refresh();
+            for (int i = 0; i < cards.size(); i++) if (same(cards.get(i).skin(), skin)) {
+                int top = 34 + i / columns * tileHeight;
+                if (top - scroll < 34 || top + tileHeight - scroll > bottom)
+                    scroll = Math.clamp(top + tileHeight - bottom, 0, maxScroll());
+                break;
+            }
+        });
     }
     private void fileDialog() {
         if (importing) return;
         importing = true;
         // Keep the native file picker off the render thread so multiplayer continues while it is open.
         java.util.concurrent.CompletableFuture.runAsync(() -> {
-            String file;
+            String file = null;
             try (var stack = MemoryStack.stackPush()) {
                 PointerBuffer patterns = stack.mallocPointer(1); patterns.put(stack.UTF8("*.png")).flip();
                 file = TinyFileDialogs.tinyfd_openFileDialog(text("import").getString(), "", patterns, "PNG", false);
+            } catch (RuntimeException | LinkageError e) {
+                CatSkins.importFailed("file_dialog_failed");
             }
-            minecraft.execute(() -> { importing = false; if (file != null) onFilesDrop(List.of(Path.of(file))); });
+            String selectedFile = file;
+            minecraft.execute(() -> { importing = false; if (selectedFile != null) onFilesDrop(List.of(Path.of(selectedFile))); });
         });
     }
     @Override public void onClose() { minecraft.setScreen(parent); }
