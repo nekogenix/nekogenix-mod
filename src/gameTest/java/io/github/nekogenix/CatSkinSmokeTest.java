@@ -30,6 +30,7 @@ public final class CatSkinSmokeTest {
         private static String capture;
         private static Path imported, rejected, template;
         private static CatSkin testSkin;
+        private static CatNameplatePreview nameplates;
         private static int menuTicks = -1, previousSkins;
 
         @SubscribeEvent public static void status(net.neoforged.neoforge.client.event.ClientTickEvent.Pre event) throws java.io.IOException {
@@ -59,6 +60,11 @@ public final class CatSkinSmokeTest {
                 check(done.getWidth() == 200 && done.getHeight() == 20 && done.getX() == (mc.screen.width - 200) / 2, "Done has the centered vanilla size");
                 check(CatSkin.VARIANTS.contains(CatSkins.selected().variant()) && !name(mc.screen).visible, "A vanilla variant is selected and its name is read only");
             }
+            if (age == 55) {
+                var selected = find(mc.screen, Component.translatable("skins.nekogenix.variant." + CatSkins.selected().variant()));
+                mc.screen.mouseClicked(selected.getX() + 5, selected.getY() + 25, 0);
+                capture = "cat-skins-selected-card.png";
+            }
             if (age == 65) {
                 previousSkins = CatSkins.entries().size(); button(mc.screen, "import").onPress();
                 check(mc.screen instanceof NewCatSkinScreen, "New Skin opens the draft form");
@@ -77,6 +83,14 @@ public final class CatSkinSmokeTest {
             if (age == 85) {
                 check(CatSkins.entries().size() == previousSkins && !button(mc.screen, "save").active, "Invalid dimensions cannot be saved");
                 capture = "cat-skins-rejected-form.png";
+                var placeholder = io.github.nekogenix.client.skin.CatSkinTemplate.placeholder();
+                var pixels = javax.imageio.ImageIO.read(new java.io.ByteArrayInputStream(placeholder.png()));
+                for (int y = 0; y < 32; y++) for (int x = 0; x < 64; x++) {
+                    int c = pixels.getRGB(x, y);
+                    check((c >> 16 & 255) == (c >> 8 & 255) && (c >> 8 & 255) == (c & 255), "The empty preview has no colored body parts");
+                }
+                check((pixels.getRGB(5, 6) & 255) > (pixels.getRGB(7, 6) & 255), "Body outlines are brighter than their interior");
+                Files.write(mc.gameDirectory.toPath().resolve("screenshots/cat-skin-placeholder.png"), placeholder.png());
             }
             if (age == 90) mc.screen.onFilesDrop(List.of(imported));
             if (age == 110) {
@@ -130,6 +144,13 @@ public final class CatSkinSmokeTest {
                 new CatSkin("custom", Files.readAllBytes(template)).validated();
                 Files.copy(template, mc.gameDirectory.toPath().resolve("screenshots/cat-skin-template.png"), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
                 Files.delete(imported); Files.delete(rejected); Files.delete(template);
+                mc.options.guiScale().set(2); mc.resizeDisplay();
+                nameplates = new CatNameplatePreview(); mc.setScreen(nameplates);
+            }
+            if (nameplates != null) nameplates.tickActors(age);
+            if (age == 235) capture = "cat-player-nameplates.png";
+            if (age == 240) {
+                nameplates.verify();
                 mc.disconnect(new net.minecraft.client.gui.screens.TitleScreen()); mc.options.guiScale().set(2); mc.resizeDisplay();
                 mc.setScreen(new NewCatSkinScreen(new CatSkinScreen(new net.minecraft.client.gui.screens.TitleScreen()))); menuTicks = 0;
             }

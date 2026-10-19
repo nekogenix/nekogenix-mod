@@ -18,7 +18,7 @@ import org.lwjgl.util.tinyfd.TinyFileDialogs;
 public final class NewCatSkinScreen extends Screen {
     private final CatSkinScreen parent;
     private CatSkinPreview preview;
-    private CatSkin draft, template;
+    private CatSkin draft, template, placeholder;
     private EditBox name;
     private Button save, use, browse, export;
     private Component status = Component.empty();
@@ -32,7 +32,7 @@ public final class NewCatSkinScreen extends Screen {
     @Override protected void init() {
         CatSkins.load(); preview = new CatSkinPreview();
         if (template == null) {
-            try { template = CatSkinTemplate.create(); }
+            try { template = CatSkinTemplate.create(); placeholder = CatSkinTemplate.placeholder(); }
             catch (java.io.IOException e) { status = text("storage_failed"); }
         }
         panel = Math.max(104, width / 2 - 16); controls = panel + 24; controlWidth = width - controls - 12;
@@ -70,7 +70,7 @@ public final class NewCatSkinScreen extends Screen {
         graphics.drawWordWrap(font, text("requirements"), controls, 76, controlWidth, 0xa7b4bc);
         graphics.enableScissor(9, 31, panel + 7, height - 54);
         float scale = Math.min(panel * .85F, (height - 96) * .9F) * zoom;
-        CatSkin skin = draft != null ? draft : template;
+        CatSkin skin = draft != null ? draft : placeholder;
         if (skin != null) preview.render(graphics, skin, panel / 2 + 8, (height - 24) / 2 + (int)(scale * .3F), scale, rotation);
         graphics.disableScissor();
         graphics.drawCenteredString(font, text("drag"), panel / 2 + 8, height - 51, 0x89989f);

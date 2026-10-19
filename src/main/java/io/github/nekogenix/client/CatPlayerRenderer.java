@@ -343,6 +343,7 @@ public final class CatPlayerRenderer extends CatRenderer {
     private static final class PlayerCat extends Cat {
         private final Player player;
         private int poseTick = -1;
+        private float dimensionsScale = Float.NaN;
         private float oldCrouch, crouch, oldAir, air;
         private float oldForward, forward, oldSideways, sideways;
         private float oldVertical, vertical, oldMotion, motion, oldSwim, swim, oldSpeed, speed;
@@ -361,6 +362,10 @@ public final class CatPlayerRenderer extends CatRenderer {
             if (poseTick == player.tickCount) return;
             int ticks = poseTick < 0 ? 1 : Mth.clamp(player.tickCount - poseTick, 1, 4);
             poseTick = player.tickCount;
+            if (dimensionsScale != player.getScale()) {
+                dimensionsScale = player.getScale();
+                refreshDimensions();
+            }
             oldCrouch = crouch; oldAir = air;
             oldForward = forward; oldSideways = sideways;
             oldVertical = vertical; oldMotion = motion; oldSwim = swim; oldSpeed = speed;
@@ -424,6 +429,7 @@ public final class CatPlayerRenderer extends CatRenderer {
         @Override public net.minecraft.world.scores.PlayerTeam getTeam() { return player.getTeam(); }
         @Override public boolean isInvisibleTo(Player viewer) { return player.isInvisibleTo(viewer); }
         @Override public boolean isCrouching() { return player != null && player.isCrouching(); }
+        @Override public boolean isDiscrete() { return player != null && player.isDiscrete(); }
         @Override public HumanoidArm getMainArm() { return player.getMainArm(); }
         @Override public float getScale() { return player == null ? 1 : player.getScale(); }
     }
