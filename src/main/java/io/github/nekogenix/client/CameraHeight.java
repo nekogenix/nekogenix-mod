@@ -3,6 +3,7 @@ package io.github.nekogenix.client;
 import io.github.nekogenix.Nekogenix;
 import io.github.nekogenix.config.ClientConfig;
 import io.github.nekogenix.gameplay.CameraGeometry;
+import io.github.nekogenix.gameplay.CatForm;
 import io.github.nekogenix.network.CameraViewInput;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -80,7 +81,8 @@ public final class CameraHeight {
         double x = Mth.lerp(partial, player.xo, player.getX());
         double z = Mth.lerp(partial, player.zo, player.getZ());
         var base = new Vec3(x, feet, z);
-        double clearance = CameraGeometry.ceiling(player, base, Math.max(requested, owner == player ? height : vanillaEye));
+        double margin = CatForm.active(player) ? .24 : .08;
+        double clearance = CameraGeometry.ceiling(player, base, Math.max(requested, owner == player ? height : vanillaEye), margin);
         double target = Math.min(requested, clearance);
         var velocity = player.getDeltaMovement().multiply(1, 0, 1).scale(8);
         double length = velocity.length();
@@ -92,7 +94,7 @@ public final class CameraHeight {
             for (int step = 1; step <= steps; step++) {
                 var offset = velocity.scale(step / (double)steps);
                 if (!player.level().noCollision(player, body.move(offset))) break;
-                double ahead = CameraGeometry.ceiling(player, base.add(offset), requested);
+                double ahead = CameraGeometry.ceiling(player, base.add(offset), requested, margin);
                 target = Math.min(target, ahead);
             }
         }

@@ -53,6 +53,7 @@ public final class CameraHeightSmokeTest {
             saved.putInt("abilities", age == 120 ? 7 : 0); saved.putInt("lives", 9);
             player.getData(Content.NEKO).deserializeNBT(player.registryAccess(), saved);
             io.github.nekogenix.gameplay.TransformationHandler.refreshEffects(player);
+            if (age == 120) player.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.MOVEMENT_SPEED, 1200, 1));
         }
         if (age == 740) {
             if (arrows != 3 || snowballs != 1 || tridents != 1) throw new IllegalStateException("Missing actual weapon shots: " + arrows + "/" + snowballs + "/" + tridents);
@@ -71,16 +72,17 @@ public final class CameraHeightSmokeTest {
         else return;
         double actual = projectile.getY() - player.getY();
         Nekogenix.LOGGER.info("Camera weapon runtime {}: origin={} expected={}", projectile.getType(), actual, expected);
-        if (Double.isNaN(expected) ? actual <= .90 || actual >= 1.46 : Math.abs(actual - expected) > .04) {
+        if (Double.isNaN(expected) ? actual <= .74 || actual >= 1.46 : Math.abs(actual - expected) > .04) {
             throw new IllegalStateException("Weapon origin disagrees with the visible camera: " + actual + " expected " + expected);
         }
     }
 
     @EventBusSubscriber(modid = Nekogenix.ID, value = net.neoforged.api.distmarker.Dist.CLIENT)
     public static final class Client {
-        private static boolean capture;
+        private static String capture;
         private static boolean approachChecked;
         private static boolean smoothCrouch;
+        private static int oneBlockFrames, halfBlockFrames;
 
         @SubscribeEvent public static void tick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
             if (!ENABLED) return;
@@ -110,7 +112,7 @@ public final class CameraHeightSmokeTest {
                 camera.mouseClicked(camera.getX() + 4, camera.getY() + 10, 0);
                 camera.mouseReleased(camera.getX() + 4, camera.getY() + 10, 0);
                 check(io.github.nekogenix.config.ClientConfig.CAMERA_HEIGHT.get() == 0 && camera.getMessage().getString().endsWith("Cat"), "A human can select Cat");
-                capture = true;
+                capture = "camera-height-options.png";
             }
             if (age == 60) {
                 mc.setScreen(null);
@@ -130,6 +132,9 @@ public final class CameraHeightSmokeTest {
                 check(player.getData(Content.CAT_FORM) && io.github.nekogenix.config.ClientConfig.CAMERA_HEIGHT.get() == 100, "Cat transformation preserves the Human setting");
                 check(Math.abs(height() - 1.62) < .03, "Human remains the default cat camera");
                 io.github.nekogenix.config.ClientConfig.CAMERA_HEIGHT.set(50);
+                mc.options.fov().set(110);
+                mc.options.fovEffectScale().set(1.0);
+                mc.options.bobView().set(true);
             }
             if (age == 170) {
                 check(Math.abs(height() - 1.025) < .03, "Custom standing height settles");
@@ -144,12 +149,19 @@ public final class CameraHeightSmokeTest {
                 check(height() < 1.1 && player.getX() < 4, "Camera lowers before entering one block tunnel");
                 approachChecked = true;
             }
-            if (age == 235) check(height() <= .925 && height() > .8, "Camera stays below tunnel roof");
+            if (age == 235) {
+                check(height() <= .765 && height() > .7, "Camera stays farther below tunnel roof");
+                check(player.hasEffect(net.minecraft.world.effect.MobEffects.MOVEMENT_SPEED), "Speed potion is active during high FOV clearance checks");
+                capture = "camera-ceiling-one-block.png";
+            }
             if (age == 275) check(height() > 1.59, "Camera restores after leaving tunnel");
+            if (age == 280) io.github.nekogenix.config.ClientConfig.CAMERA_HEIGHT.set(70);
             if (age == 310) {
                 mc.gameRenderer.getMainCamera().setup(mc.level, player, false, false, 1);
-                check(height() <= .425 && height() > .3, "Half block clearance is protected");
+                check(height() <= .265 && height() > .2, "Half block clearance includes room for view bobbing");
+                capture = "camera-ceiling-half-block.png";
             }
+            if (age == 315) io.github.nekogenix.config.ClientConfig.CAMERA_HEIGHT.set(100);
             if (age == 350) {
                 check(height() > 1.59 && io.github.nekogenix.config.ClientConfig.CAMERA_HEIGHT.get() == 100, "Temporary clearance keeps the saved preference");
             }
@@ -159,10 +171,42 @@ public final class CameraHeightSmokeTest {
             if (age == 785) {
                 check(!player.getData(Content.CAT_FORM) && io.github.nekogenix.config.ClientConfig.CAMERA_HEIGHT.get() == 25, "A form change preserves a manual preference");
                 check(approachChecked, "Approach scenario executed");
+                check(oneBlockFrames > 5 && halfBlockFrames > 5, "Rendered near plane stays below both ceilings during high FOV sprint bobbing");
                 io.github.nekogenix.config.ClientConfig.SPEC.save();
                 Nekogenix.LOGGER.info("Nekogenix camera height smoke passed: default Human native slider smooth crouching reachable clearance actual weapon input and manual preference across form changes");
                 mc.stop();
             }
+        }
+
+        @SubscribeEvent public static void bob(net.neoforged.neoforge.client.event.RenderFrameEvent.Pre event) {
+            if (!ENABLED) return;
+            var player = net.minecraft.client.Minecraft.getInstance().player;
+            if (player != null && player.tickCount >= 190 && player.tickCount < 315) {
+                player.bob = player.oBob = .1F;
+                player.setSprinting(true);
+                player.setXRot((float)Math.sin(player.tickCount * .3) * 80);
+                player.xRotO = player.getXRot();
+            }
+        }
+
+        @SubscribeEvent public static void ceiling(net.neoforged.neoforge.client.event.RenderLevelStageEvent event) {
+            if (!ENABLED || event.getStage() != net.neoforged.neoforge.client.event.RenderLevelStageEvent.Stage.AFTER_LEVEL) return;
+            var player = net.minecraft.client.Minecraft.getInstance().player;
+            if (player == null) return;
+            int age = player.tickCount;
+            double cameraX = event.getCamera().getPosition().x;
+            double roof = age >= 225 && age < 240 && cameraX >= 4.25 && cameraX <= 7.75 ? 81
+                    : age >= 300 && age < 315 && cameraX >= 12.25 && cameraX <= 15.75 ? 80.5 : Double.NaN;
+            if (Double.isNaN(roof)) return;
+            var inverse = new org.joml.Matrix4f(event.getProjectionMatrix()).mul(event.getModelViewMatrix()).invert();
+            for (int x : new int[] {-1, 1}) for (int y : new int[] {-1, 1}) {
+                var corner = inverse.transform(new org.joml.Vector4f(x, y, -1, 1));
+                double actual = event.getCamera().getPosition().y + corner.y / corner.w;
+                check(actual < roof - .01, "Rendered near plane cannot see through the ceiling: " + actual + " roof " + roof
+                        + " tick " + age + " camera " + event.getCamera().getPosition());
+            }
+            if (roof == 81) oneBlockFrames++;
+            else halfBlockFrames++;
         }
 
         private static double height() {
@@ -179,11 +223,12 @@ public final class CameraHeightSmokeTest {
                 double height = mc.gameRenderer.getMainCamera().getPosition().y - mc.player.getY();
                 if (height > .84 && height < 1.0) smoothCrouch = true;
             }
-            if (!capture) return;
+            if (capture == null) return;
             try (var image = net.minecraft.client.Screenshot.takeScreenshot(mc.getMainRenderTarget())) {
-                image.writeToFile(mc.gameDirectory.toPath().resolve("screenshots/camera-height-options.png"));
+                java.nio.file.Files.createDirectories(mc.gameDirectory.toPath().resolve("screenshots"));
+                image.writeToFile(mc.gameDirectory.toPath().resolve("screenshots/" + capture));
             } catch (java.io.IOException e) { throw new IllegalStateException(e); }
-            capture = false;
+            capture = null;
         }
 
         private static void check(boolean valid, String message) {

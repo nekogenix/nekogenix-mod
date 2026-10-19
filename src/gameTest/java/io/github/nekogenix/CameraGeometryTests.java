@@ -28,11 +28,13 @@ public final class CameraGeometryTests {
         }
         player.setPos(pos.getX() + .5, pos.getY(), pos.getZ() + .5);
         helper.assertTrue(Double.isInfinite(CameraGeometry.ceiling(player, player.position(), 1.62)), "Ordinary floor is not a ceiling");
+        helper.assertTrue(Double.isInfinite(CameraGeometry.ceiling(player, player.position(), 1.62, .24)), "Extra camera clearance does not detect the floor");
         helper.getLevel().setBlockAndUpdate(pos, Blocks.TALL_GRASS.defaultBlockState());
         helper.assertTrue(Double.isInfinite(CameraGeometry.ceiling(player, player.position(), 1.62)), "Foliage does not lower the camera");
         helper.getLevel().setBlockAndUpdate(pos, Blocks.STONE_SLAB.defaultBlockState());
         player.setPos(player.getX(), pos.getY() + .5, player.getZ());
         helper.assertTrue(Double.isInfinite(CameraGeometry.ceiling(player, player.position().add(0, -.4, 0), 1.62)), "A step below the real feet is ignored during interpolated movement");
+        helper.assertTrue(Double.isInfinite(CameraGeometry.ceiling(player, player.position().add(0, -.4, 0), 1.62, .24)), "Extra clearance still ignores a step below the real feet");
         helper.getLevel().setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
         player.setPos(player.getX(), pos.getY(), player.getZ());
         helper.getLevel().setBlockAndUpdate(pos.east(), Blocks.STONE.defaultBlockState());
@@ -40,11 +42,16 @@ public final class CameraGeometryTests {
         var reachable = CameraGeometry.reachableMovement(player, player.position(), new Vec3(2, 0, 0));
         helper.assertTrue(reachable.x < .25 && reachable.x >= 0, "Forecast stops at an impassable wall");
         helper.assertTrue(Double.isInfinite(CameraGeometry.ceiling(player, player.position().add(reachable), 1.62)), "A wall is not mistaken for a reachable tunnel");
+        helper.assertTrue(Double.isInfinite(CameraGeometry.ceiling(player, player.position().add(reachable), 1.62, .24)), "Extra clearance does not turn the blocked wall into a ceiling");
         helper.getLevel().setBlockAndUpdate(pos.above(), Blocks.STONE.defaultBlockState());
         helper.assertTrue(Math.abs(CameraGeometry.ceiling(player, player.position(), 1.62) - .92) < .0001, "A real one block ceiling limits camera height");
+        helper.assertTrue(Math.abs(CameraGeometry.ceiling(player, player.position(), 1.62, .24) - .76) < .0001, "The cat camera has room for view bobbing below a one block roof");
+        helper.assertTrue(Math.abs(CameraGeometry.ceiling(player, player.position(), .85, .24) - .76) < .0001, "A nearby roof is detected even when the selected camera is already below it");
+        helper.assertTrue(Double.isInfinite(CameraGeometry.ceiling(player, player.position(), .43, .24)), "A low cat camera is unchanged in a one block passage");
         helper.getLevel().setBlockAndUpdate(pos.above(), Blocks.AIR.defaultBlockState());
         helper.getLevel().setBlockAndUpdate(pos, Blocks.STONE_SLAB.defaultBlockState().setValue(SlabBlock.TYPE, SlabType.TOP));
         helper.assertTrue(Math.abs(CameraGeometry.ceiling(player, player.position(), 1.62) - .42) < .0001, "A real half block ceiling is protected");
+        helper.assertTrue(Math.abs(CameraGeometry.ceiling(player, player.position(), 1.62, .24) - .26) < .0001, "Half block roofs leave the same visual clearance");
         GameplayTests.remove(player); helper.succeed();
     }
 

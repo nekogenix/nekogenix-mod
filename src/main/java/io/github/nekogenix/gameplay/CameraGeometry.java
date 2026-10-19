@@ -20,13 +20,17 @@ public final class CameraGeometry {
     }
 
     public static double ceiling(Player player, Vec3 feet, double height) {
+        return ceiling(player, feet, height, .08);
+    }
+
+    public static double ceiling(Player player, Vec3 feet, double height, double margin) {
         double ceiling = Double.POSITIVE_INFINITY;
         var column = new AABB(feet.x - .12, feet.y + .08, feet.z - .12,
-                feet.x + .12, feet.y + height + .08, feet.z + .12);
+                feet.x + .12, feet.y + height + margin, feet.z + .12);
         for (var shape : player.level().getBlockCollisions(player, column)) {
             for (var box : shape.toAabbs()) {
                 if (box.minY <= Math.max(feet.y, player.getY()) + Math.min(.2, player.getBbHeight() * .25) || !box.intersects(column)) continue;
-                ceiling = Math.min(ceiling, Math.max(.08, box.minY - feet.y - .08));
+                ceiling = Math.min(ceiling, Math.max(.08, box.minY - feet.y - margin));
             }
         }
         return ceiling;
