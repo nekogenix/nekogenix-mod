@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.model.CatModel;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.model.geom.ModelPart;
@@ -50,7 +51,9 @@ public final class CatPlayerRenderer extends CatRenderer {
 
     private CatPlayerRenderer(EntityRendererProvider.Context context) {
         super(context);
-        model = new PawModel(context.bakeLayer(ModelLayers.CAT));
+        ModelPart root = context.bakeLayer(ModelLayers.CAT);
+        model = new PawModel(root);
+        CatEquipment equipment = new CatEquipment(context, root);
         items = context.getItemInHandRenderer();
         ModelPart paws = context.bakeLayer(ModelLayers.CAT);
         rightPaw = paws.getChild("right_front_leg");
@@ -59,6 +62,10 @@ public final class CatPlayerRenderer extends CatRenderer {
             @Override
             public void render(PoseStack pose, MultiBufferSource buffers, int light, Cat cat, float walk,
                     float speed, float partial, float age, float yaw, float pitch) {
+                if (cat instanceof PlayerCat proxy && proxy.player instanceof AbstractClientPlayer player) {
+                    equipment.render(player, pose, buffers, light, player.walkAnimation.position(partial),
+                            player.walkAnimation.speed(partial), partial, age, yaw, pitch);
+                }
                 if (cat.isInvisible()) return;
                 drawHeld(cat, HumanoidArm.RIGHT, pose, buffers, light, partial);
                 drawHeld(cat, HumanoidArm.LEFT, pose, buffers, light, partial);
@@ -159,6 +166,8 @@ public final class CatPlayerRenderer extends CatRenderer {
         PlayerCat cat = proxy(player);
         float crouch = cat.crouch(event.getPartialTick());
         float air = cat.air(event.getPartialTick());
+        float forward = cat.forward(event.getPartialTick());
+        float sideways = cat.sideways(event.getPartialTick());
         PoseStack pose = event.getPoseStack();
         pose.pushPose();
         float swing = Mth.sin(Mth.sqrt(event.getSwingProgress()) * Mth.PI);
@@ -172,7 +181,8 @@ public final class CatPlayerRenderer extends CatRenderer {
                 default -> {}
             }
         }
-        pose.mulPose(Axis.ZP.rotationDegrees(side * (air * 16 - crouch * 5 - swing * 20)));
+        pose.translate(sideways * .08, 0, forward * .06);
+        pose.mulPose(Axis.ZP.rotationDegrees(side * (air * 32 - crouch * 5 - swing * 20) + sideways * 12));
         ModelPart paw = renderer.paw(arm);
         paw.setPos(0, -10, -.5F);
         paw.render(pose, event.getMultiBufferSource().getBuffer(RenderType.entityCutout(cat.getTextureId())),
@@ -193,8 +203,8 @@ public final class CatPlayerRenderer extends CatRenderer {
         float side = event.getArm() == HumanoidArm.RIGHT ? 1 : -1;
         paw.setPos(-side * 5, 2 + cat.crouch(partial) * .5F, -1);
         paw.yScale = 1.2F;
-        paw.zRot = side * (cat.air(partial) * .24F - cat.crouch(partial) * .08F);
-        paw.xRot = -cat.air(partial) * .15F;
+        paw.zRot = side * (cat.air(partial) * .6F - cat.crouch(partial) * .08F) + cat.sideways(partial) * .2F;
+        paw.xRot = -cat.air(partial) * .15F + cat.forward(partial) * .25F;
         paw.render(event.getPoseStack(), event.getMultiBufferSource().getBuffer(RenderType.entityCutout(cat.getTextureId())),
                 event.getPackedLight(), OverlayTexture.NO_OVERLAY);
     }
@@ -231,19 +241,23 @@ public final class CatPlayerRenderer extends CatRenderer {
             float partial = Mth.clamp(age - cat.tickCount, 0, 1);
             super.setupAnim(cat, player.walkAnimation.position(partial), player.walkAnimation.speed(partial), age, yaw, pitch);
             float air = proxy.air(partial);
-            float stride = Math.min(1, player.walkAnimation.speed(partial)) * .85F * (1 - air);
+            float stride = player.onGround() ? Math.min(1, player.walkAnimation.speed(partial)) * .85F : 0;
             float phase = player.walkAnimation.position(partial) * (player.isSprinting() ? 1.45F : .9F);
             float hindOffset = player.isSprinting() ? .65F : .2F;
             rightFrontLeg.xRot = Mth.cos(phase) * stride;
             leftFrontLeg.xRot = Mth.cos(phase + Mth.PI) * stride;
             rightHindLeg.xRot = Mth.cos(phase + Mth.PI + hindOffset) * stride;
             leftHindLeg.xRot = Mth.cos(phase + hindOffset) * stride;
-            rightFrontLeg.zRot = air * .3F;
-            leftFrontLeg.zRot = -air * .3F;
-            rightHindLeg.zRot = air * .25F;
-            leftHindLeg.zRot = -air * .25F;
+            float forward = proxy.forward(partial) * .3F;
+            float sideways = proxy.sideways(partial) * .25F;
+            rightFrontLeg.zRot = air * .75F + sideways;
+            leftFrontLeg.zRot = -air * .75F + sideways;
+            rightHindLeg.zRot = air * .65F + sideways;
+            leftHindLeg.zRot = -air * .65F + sideways;
             rightFrontLeg.xRot -= air * .22F; leftFrontLeg.xRot -= air * .22F;
             rightHindLeg.xRot += air * .22F; leftHindLeg.xRot += air * .22F;
+            rightFrontLeg.xRot += forward; leftFrontLeg.xRot += forward;
+            rightHindLeg.xRot += forward; leftHindLeg.xRot += forward;
             hold(player, HumanoidArm.RIGHT, partial);
             hold(player, HumanoidArm.LEFT, partial);
         }
@@ -272,6 +286,8 @@ public final class CatPlayerRenderer extends CatRenderer {
         private final Player player;
         private int poseTick = -1;
         private float oldCrouch, crouch, oldAir, air;
+        private float oldForward, forward, oldSideways, sideways;
+        private int fallingTicks;
         private PlayerCat(Player player) {
             super(EntityType.CAT, player.level());
             this.player = player;
@@ -284,12 +300,26 @@ public final class CatPlayerRenderer extends CatRenderer {
             int ticks = poseTick < 0 ? 1 : Mth.clamp(player.tickCount - poseTick, 1, 4);
             poseTick = player.tickCount;
             oldCrouch = crouch; oldAir = air;
+            oldForward = forward; oldSideways = sideways;
             crouch = Mth.lerp(1 - (float)Math.pow(.6, ticks), crouch, player.isCrouching() ? 1 : 0);
             boolean airborne = !player.onGround() && !player.isInWaterOrBubble() && !player.onClimbable() && !player.isPassenger();
-            air = Mth.lerp(1 - (float)Math.pow(.6, ticks), air, airborne ? 1 : 0);
+            boolean flying = player.getAbilities().flying;
+            boolean falling = airborne && !flying && !player.isFallFlying() && player.getDeltaMovement().y < -.03;
+            fallingTicks = falling ? Math.min(30, fallingTicks + ticks) : 0;
+            float spread = airborne && flying ? .4F : falling ? .12F + .88F * fallingTicks / 30F : 0;
+            float blend = 1 - (float)Math.pow(.6, ticks);
+            air = Mth.lerp(blend, air, spread);
+            var motion = player.getDeltaMovement();
+            float yaw = player.yBodyRot * Mth.DEG_TO_RAD;
+            float along = (float)(motion.z * Mth.cos(yaw) - motion.x * Mth.sin(yaw));
+            float across = (float)(motion.x * Mth.cos(yaw) + motion.z * Mth.sin(yaw));
+            forward = Mth.lerp(blend, forward, airborne && !flying ? Mth.clamp(along * 3, -1, 1) : 0);
+            sideways = Mth.lerp(blend, sideways, airborne && !flying ? Mth.clamp(across * 3, -1, 1) : 0);
         }
         private float crouch(float partial) { return Mth.lerp(partial, oldCrouch, crouch); }
         private float air(float partial) { return Mth.lerp(partial, oldAir, air); }
+        private float forward(float partial) { return Mth.lerp(partial, oldForward, forward); }
+        private float sideways(float partial) { return Mth.lerp(partial, oldSideways, sideways); }
         @Override public Component getDisplayName() { return player.getDisplayName(); }
         @Override public Component getName() { return player.getName(); }
         @Override public net.minecraft.world.scores.PlayerTeam getTeam() { return player.getTeam(); }

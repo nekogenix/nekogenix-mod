@@ -16,6 +16,46 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 @GameTestHolder(Nekogenix.ID)
 @PrefixGameTestTemplate(false)
 public final class PneumaticStandTests {
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void addingSecondSyringeRestartsTheWholeBatch(GameTestHelper helper) {
+        restartBatch(helper, false);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void addingSecondSyringeAlsoRestartsCrystallizingBatch(GameTestHelper helper) {
+        restartBatch(helper, true);
+        helper.succeed();
+    }
+
+    private static void restartBatch(GameTestHelper helper, boolean crystallizing) {
+        var level = helper.getLevel();
+        BlockPos pos = helper.absolutePos(new BlockPos(2, 2, 2));
+        level.setBlockAndUpdate(pos, Content.PNEUMATIC_STAND.get().defaultBlockState());
+        var stand = (PneumaticStandBlockEntity) level.getBlockEntity(pos);
+        stand.setItem(0, Content.SYRINGE.toStack());
+        stand.setItem(3, crystallizing ? Content.NEKO_STABILIZER.toStack() : Content.CAT_NUCLEOCARD.toStack());
+        stand.setItem(4, new ItemStack(Items.WIND_CHARGE, 2));
+        for (int tick = 0; tick < 390; tick++) PneumaticStandBlockEntity.tick(level, pos, stand.getBlockState(), stand);
+        stand.setItem(2, Content.SYRINGE.toStack());
+        PneumaticStandBlockEntity.tick(level, pos, stand.getBlockState(), stand);
+        helper.assertTrue(stand.progress() == 1 && stand.getItem(4).getCount() == 1,
+                "A late second syringe restarts the batch with the pressure already supplied");
+        for (int tick = 0; tick < 20; tick++) PneumaticStandBlockEntity.tick(level, pos, stand.getBlockState(), stand);
+        helper.assertTrue(stand.getItem(0).is(Content.SYRINGE) && stand.getItem(2).is(Content.SYRINGE),
+                "Neither syringe completes at the old deadline");
+        var saved = stand.saveWithFullMetadata(level.registryAccess());
+        var restored = (PneumaticStandBlockEntity) BlockEntity.loadStatic(pos, stand.getBlockState(), saved, level.registryAccess());
+        level.removeBlockEntity(pos);
+        level.setBlockEntity(restored);
+        for (int tick = 0; tick < 379; tick++) PneumaticStandBlockEntity.tick(level, pos, restored.getBlockState(), restored);
+        var output = crystallizing ? Content.STABILIZING_INJECTION : Content.INJECTION;
+        helper.assertTrue(restored.getItem(0).is(output) && restored.getItem(2).is(output)
+                        && (crystallizing ? restored.getItem(3).is(Items.GLASS_BOTTLE) : restored.getItem(3).is(Content.BLANK_NUCLEOCARD))
+                        && restored.getItem(4).getCount() == 1,
+                "The restarted batch fills both syringes together across a reload without extra fuel");
+    }
+
     @GameTest(template = "empty", timeoutTicks = 900)
     public static void oneChargeFillsBothSyringesAcrossReload(GameTestHelper helper) {
         var level = helper.getLevel();

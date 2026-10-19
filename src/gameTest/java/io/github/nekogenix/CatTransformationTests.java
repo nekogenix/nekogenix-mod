@@ -109,7 +109,7 @@ public final class CatTransformationTests {
     }
 
     @GameTest(template = "empty", timeoutTicks = 450)
-    public static void brewingAndOneBottleFillExactlyOneSyringe(GameTestHelper helper) {
+    public static void brewingAndOneBottleFillBothSyringes(GameTestHelper helper) {
         var level = helper.getLevel();
         var brewingPos = helper.absolutePos(new BlockPos(2, 2, 2));
         level.setBlockAndUpdate(brewingPos, Blocks.BREWING_STAND.defaultBlockState());
@@ -130,9 +130,9 @@ public final class CatTransformationTests {
             var restored = (PneumaticStandBlockEntity) BlockEntity.loadStatic(pos, stand.getBlockState(), saved, level.registryAccess());
             level.removeBlockEntity(pos); level.setBlockEntity(restored);
             for (int i = 190; i < 405; i++) PneumaticStandBlockEntity.tick(level, pos, restored.getBlockState(), restored);
-            helper.assertTrue(restored.getItem(0).is(Content.STABILIZING_INJECTION) && restored.getItem(2).is(Content.SYRINGE)
+            helper.assertTrue(restored.getItem(0).is(Content.STABILIZING_INJECTION) && restored.getItem(2).is(Content.STABILIZING_INJECTION)
                     && restored.getItem(3).is(Items.GLASS_BOTTLE) && restored.getItem(4).getCount() == 1,
-                    "One bottle and charge produce only one stabilizing injection across reload and return a glass bottle");
+                    "One bottle and charge fill both syringes across reload and return a glass bottle");
             helper.succeed();
         });
     }

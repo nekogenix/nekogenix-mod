@@ -17,6 +17,7 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 public final class CatFormSmokeTest {
     private static final boolean ENABLED = Boolean.getBoolean("nekogenix.catSmokeTest");
     private static final boolean PREVIEW = Boolean.getBoolean("nekogenix.catPreview");
+    private static final boolean EQUIPMENT = Boolean.getBoolean("nekogenix.catEquipmentPreview");
     private static final BlockPos STAND = new BlockPos(128, -60, 128);
 
     @SubscribeEvent
@@ -105,6 +106,17 @@ public final class CatFormSmokeTest {
             check(player.getData(Content.NEKO).isCat() && Math.abs(player.getBbHeight() - .7F) < .001,
                     "Full cat form retains server collision dimensions");
             Nekogenix.LOGGER.info("Nekogenix cat server smoke passed: injection stabilization final cat form and synchronized dimensions");
+        }
+        if (EQUIPMENT && age == 1290) {
+            player.teleportTo(level, 140.5, 4, 125, 0, 0);
+            player.setDeltaMovement(.12, -.05, .08);
+            player.hurtMarked = true;
+        }
+        if (EQUIPMENT && age == 1360) {
+            player.setGameMode(GameType.CREATIVE);
+            player.getAbilities().flying = true;
+            player.onUpdateAbilities();
+            player.teleportTo(level, 128.5, -54, 125, 0, 0);
         }
     }
 
@@ -206,7 +218,7 @@ public final class CatFormSmokeTest {
             if (age == 950) {
                 check(mc.screen instanceof io.github.nekogenix.client.PneumaticStandScreen, "Pneumatic menu opens for a cat player");
                 var menu = (io.github.nekogenix.pneumatic.PneumaticStandMenu) mc.player.containerMenu;
-                check(menu.filling(0) && !menu.filling(1), "Only one syringe receives the stabilizer");
+                check(menu.filling(0) && menu.filling(1), "Both syringes receive the stabilizer together");
                 var stack = menu.getSlot(0).getItem();
                 check(net.minecraft.client.renderer.item.ItemProperties.getProperty(stack, Content.id("stabilizing_progress"))
                         .call(stack, mc.level, mc.player, 0) > 0, "Stabilizer has its own synchronized filling animation");
@@ -214,19 +226,30 @@ public final class CatFormSmokeTest {
             }
             if (age == 1200) {
                 var menu = mc.player.containerMenu;
-                check(menu.getSlot(0).getItem().is(Content.STABILIZING_INJECTION) && menu.getSlot(1).getItem().is(Content.SYRINGE)
+                check(menu.getSlot(0).getItem().is(Content.STABILIZING_INJECTION) && menu.getSlot(1).getItem().is(Content.STABILIZING_INJECTION)
                         && menu.getSlot(2).getItem().is(Items.GLASS_BOTTLE) && windSounds >= 4,
-                        "One stabilizer bottle produces one syringe and returns glass with vanilla wind sounds");
+                        "One stabilizer bottle fills both syringes and returns glass with vanilla wind sounds");
                 capture(mc, "cat-pneumatic-complete.png");
                 Nekogenix.LOGGER.info("Nekogenix cat client smoke passed: both injections cat model paws inventory camera and pneumatic recipe");
             }
-            if (age == 1210) mc.setScreen(new GripPreview(false));
+            if (age == 1210) mc.setScreen(EQUIPMENT ? new CatEquipmentSmokeTest(false) : new GripPreview(false));
             if (age == 1220) capture(mc, "cat-item-grips-front.png");
             if (age == 1240) mc.player.closeContainer();
             if (age == 1250) capture(mc, "cat-map-paws.png");
-            if (age == 1260) mc.setScreen(new GripPreview(true));
+            if (age == 1260) mc.setScreen(EQUIPMENT ? new CatEquipmentSmokeTest(true) : new GripPreview(true));
             if (age == 1270) capture(mc, "cat-item-grips-side.png");
-            if (age >= 1280) mc.stop();
+            if (EQUIPMENT) {
+                if (age == 1280) {
+                    check(CatEquipmentSmokeTest.customModels > 0, "Modded armor model hooks render against the actual feline player");
+                    mc.player.closeContainer();
+                }
+                if (age >= 1295) mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT);
+                if (age == 1300 || age == 1320 || age == 1330 || age == 1380) capture(mc, "cat-flight-" + age + ".png");
+                if (age == 1400) {
+                    Nekogenix.LOGGER.info("Nekogenix equipment smoke passed: armor dye trims glint custom model hooks heads elytra and progressive falling");
+                    mc.stop();
+                }
+            } else if (age >= 1280) mc.stop();
         }
 
         private static final class GripPreview extends net.minecraft.client.gui.screens.Screen {
@@ -275,17 +298,19 @@ public final class CatFormSmokeTest {
                 b[i] = Float.intBitsToFloat(vertices[8 + i]);
                 c[i] = Float.intBitsToFloat(vertices[16 + i]);
             }
-            float u = quad.getSprite().getU(1.5F / 16F), v = quad.getSprite().getV(1.5F / 16F);
-            float determinant = (b[4]-a[4])*(c[5]-a[5])-(b[5]-a[5])*(c[4]-a[4]);
-            float x = ((u-a[4])*(c[5]-a[5])-(v-a[5])*(c[4]-a[4]))/determinant;
-            float y = ((b[4]-a[4])*(v-a[5])-(b[5]-a[5])*(u-a[4]))/determinant;
-            var tip = new org.joml.Vector4f(a[0]+x*(b[0]-a[0])+y*(c[0]-a[0]),
-                    a[1]+x*(b[1]-a[1])+y*(c[1]-a[1]), a[2]+x*(b[2]-a[2])+y*(c[2]-a[2]), 1);
-            tip.mul(pose.last().pose());
-            float vertical = -tip.z * (float)Math.tan(Math.toRadians(35));
-            boolean hidden = tip.z >= -.05F || Math.abs(tip.y) > vertical || Math.abs(tip.x) > vertical * mc.getWindow().getWidth()/mc.getWindow().getHeight();
-            Nekogenix.LOGGER.info("Nekogenix needle position {} hidden={}", tip, hidden);
-            check(hidden, "The needle tip stays outside the view during injection");
+            for (float pixel : new float[] {1.5F, 3.5F}) {
+                float u = quad.getSprite().getU(pixel / 16F), v = quad.getSprite().getV(pixel / 16F);
+                float determinant = (b[4]-a[4])*(c[5]-a[5])-(b[5]-a[5])*(c[4]-a[4]);
+                float x = ((u-a[4])*(c[5]-a[5])-(v-a[5])*(c[4]-a[4]))/determinant;
+                float y = ((b[4]-a[4])*(v-a[5])-(b[5]-a[5])*(u-a[4]))/determinant;
+                var tip = new org.joml.Vector4f(a[0]+x*(b[0]-a[0])+y*(c[0]-a[0]),
+                        a[1]+x*(b[1]-a[1])+y*(c[1]-a[1]), a[2]+x*(b[2]-a[2])+y*(c[2]-a[2]), 1);
+                tip.mul(pose.last().pose());
+                float vertical = -tip.z * (float)Math.tan(Math.toRadians(35));
+                boolean hidden = tip.z >= -.05F || Math.abs(tip.y) > vertical || Math.abs(tip.x) > vertical * mc.getWindow().getWidth()/mc.getWindow().getHeight();
+                Nekogenix.LOGGER.info("Nekogenix needle pixel {} position {} hidden={}", pixel, tip, hidden);
+                check(hidden == (pixel == 1.5F), "Only the needle tip leaves the view during injection while its shaft stays visible");
+            }
         }
 
         private static void capture(net.minecraft.client.Minecraft mc, String name) { pendingCapture = name; }

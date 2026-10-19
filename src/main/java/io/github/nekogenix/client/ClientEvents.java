@@ -172,11 +172,11 @@ public final class ClientEvents {
                         pressure *= retreat;
                         tremor *= retreat;
                     }
-                    pose.translate(side * (.56F - .52F * approach * retreat), -.52F + .46F * approach * retreat + pressure,
-                            -.72F + .37F * approach * retreat);
-                    pose.mulPose(Axis.YP.rotationDegrees(side * (45F + 100F * approach * retreat)));
-                    pose.mulPose(Axis.ZP.rotationDegrees(side * (162F * approach * retreat)));
-                    pose.mulPose(Axis.XP.rotationDegrees(30F * approach * retreat + tremor));
+                    pose.translate(side * (.56F - .45F * approach * retreat), -.52F + .493F * approach * retreat + pressure,
+                            -.72F - .069F * approach * retreat);
+                    pose.mulPose(Axis.YP.rotationDegrees(side * (45F + 83F * approach * retreat)));
+                    pose.mulPose(Axis.ZP.rotationDegrees(side * (155F * approach * retreat)));
+                    pose.mulPose(Axis.XP.rotationDegrees(25F * approach * retreat + tremor));
                     return true;
                 }
             }, Content.INJECTION.get(), Content.STABILIZING_INJECTION.get());

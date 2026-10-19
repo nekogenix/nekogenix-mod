@@ -52,7 +52,6 @@ public final class PneumaticStandBlockEntity extends BaseContainerBlockEntity im
             stand.targets = (stand.getItem(0).is(Content.SYRINGE) ? 1 : 0) | (stand.getItem(2).is(Content.SYRINGE) ? 4 : 0);
             if (stand.targets == 0) return;
             stand.stabilizing = stand.getItem(CARD).is(Content.NEKO_STABILIZER);
-            if (stand.stabilizing) stand.targets = Integer.lowestOneBit(stand.targets);
             stand.progress = 1;
             stand.items.get(FUEL).shrink(1);
             stand.sound(SoundEvents.BREEZE_INHALE, .55F, 1.2F);
@@ -62,6 +61,12 @@ public final class PneumaticStandBlockEntity extends BaseContainerBlockEntity im
             stand.targets = 0;
             stand.returnCenterItem();
             stand.sound(SoundEvents.BREEZE_SLIDE, .35F, 1.3F);
+            stand.sync();
+        } else if ((stand.targets & 2) == 0 && (stand.syringes() & ~stand.targets) != 0) {
+            // Keep the pressure already paid for, but start filling the expanded batch together.
+            stand.targets = stand.syringes();
+            stand.progress = 1;
+            stand.sound(SoundEvents.BREEZE_INHALE, .55F, 1.2F);
             stand.sync();
         } else if (++stand.progress >= PROCESS_TICKS) {
             for (int slot = 0; slot < 3; slot++) if ((stand.targets & 1 << slot) != 0) stand.items.set(slot, stand.stabilizing ? Content.STABILIZING_INJECTION.toStack() : Content.INJECTION.toStack());
@@ -77,6 +82,10 @@ public final class PneumaticStandBlockEntity extends BaseContainerBlockEntity im
             if (stand.progress % 20 == 0) stand.sync();
             if (stand.progress % 80 == 0) stand.sound(SoundEvents.BREEZE_IDLE_AIR, .18F, 1.3F);
         }
+    }
+
+    private int syringes() {
+        return (getItem(0).is(Content.SYRINGE) ? 1 : 0) | (getItem(2).is(Content.SYRINGE) ? 4 : 0);
     }
 
     private boolean validInputs() {
