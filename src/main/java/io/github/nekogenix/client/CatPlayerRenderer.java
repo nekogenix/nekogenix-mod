@@ -179,15 +179,10 @@ public final class CatPlayerRenderer extends CatRenderer {
         HumanoidArm arm = event.getHand() == InteractionHand.MAIN_HAND ? player.getMainArm() : player.getMainArm().getOpposite();
         float side = arm == HumanoidArm.RIGHT ? 1 : -1;
         PlayerCat cat = proxy(player);
-        float crouch = cat.crouch(event.getPartialTick());
-        float air = cat.air(event.getPartialTick());
-        float forward = cat.forward(event.getPartialTick());
-        float sideways = cat.sideways(event.getPartialTick());
         PoseStack pose = event.getPoseStack();
         pose.pushPose();
         float swing = Mth.sin(Mth.sqrt(event.getSwingProgress()) * Mth.PI);
-        pose.translate(side * (.56 - swing * .16 + air * .04), -.52 - event.getEquipProgress() * .6
-                + swing * .12 - crouch * .04 + air * .035, -.72 + crouch * .025);
+        pose.translate(side * (.56 - swing * .16), -.52 - event.getEquipProgress() * .6 + swing * .12, -.72);
         if (player.isUsingItem() && player.getUsedItemHand() == event.getHand()) {
             switch (stack.getUseAnimation()) {
                 case EAT, DRINK -> pose.translate(side * -.18, .16, .12);
@@ -196,11 +191,9 @@ public final class CatPlayerRenderer extends CatRenderer {
                 default -> {}
             }
         }
-        pose.translate(sideways * .08, 0, forward * .06);
-        pose.mulPose(Axis.ZP.rotationDegrees(side * (air * 32 - crouch * 5 - swing * 20) + sideways * 12));
+        pose.mulPose(Axis.ZP.rotationDegrees(-side * swing * 20));
         ModelPart paw = renderer.paw(arm);
         paw.setPos(0, -10, -.5F);
-        paw.xRot = cat.vertical(event.getPartialTick()) * .2F + cat.stroke(event.getPartialTick(), side) * .3F;
         paw.render(pose, event.getMultiBufferSource().getBuffer(RenderType.entityCutout(cat.getTextureId())),
                 event.getPackedLight(), OverlayTexture.NO_OVERLAY);
         pose.popPose();
@@ -212,16 +205,11 @@ public final class CatPlayerRenderer extends CatRenderer {
         if (renderer == null || !CatForm.active(player) || player.isSpectator()) return;
         event.setCanceled(true);
         if (player.isInvisible()) return;
-        var mc = Minecraft.getInstance();
-        float partial = mc.getTimer().getGameTimeDeltaPartialTick(false);
         PlayerCat cat = proxy(player);
         ModelPart paw = renderer.paw(event.getArm());
         float side = event.getArm() == HumanoidArm.RIGHT ? 1 : -1;
-        paw.setPos(-side * 5, 2 + cat.crouch(partial) * .5F, -1);
+        paw.setPos(-side * 5, 2, -1);
         paw.yScale = 1.2F;
-        paw.zRot = side * (cat.air(partial) * .6F - cat.crouch(partial) * .08F) + cat.sideways(partial) * .2F;
-        paw.xRot = -cat.air(partial) * .15F + cat.forward(partial) * .25F
-                + cat.vertical(partial) * .2F + cat.stroke(partial, side) * .3F;
         paw.render(event.getPoseStack(), event.getMultiBufferSource().getBuffer(RenderType.entityCutout(cat.getTextureId())),
                 event.getPackedLight(), OverlayTexture.NO_OVERLAY);
     }

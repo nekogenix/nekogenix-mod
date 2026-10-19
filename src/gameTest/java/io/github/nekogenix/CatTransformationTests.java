@@ -90,7 +90,9 @@ public final class CatTransformationTests {
         helper.assertTrue(player.getData(Content.INJECTION_STARTED) == -1, "Humans cannot consume stabilizing injection");
         set(player, NekoState.Phase.CAT_TRANSFORMING, 1000, 7);
         for (int tick : new int[] {66, 86, 106, 126, 146}) helper.runAfterDelay(tick, () -> InjectionHandler.input(player, true));
-        helper.runAfterDelay(77, () -> helper.assertTrue(player.getHealth() == 19F,
+        helper.runAfterDelay(77, () -> helper.assertTrue(player.getHealth() == 20F,
+                "The initial insertion preserves health until the jab"));
+        helper.runAfterDelay(80, () -> helper.assertTrue(player.getHealth() == 19F,
                 "Crystallizing injection damage also happens at needle contact"));
         helper.runAfterDelay(165, () -> {
             helper.assertTrue(player.getData(Content.NEKO).phase() == NekoState.Phase.NEKO && player.getData(Content.NEKO).lives() == 7

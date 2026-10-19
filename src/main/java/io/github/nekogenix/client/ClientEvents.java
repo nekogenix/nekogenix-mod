@@ -136,7 +136,13 @@ public final class ClientEvents {
                     (stack, level, entity, seed) -> {
                         float age = elapsed(entity, 0);
                         if (age < 0 || age >= InjectionHandler.TOTAL_TICKS || entity.getMainHandItem() != stack) return 0;
-                        return age < 80 ? (int) age / 20 : 4 + Math.min(3, ((int) age - 80) / 3);
+                        if (age >= InjectionHandler.FORWARD_TICKS) return 4 + Math.min(3, ((int)age - InjectionHandler.FORWARD_TICKS) / 3);
+                        int frame = Math.min(3, (int)(Mth.clamp((age - InjectionHandler.NEEDLE_ENTRY_TICKS)
+                                / (InjectionHandler.FORWARD_TICKS - InjectionHandler.NEEDLE_ENTRY_TICKS), 0, 1) * 4));
+                        var returning = entity.getData(Content.INJECTION_RETURN);
+                        boolean inserted = age >= InjectionHandler.NEEDLE_ENTRY_TICKS && (returning.started() < 0
+                                || returning.remaining(entity.level().getGameTime(), 0) >= .999F);
+                        return (inserted ? 8 : 0) + frame;
                     });
             });
         }
@@ -161,20 +167,25 @@ public final class ClientEvents {
                     float age = elapsed(player, partial);
                     if (age < 0 || age >= InjectionHandler.TOTAL_TICKS) return false;
                     float side = arm == HumanoidArm.RIGHT ? 1 : -1;
-                    float approach = Mth.clamp(age / InjectionHandler.NEEDLE_ENTRY_TICKS, 0, 1);
-                    float retreat = age < 80 ? 1 : 1 - (age - 80) / 12F;
-                    float pressure = Mth.sin(age * .48F) * .006F;
-                    float tremor = Mth.cos(age * .48F) * .4F;
+                    float approachAge = age;
+                    float retreat = age < InjectionHandler.FORWARD_TICKS ? 1
+                            : 1 - (age - InjectionHandler.FORWARD_TICKS) / InjectionHandler.RETURN_TICKS;
+                    float pressure = Mth.sin(age * .48F) * .001F;
+                    float tremor = Mth.cos(age * .48F) * .1F;
                     var returning = player.getData(Content.INJECTION_RETURN);
                     if (returning.started() >= 0) {
                         retreat = returning.remaining(player.level().getGameTime(), partial);
-                        approach = Mth.clamp(returning.progress() / (float) InjectionHandler.NEEDLE_ENTRY_TICKS, 0, 1);
+                        approachAge = returning.progress();
                         pressure *= retreat;
                         tremor *= retreat;
                     }
-                    pose.translate(side * (.56F - .45F * approach * retreat), -.52F + .493F * approach * retreat + pressure,
+                    float approach = Mth.clamp(approachAge / InjectionHandler.APPROACH_TICKS, 0, 1);
+                    approach = approach * approach * (3 - 2 * approach);
+                    float jab = Mth.clamp((approachAge - InjectionHandler.APPROACH_TICKS)
+                            / (InjectionHandler.NEEDLE_ENTRY_TICKS - InjectionHandler.APPROACH_TICKS), 0, 1);
+                    pose.translate(side * (.56F - .45F * approach * retreat), -.52F + (.493F * approach - .09F * jab) * retreat + pressure,
                             -.72F - .069F * approach * retreat);
-                    pose.mulPose(Axis.YP.rotationDegrees(side * (45F + 83F * approach * retreat)));
+                    pose.mulPose(Axis.YP.rotationDegrees(side * (45F + 75F * approach * retreat)));
                     pose.mulPose(Axis.ZP.rotationDegrees(side * (155F * approach * retreat)));
                     pose.mulPose(Axis.XP.rotationDegrees(25F * approach * retreat + tremor));
                     return true;

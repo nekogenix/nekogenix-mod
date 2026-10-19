@@ -18,6 +18,7 @@ public final class CatFormSmokeTest {
     private static final boolean ENABLED = Boolean.getBoolean("nekogenix.catSmokeTest");
     private static final boolean PREVIEW = Boolean.getBoolean("nekogenix.catPreview");
     private static final boolean EQUIPMENT = Boolean.getBoolean("nekogenix.catEquipmentPreview");
+    private static final boolean CONTROLS = Boolean.getBoolean("nekogenix.controlSmokeTest");
     private static final BlockPos STAND = new BlockPos(128, -60, 128);
 
     @SubscribeEvent
@@ -76,6 +77,22 @@ public final class CatFormSmokeTest {
         if (age == 675) {
             player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
             player.setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
+            if (CONTROLS) {
+                for (int z = 120; z <= 155; z++) {
+                    level.setBlockAndUpdate(new BlockPos(132, -61, z), Blocks.STONE.defaultBlockState());
+                    level.setBlockAndUpdate(new BlockPos(132, -60, z), Blocks.AIR.defaultBlockState());
+                    level.setBlockAndUpdate(new BlockPos(132, -59, z), Blocks.STONE.defaultBlockState());
+                    level.setBlockAndUpdate(new BlockPos(131, -60, z), Blocks.STONE.defaultBlockState());
+                    level.setBlockAndUpdate(new BlockPos(133, -60, z), Blocks.STONE.defaultBlockState());
+                }
+                player.teleportTo(level, 132.5, -60, 122, 0, 0);
+            }
+        }
+        if (CONTROLS && age == 705) {
+            check(player.isSprinting() && player.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED)
+                    .hasModifier(Content.id("feline_sprint")) && player.getZ() > 123,
+                    "Sprint starts inside the one block tunnel and receives feline acceleration on the server");
+            Nekogenix.LOGGER.info("Nekogenix tunnel server smoke passed: sprint and feline acceleration start under a one block ceiling");
         }
         if (age == 750) {
             player.setGameMode(GameType.CREATIVE);
@@ -161,13 +178,13 @@ public final class CatFormSmokeTest {
             if (mc.player == null || mc.level == null) return;
             if (PREVIEW && mc.player.tickCount < 25) return;
             int age = mc.player.tickCount + (PREVIEW ? 530 : 0);
-            mc.options.setCameraType((age >= 655 && age < 665 || age >= 680 && age <= 730) ? net.minecraft.client.CameraType.THIRD_PERSON_FRONT : net.minecraft.client.CameraType.FIRST_PERSON);
+            mc.options.setCameraType((age >= 655 && age < 665 || !CONTROLS && age >= 680 && age <= 730) ? net.minecraft.client.CameraType.THIRD_PERSON_FRONT : net.minecraft.client.CameraType.FIRST_PERSON);
             mc.options.hideGui = false;
             mc.options.fov().set(70);
             mc.options.screenEffectScale().set(0D);
             mc.options.keyAttack.setDown(age >= 60 && age < 100 || age >= 160 && age < 270 || age >= 400 && age < 510);
             if (age == 85 || age == 205 || age == 445) needle(mc);
-            if (age == 85 || age == 105 || age == 205 || age == 445) capture(mc, "cat-injection-" + age + ".png");
+            if (age == 68 || age == 75 || age == 85 || age == 105 || age == 205 || age == 445) capture(mc, "cat-injection-" + age + ".png");
             if (age == 300) check(mc.player.getMainHandItem().is(Content.USED_SYRINGE) && mc.player.hasEffect(Content.SHOCK), "Neko injection still completes");
             if (age == 530) check(!mc.player.hasEffect(Content.CAT_TRANSFORMING) && mc.player.getMainHandItem().is(Content.USED_SYRINGE), "Stabilization clears Cat Transformation and returns a used syringe");
             if (age == 620) {
@@ -192,9 +209,13 @@ public final class CatFormSmokeTest {
             if (age == 660) capture(mc, "cat-third-person.png");
             if (age == 670) capture(mc, "cat-held-first-person.png");
             if (age == 679) {
-                mc.player.setYRot(90); mc.player.yRotO = 90;
-                mc.player.yBodyRot = mc.player.yBodyRotO = 90;
+                float yaw = CONTROLS ? 0 : 90;
+                mc.player.setYRot(yaw); mc.player.yRotO = yaw;
+                mc.player.yBodyRot = mc.player.yBodyRotO = yaw;
             }
+            if (CONTROLS && age == 700) check(mc.player.isSprinting() && mc.player.getAttributeValue(
+                    net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED) > .2,
+                    "The client starts sprinting with its ordinary sprint key under the low ceiling");
             mc.options.keyUp.setDown(age >= 680 && age < 710);
             mc.options.keySprint.setDown(age >= 680 && age < 710);
             mc.options.keyJump.setDown(age == 716 || age == 735);
@@ -298,19 +319,27 @@ public final class CatFormSmokeTest {
                 b[i] = Float.intBitsToFloat(vertices[8 + i]);
                 c[i] = Float.intBitsToFloat(vertices[16 + i]);
             }
-            for (float pixel : new float[] {1.5F, 3.5F}) {
-                float u = quad.getSprite().getU(pixel / 16F), v = quad.getSprite().getV(pixel / 16F);
-                float determinant = (b[4]-a[4])*(c[5]-a[5])-(b[5]-a[5])*(c[4]-a[4]);
-                float x = ((u-a[4])*(c[5]-a[5])-(v-a[5])*(c[4]-a[4]))/determinant;
-                float y = ((b[4]-a[4])*(v-a[5])-(b[5]-a[5])*(u-a[4]))/determinant;
-                var tip = new org.joml.Vector4f(a[0]+x*(b[0]-a[0])+y*(c[0]-a[0]),
-                        a[1]+x*(b[1]-a[1])+y*(c[1]-a[1]), a[2]+x*(b[2]-a[2])+y*(c[2]-a[2]), 1);
-                tip.mul(pose.last().pose());
-                float vertical = -tip.z * (float)Math.tan(Math.toRadians(35));
-                boolean hidden = tip.z >= -.05F || Math.abs(tip.y) > vertical || Math.abs(tip.x) > vertical * mc.getWindow().getWidth()/mc.getWindow().getHeight();
-                Nekogenix.LOGGER.info("Nekogenix needle pixel {} position {} hidden={}", pixel, tip, hidden);
-                check(hidden == (pixel == 1.5F), "Only the needle tip leaves the view during injection while its shaft stays visible");
-            }
+            var texture = quad.getSprite().contents().name();
+            try (var input = mc.getResourceManager().getResourceOrThrow(texture.withPath("textures/" + texture.getPath() + ".png")).open();
+                    var image = com.mojang.blaze3d.platform.NativeImage.read(input)) {
+                for (int py = 0; py < 16; py++) for (int px = 0; px < 16; px++) {
+                    int alpha = image.getPixelRGBA(px, py) >>> 24;
+                    if (py < 4) check(alpha == 0, "The entire inserted needle is hidden");
+                    if (alpha == 0) continue;
+                    for (int corner = 0; corner < 4; corner++) {
+                        float u = quad.getSprite().getU((px + corner % 2) / 16F), v = quad.getSprite().getV((py + corner / 2) / 16F);
+                        float determinant = (b[4]-a[4])*(c[5]-a[5])-(b[5]-a[5])*(c[4]-a[4]);
+                        float x = ((u-a[4])*(c[5]-a[5])-(v-a[5])*(c[4]-a[4]))/determinant;
+                        float y = ((b[4]-a[4])*(v-a[5])-(b[5]-a[5])*(u-a[4]))/determinant;
+                        var tip = new org.joml.Vector4f(a[0]+x*(b[0]-a[0])+y*(c[0]-a[0]),
+                                a[1]+x*(b[1]-a[1])+y*(c[1]-a[1]), a[2]+x*(b[2]-a[2])+y*(c[2]-a[2]), 1);
+                        tip.mul(pose.last().pose());
+                        float vertical = -tip.z * (float)Math.tan(Math.toRadians(35));
+                        boolean hidden = tip.z >= -.05F || Math.abs(tip.y) > vertical || Math.abs(tip.x) > vertical * mc.getWindow().getWidth()/mc.getWindow().getHeight();
+                        check(!hidden, "The complete syringe body stays visible while the needle is inserted");
+                    }
+                }
+            } catch (java.io.IOException e) { throw new IllegalStateException(e); }
         }
 
         private static void capture(net.minecraft.client.Minecraft mc, String name) { pendingCapture = name; }

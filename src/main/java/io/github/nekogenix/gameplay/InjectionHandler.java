@@ -18,7 +18,8 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 @EventBusSubscriber(modid = Nekogenix.ID)
 public final class InjectionHandler {
-    public static final int NEEDLE_ENTRY_TICKS = 10;
+    public static final int APPROACH_TICKS = 10;
+    public static final int NEEDLE_ENTRY_TICKS = 12;
     public static final int FORWARD_TICKS = 80;
     public static final int RETURN_TICKS = 12;
     public static final int TOTAL_TICKS = FORWARD_TICKS + RETURN_TICKS;
@@ -89,15 +90,16 @@ public final class InjectionHandler {
             }
             return;
         }
-        session.elapsed++;
+        session.elapsed = (int)Math.clamp(player.level().getGameTime() - player.getData(Content.INJECTION_STARTED), 0, TOTAL_TICKS);
         if (session.elapsed == NEEDLE_ENTRY_TICKS) {
+            sound(player, SoundEvents.HONEY_BLOCK_HIT, .25F, 1.7F);
             player.hurt(player.damageSources().generic(), 1.0F);
             if (!player.isAlive()) {
                 cancel(player, session);
                 return;
             }
         }
-        if (session.elapsed < FORWARD_TICKS && session.elapsed % 20 == 0) {
+        if (session.elapsed > NEEDLE_ENTRY_TICKS && session.elapsed < FORWARD_TICKS && session.elapsed % 20 == 0) {
             sound(player, SoundEvents.HONEY_BLOCK_SLIDE, 0.45F, 1.4F - session.elapsed / 160F);
         }
         if (session.elapsed == FORWARD_TICKS) sound(player, SoundEvents.BOTTLE_EMPTY, 0.7F, 1.25F);
@@ -118,6 +120,10 @@ public final class InjectionHandler {
 
     public static boolean isInjection(ItemStack stack) {
         return stack.is(Content.INJECTION) || stack.is(Content.STABILIZING_INJECTION);
+    }
+
+    public static boolean isSyringe(ItemStack stack) {
+        return stack.is(Content.SYRINGE) || stack.is(Content.USED_SYRINGE) || isInjection(stack);
     }
 
     private static boolean canInject(ServerPlayer player, ItemStack stack) {

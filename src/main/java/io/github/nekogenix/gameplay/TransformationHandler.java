@@ -22,6 +22,7 @@ import net.neoforged.bus.api.EventPriority;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
 import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerSpawnPhantomsEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
@@ -150,6 +151,13 @@ public final class TransformationHandler {
         var effect = event.getEffect();
         if (effect.is(Content.SHOCK) || effect.is(Content.TRANSFORMING) || effect.is(Content.CAT_TRANSFORMING) || effect.is(Content.AGILITY)
                 || effect.is(Content.VISION) || effect.is(Content.PAWS)) event.setCanceled(true);
+    }
+
+    @SubscribeEvent
+    public static void fallDistance(LivingFallEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player) || !player.getData(Content.NEKO).isNeko()) return;
+        if (event.getDistance() < 10) event.setCanceled(true);
+        else event.setDistance(event.getDistance() - 6);
     }
 
     @SubscribeEvent

@@ -75,7 +75,9 @@ public final class GameplayTests {
         helper.runAfterDelay(65, () -> InjectionHandler.input(player, true));
         helper.runAfterDelay(71, () -> helper.assertTrue(player.getHealth() == 20F,
                 "The approach before needle contact does not hurt"));
-        helper.runAfterDelay(77, () -> helper.assertTrue(player.getHealth() == 19F
+        helper.runAfterDelay(76, () -> helper.assertTrue(player.getHealth() == 20F,
+                "The slow initial insertion does not hurt before the jab"));
+        helper.runAfterDelay(79, () -> helper.assertTrue(player.getHealth() == 19F
                 && player.getData(Content.NEKO).phase() == NekoState.Phase.HUMAN,
                 "Needle contact hurts before any transformation begins"));
         helper.runAfterDelay(85, () -> {
