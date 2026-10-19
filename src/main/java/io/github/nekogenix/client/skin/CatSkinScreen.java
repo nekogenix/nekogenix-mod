@@ -220,7 +220,7 @@ public final class CatSkinScreen extends Screen {
             preview.render(graphics, entry.skin(), x + w / 2, y + h / 2 + (int)(scale * .4F), scale, 145);
             if (used) icon(graphics, 0, x + w - 20, y + 3, 0xffa6d6a4);
             if (hovered) {
-                if (!used) action(graphics, 4, useX(), actionY(), mouseX, mouseY, canUse(), canUse() ? text("use") : text("license_required"));
+                if (!used) action(graphics, 0, useX(), actionY(), mouseX, mouseY, canUse(), canUse() ? text("use") : text("license_required"));
                 if (custom()) action(graphics, 1, x + w - 21, actionY(), mouseX, mouseY, true, text("delete"));
             }
             if (isHovered && mouseY < y + 22 && font.width(getMessage()) > labelWidth) hoverTip = getMessage();
@@ -253,12 +253,6 @@ public final class CatSkinScreen extends Screen {
         } else if (type == 3) {
             graphics.fill(x + 1, y + 1, x + 6, y + 6, color); graphics.fill(x + 2, y + 2, x + 5, y + 5, 0xff243c37);
             graphics.fill(x + 5, y + 5, x + 9, y + 7, color); graphics.fill(x + 7, y + 6, x + 9, y + 9, color);
-        } else {
-            graphics.fill(x, y + 4, x + 8, y + 6, color);
-            for (int i = 0; i < 4; i++) {
-                graphics.fill(x + 4 + i, y + 1 + i, x + 6 + i, y + 3 + i, color);
-                graphics.fill(x + 4 + i, y + 7 - i, x + 6 + i, y + 9 - i, color);
-            }
         }
     }
     private final class VerifyButton extends Button {
