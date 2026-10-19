@@ -10,6 +10,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.OptionsList;
 import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.screens.ConfirmScreen;
@@ -47,7 +48,9 @@ public final class CatSkinScreen extends Screen {
         name = addRenderableWidget(new EditBox(font, 20, 43, previewWidth - 38, 16, text("rename")));
         name.setMaxLength(32); name.setBordered(false); name.setTextColor(0xe4f1ee);
         verify = addRenderableWidget(new VerifyButton(width - 28, 7));
-        addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> onClose()).bounds((width - 200) / 2, height - 28, 200, 20).build());
+        var footer = new HeaderAndFooterLayout(this);
+        footer.addToFooter(Button.builder(CommonComponents.GUI_DONE, button -> onClose()).width(200).build());
+        footer.arrangeElements(); footer.visitWidgets(this::addRenderableWidget);
         lastEntries = null; sync(); updateName();
         if (!CatSkins.licensed()) CatSkins.verify();
     }

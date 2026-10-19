@@ -49,6 +49,7 @@ public final class CatSkinSmokeTest {
             int age = mc.player.tickCount;
             if (age == 40) mc.setScreen(new SkinCustomizationScreen(null, mc.options));
             if (age == 50) {
+                var vanillaDone = find(mc.screen, net.minecraft.network.chat.CommonComponents.GUI_DONE);
                 boolean found = false;
                 for (var child : mc.screen.children()) if (child instanceof OptionsList options) {
                     for (net.minecraft.client.gui.components.ContainerObjectSelectionList.Entry<?> row : options.children()) for (var entry : row.children())
@@ -57,7 +58,8 @@ public final class CatSkinSmokeTest {
                 }
                 check(found && mc.screen instanceof CatSkinScreen, "Cat Skin opens from native Skin Customization");
                 var done = find(mc.screen, net.minecraft.network.chat.CommonComponents.GUI_DONE);
-                check(done.getWidth() == 200 && done.getHeight() == 20 && done.getX() == (mc.screen.width - 200) / 2, "Done has the centered vanilla size");
+                check(done.getWidth() == vanillaDone.getWidth() && done.getHeight() == vanillaDone.getHeight()
+                        && done.getX() == vanillaDone.getX() && done.getY() == vanillaDone.getY(), "Done matches the native Skin Customization button size and position");
                 check(CatSkin.VARIANTS.contains(CatSkins.selected().variant()) && !name(mc.screen).visible, "A vanilla variant is selected and its name is read only");
             }
             if (age == 55) {
