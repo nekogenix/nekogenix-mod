@@ -322,9 +322,10 @@ public final class CatFormSmokeTest {
             var texture = quad.getSprite().contents().name();
             try (var input = mc.getResourceManager().getResourceOrThrow(texture.withPath("textures/" + texture.getPath() + ".png")).open();
                     var image = com.mojang.blaze3d.platform.NativeImage.read(input)) {
+                check(java.util.stream.IntStream.range(0, 16).anyMatch(x -> (image.getPixelRGBA(x, 0) >>> 24) != 0),
+                        "The original needle remains in the injection texture");
                 for (int py = 0; py < 16; py++) for (int px = 0; px < 16; px++) {
                     int alpha = image.getPixelRGBA(px, py) >>> 24;
-                    if (py < 4) check(alpha == 0, "The entire inserted needle is hidden");
                     if (alpha == 0) continue;
                     for (int corner = 0; corner < 4; corner++) {
                         float u = quad.getSprite().getU((px + corner % 2) / 16F), v = quad.getSprite().getV((py + corner / 2) / 16F);
@@ -335,8 +336,13 @@ public final class CatFormSmokeTest {
                                 a[1]+x*(b[1]-a[1])+y*(c[1]-a[1]), a[2]+x*(b[2]-a[2])+y*(c[2]-a[2]), 1);
                         tip.mul(pose.last().pose());
                         float vertical = -tip.z * (float)Math.tan(Math.toRadians(35));
-                        boolean hidden = tip.z >= -.05F || Math.abs(tip.y) > vertical || Math.abs(tip.x) > vertical * mc.getWindow().getWidth()/mc.getWindow().getHeight();
-                        check(!hidden, "The complete syringe body stays visible while the needle is inserted");
+                        if (py < 4) {
+                            check(tip.y <= -vertical + .00001F, "The intact needle passes below the first person view");
+                        } else {
+                            check(tip.z < -.05F && Math.abs(tip.y) <= vertical + .00001F
+                                    && Math.abs(tip.x) <= vertical * mc.getWindow().getWidth()/mc.getWindow().getHeight(),
+                                    "The complete syringe body stays visible while the needle is inserted: " + px + "," + py + " corner " + corner + " position " + tip + " vertical " + vertical);
+                        }
                     }
                 }
             } catch (java.io.IOException e) { throw new IllegalStateException(e); }

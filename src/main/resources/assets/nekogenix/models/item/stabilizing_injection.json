@@ -45,30 +45,6 @@
         "nekogenix:injection_stage": 7
       },
       "model": "nekogenix:item/syringe"
-    },
-    {
-      "predicate": {
-        "nekogenix:injection_stage": 8
-      },
-      "model": "nekogenix:item/stabilizing_injection_inserted"
-    },
-    {
-      "predicate": {
-        "nekogenix:injection_stage": 9
-      },
-      "model": "nekogenix:item/stabilizing_injection_pressed_1_inserted"
-    },
-    {
-      "predicate": {
-        "nekogenix:injection_stage": 10
-      },
-      "model": "nekogenix:item/stabilizing_injection_pressed_2_inserted"
-    },
-    {
-      "predicate": {
-        "nekogenix:injection_stage": 11
-      },
-      "model": "nekogenix:item/stabilizing_injection_pressed_3_inserted"
     }
   ]
 }
