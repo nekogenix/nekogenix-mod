@@ -44,11 +44,12 @@ public final class FelineScentTests {
         helper.assertTrue(FelineScent.color(other) == FelineScent.PLAYER, "Humans are white");
         CatTransformationTests.cat(other);
         helper.assertTrue(FelineScent.color(other) == FelineScent.PLAYER, "Player cats remain white");
-        for (var type : new EntityType<?>[] {EntityType.ZOMBIE, EntityType.CREEPER, EntityType.GUARDIAN})
+        for (var type : new EntityType<?>[] {EntityType.ZOMBIE, EntityType.SKELETON, EntityType.GUARDIAN})
             helper.assertTrue(FelineScent.color((net.minecraft.world.entity.LivingEntity)type.create(helper.getLevel())) == FelineScent.HOSTILE, "Hostile creatures are red");
         for (var type : new EntityType<?>[] {EntityType.CAT, EntityType.WOLF, EntityType.BEE, EntityType.IRON_GOLEM, EntityType.LLAMA})
             helper.assertTrue(FelineScent.color((net.minecraft.world.entity.LivingEntity)type.create(helper.getLevel())) == FelineScent.NEUTRAL, "Cats and defensive creatures are yellow");
-        for (var type : new EntityType<?>[] {EntityType.COW, EntityType.SHEEP, EntityType.VILLAGER, EntityType.RABBIT, EntityType.FROG, EntityType.AXOLOTL})
+        for (var type : new EntityType<?>[] {EntityType.COW, EntityType.SHEEP, EntityType.VILLAGER, EntityType.RABBIT,
+                EntityType.FROG, EntityType.AXOLOTL, EntityType.CREEPER, EntityType.PHANTOM})
             helper.assertTrue(FelineScent.color((net.minecraft.world.entity.LivingEntity)type.create(helper.getLevel())) == FelineScent.PASSIVE, "Harmless creatures are green");
         var rabbit = EntityType.RABBIT.create(helper.getLevel()); rabbit.setVariant(net.minecraft.world.entity.animal.Rabbit.Variant.EVIL);
         helper.assertTrue(FelineScent.color(rabbit) == FelineScent.HOSTILE, "Only the killer rabbit is dangerous to players");

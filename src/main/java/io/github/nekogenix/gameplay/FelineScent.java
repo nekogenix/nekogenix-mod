@@ -13,6 +13,8 @@ import net.minecraft.world.entity.animal.horse.Llama;
 import net.minecraft.world.entity.animal.Pufferfish;
 import net.minecraft.world.entity.animal.Rabbit;
 import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.entity.monster.Creeper;
+import net.minecraft.world.entity.monster.Phantom;
 import net.minecraft.world.entity.player.Player;
 
 public final class FelineScent {
@@ -28,6 +30,7 @@ public final class FelineScent {
 
     public static int color(LivingEntity entity) {
         if (entity instanceof Player) return PLAYER;
+        if (entity instanceof Creeper || entity instanceof Phantom) return PASSIVE;
         if (entity instanceof Rabbit rabbit) return rabbit.getVariant() == Rabbit.Variant.EVIL ? HOSTILE : PASSIVE;
         if (entity.getType() == EntityType.AXOLOTL || entity.getType() == EntityType.FROG) return PASSIVE;
         if (entity instanceof Cat || entity instanceof NeutralMob || entity instanceof Llama) return NEUTRAL;
