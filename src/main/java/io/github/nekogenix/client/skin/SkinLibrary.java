@@ -40,7 +40,7 @@ public final class SkinLibrary {
                     }
                     custom.add(new Entry(cleanName(item.get("name").getAsString()), skin));
                     loaded.put(hash, skin);
-                } catch (IOException | RuntimeException ignored) { /* Keep the remaining library usable. */ }
+                } catch (IOException | RuntimeException ignored) {}
             }
             String active = json.has("selected") ? json.get("selected").getAsString() : "default";
             if (active.matches("[0-9a-f]{64}")) {

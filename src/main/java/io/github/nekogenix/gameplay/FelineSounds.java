@@ -36,14 +36,12 @@ public final class FelineSounds {
         if (event instanceof PlayLevelSoundEvent.AtEntity atEntity && atEntity.getEntity() instanceof Player player) {
             speaker = player;
         } else if (event instanceof PlayLevelSoundEvent.AtPosition atPosition && !event.getLevel().isClientSide) {
-            // Player.playSound uses a position event on the server. Only match its exact coordinates.
             var position = atPosition.getPosition();
             var players = event.getLevel().getEntitiesOfClass(Player.class,
                     new AABB(position, position).inflate(0.01), player -> player.position().equals(position));
             if (players.size() == 1) speaker = players.getFirst();
         }
         if (speaker != null && speaker.getData(Content.FELINE_VOICE)) {
-            // Vanilla fall sounds can precede damage, including client predictions of harmless landings.
             if (replacement == SoundEvents.CAT_HURT) event.setCanceled(true);
             else event.setSound(Holder.direct(replacement));
         }

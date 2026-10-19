@@ -73,7 +73,6 @@ public final class SkinServer {
         var current = state;
         if (current == null || System.currentTimeMillis() < current.nextClean) return;
         current.nextClean = System.currentTimeMillis() + TimeUnit.HOURS.toMillis(24);
-        // Only verified owners refresh activity. Downloading somebody else's skin never does.
         var active = current.sessions.values().stream().filter(s -> s.verified).map(s -> s.account).toList();
         current.work(() -> {
             if (current.store == null) return;
@@ -117,7 +116,7 @@ public final class SkinServer {
                     current.store.seen(session.account, System.currentTimeMillis());
                     saved = current.store.get(session.account);
                 }
-            } catch (Exception ignored) { /* Fail closed without logging credentials or authentication responses. */ }
+            } catch (Exception ignored) {}
             boolean allowed = verified; CatSkin skin = saved;
             current.server.execute(() -> {
                 if (state != current || current.sessions.get(player.getUUID()) != session || player.hasDisconnected()) return;

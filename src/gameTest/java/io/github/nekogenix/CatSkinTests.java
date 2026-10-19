@@ -64,7 +64,7 @@ public final class CatSkinTests {
         try {
             CatSkin.normalize(encoded.toByteArray());
             throw new IllegalStateException("A pixel outside the cat surface bypassed empty skin validation");
-        } catch (CatSkin.InvalidImageException expected) { /* Unused pixels cannot make an empty skin valid. */ }
+        } catch (CatSkin.InvalidImageException expected) {}
 
         var palette = new java.awt.image.IndexColorModel(8, 2, new byte[] {17, 68}, new byte[] {34, 85}, new byte[] {51, 102}, new byte[] {1, 0});
         var indexed = new java.awt.image.BufferedImage(64, 32, java.awt.image.BufferedImage.TYPE_BYTE_INDEXED, palette);

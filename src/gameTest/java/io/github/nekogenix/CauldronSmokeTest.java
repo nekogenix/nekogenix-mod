@@ -8,7 +8,6 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
-/** Opt-in cauldron client and dedicated-server check, excluded from the released jar. */
 @EventBusSubscriber(modid = Nekogenix.ID)
 public final class CauldronSmokeTest {
     private static final boolean ENABLED = Boolean.getBoolean("nekogenix.cauldronSmokeTest");

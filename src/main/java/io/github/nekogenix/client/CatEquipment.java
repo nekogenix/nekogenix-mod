@@ -24,7 +24,6 @@ import net.minecraft.world.item.Items;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-/** Retarget the equipment skeleton, leaving materials and item rendering to vanilla and NeoForge. */
 final class CatEquipment implements RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
     private final PlayerModel<AbstractClientPlayer> model;
     private final HumanoidArmorLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>, HumanoidArmorModel<AbstractClientPlayer>> armor;
@@ -60,18 +59,15 @@ final class CatEquipment implements RenderLayerParent<AbstractClientPlayer, Play
         fit(model.leftArm, frontLeft, -.5F, 5 / 3F, 1, .5F, 5 / 6F, .5F);
         fit(model.rightLeg, hindRight, 0, 0, 2, .5F, .5F, .5F);
         fit(model.leftLeg, hindLeft, 0, 0, 2, .5F, .5F, .5F);
-        // The native armor layer preserves custom models, texture hooks, dye layers, trims and glint.
         armor.render(pose, buffers, light, player, walk, speed, partial, age, yaw, pitch);
         head.render(pose, buffers, light, player, walk, speed, partial, age, yaw, pitch);
         pose.pushPose();
         catBody.translateAndRotate(pose);
-        // One model pixel lower and one pixel farther along the back, toward the tail.
         pose.translate(0, 4 / 16F, -3.2F / 16F);
         pose.pushPose();
         pose.scale(.55F, .75F, .65F);
         wings.render(pose, buffers, light, player, walk, speed, partial, age, yaw, pitch);
         pose.popPose();
-        // Leave a real gap above the armor shell rather than placing two faces on the same plane.
         if (player.getItemBySlot(EquipmentSlot.CHEST).getItem() instanceof ArmorItem) pose.translate(0, 0, 1 / 16F);
         pose.scale(.55F, .75F, .65F);
         cape(player, pose, buffers, light, partial);

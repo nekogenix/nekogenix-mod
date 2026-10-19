@@ -76,7 +76,6 @@ public final class ScentOutlines {
             float partial = event.getPartialTick().getGameTimeDeltaPartialTick(false);
             var camera = event.getCamera().getPosition();
             var dispatcher = mc.getEntityRenderDispatcher();
-            // Redirect only outline geometry; vanilla Glowing keeps its own target and colors.
             MultiBufferSource buffers = type -> {
                 var outline = type.isOutline() ? type : type.outline().orElse(null);
                 if (outline == null) return DISCARD;
@@ -107,7 +106,6 @@ public final class ScentOutlines {
         } else if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_LEVEL && drawn && effect != null) {
             try {
                 float partial = event.getPartialTick().getGameTimeDeltaPartialTick(false);
-                // The vanilla outline shader ignores vertex alpha, so fade the finished contour.
                 effect.setUniform("Opacity", FOCUS.opacity(partial));
                 effect.process(event.getPartialTick().getGameTimeDeltaTicks());
                 mc.getMainRenderTarget().bindWrite(false);

@@ -89,7 +89,6 @@ public final class CatPlayerRenderer extends CatRenderer {
         if (stack.isEmpty()) return;
         pose.pushPose();
         ((PawModel) model).paw(arm).translateAndRotate(pose);
-        // Align the vanilla palm with the cat's toes, scaling the entire grip as well as the item.
         float scale = stack.getUseAnimation() == net.minecraft.world.item.UseAnim.SPEAR ? .4F : .55F;
         pose.translate(0, 9 / 16F, 1 / 16F);
         pose.scale(scale, scale, scale);
@@ -107,7 +106,6 @@ public final class CatPlayerRenderer extends CatRenderer {
     protected void setupRotations(Cat cat, PoseStack pose, float age, float yaw, float partial, float scale) {
         PlayerCat proxy = (PlayerCat) cat;
         super.setupRotations(cat, pose, age, yaw + proxy.bodyYaw(partial), partial, scale);
-        // A cat is already horizontal; tilt around its center rather than applying the humanoid dive pose.
         pose.translate(0, .35, 0);
         pose.mulPose(Axis.XP.rotationDegrees(-proxy.bodyPitch(partial)));
         pose.mulPose(Axis.ZP.rotationDegrees(proxy.bodyRoll(partial)));
@@ -179,8 +177,6 @@ public final class CatPlayerRenderer extends CatRenderer {
         var player = mc.player;
         if (renderer == null || player == null || !CatForm.active(player) || player.isSpectator() || player.isScoping()) return;
         ItemStack stack = event.getItemStack();
-        // Vanilla controls item transforms, use animations, maps and which hands are visible.
-        // Empty hands and map arms reach the arm event below.
         if (stack.isEmpty() || stack.getItem() instanceof MapItem || player.isInvisible()) return;
         HumanoidArm arm = event.getHand() == InteractionHand.MAIN_HAND ? player.getMainArm() : player.getMainArm().getOpposite();
         float side = arm == HumanoidArm.RIGHT ? 1 : -1;
@@ -325,7 +321,6 @@ public final class CatPlayerRenderer extends CatRenderer {
                 paw.xRot = paw.xRot * .25F - .65F;
                 paw.zRot += -side * .12F;
             }
-            // Actions bring the active paw forward instead of leaving it spread in the flight pose.
             float action = using ? 1 : swing;
             paw.xRot = Mth.lerp(action, paw.xRot, -1.4F);
             paw.zRot = Mth.lerp(action, paw.zRot, -side * .12F);

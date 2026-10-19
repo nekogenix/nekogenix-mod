@@ -38,7 +38,6 @@ public final class CatNameplatePreview extends Screen {
 
     void tickActors(int age) {
         for (var actor : actors) actor.tickCount = age;
-        // Change the scale after the proxy has already rendered at its original size.
         if (age == 225) {
             actors[2].getAttribute(Attributes.SCALE).setBaseValue(2);
             actors[2].refreshDimensions();

@@ -12,7 +12,6 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
-/** Opt-in centrifuge client and server check, excluded from the released jar. */
 @EventBusSubscriber(modid = Nekogenix.ID)
 public final class CentrifugeSmokeTest {
     private static final boolean ENABLED = Boolean.getBoolean("nekogenix.centrifugeSmokeTest");

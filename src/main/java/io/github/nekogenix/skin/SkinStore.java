@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-/** One selected skin per account; private libraries stay on the owner's computer. */
 public final class SkinStore {
     public static final long RETENTION = Duration.ofDays(365).toMillis();
     public static final int MAX_PLAYERS = 4096;
@@ -34,7 +33,7 @@ public final class SkinStore {
                         if (!CatSkin.VARIANTS.contains(variant) && !variant.equals("custom") && !variant.equals("default")) continue;
                         if (variant.equals("custom") && !hash.matches("[0-9a-f]{64}")) continue;
                         entries.put(UUID.fromString(item.getKey()), new Entry(variant, hash, value.get("seen").getAsLong()));
-                    } catch (RuntimeException ignored) { /* Ignore only the malformed entry. */ }
+                    } catch (RuntimeException ignored) {}
                 }
             } catch (RuntimeException e) { throw new IOException("Invalid cat skin index", e); }
         }

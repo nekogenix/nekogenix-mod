@@ -12,7 +12,6 @@ final class VoiceSound extends AbstractSoundInstance implements TickableSoundIns
     private final SoundInstance original;
 
     VoiceSound(SoundInstance original) {
-        // Master Volume still applies; the Players slider controls action sounds independently.
         super(original.getLocation(), SoundSource.MASTER, SoundInstance.createUnseededRandom());
         this.original = original;
     }

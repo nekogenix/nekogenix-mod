@@ -70,7 +70,6 @@ public final class TransformationHandler {
         marker(player, Content.SHOCK, state.phase() == NekoState.Phase.SHOCK,
                 NekoState.SHOCK_DURATION - state.elapsed());
         if (state.phase() == NekoState.Phase.SHOCK && !player.hasEffect(MobEffects.CONFUSION)) {
-            // Use nausea's distortion path so the renderer never substitutes the Nether portal overlay.
             player.addEffect(new MobEffectInstance(MobEffects.CONFUSION,
                     NekoState.SHOCK_DURATION - state.elapsed(), 0, false, false, false));
         }
@@ -127,7 +126,6 @@ public final class TransformationHandler {
         if (level.isDay() && level.canSeeSky(origin) && level.getBrightness(net.minecraft.world.level.LightLayer.SKY, origin) > 0) return false;
         for (BlockPos pos : BlockPos.betweenClosed(origin.offset(-16, -16, -16), origin.offset(16, 16, 16))) {
             if (pos.distSqr(origin) > 256 || !level.hasChunkAt(pos)) continue;
-            // Moonlight must not prevent vision in an area with no emitted light.
             boolean dark = level.isNight()
                     ? level.getBrightness(net.minecraft.world.level.LightLayer.BLOCK, pos) == 0
                     : level.getMaxLocalRawBrightness(pos) == 0;

@@ -93,8 +93,6 @@ public final class CatInteractions {
     }
 
     private static void adjustAvoidance(Cat cat) {
-        // Replace only vanilla's player avoidance through the public goal selector.
-        // Cat may reinsert this goal when its tame state changes.
         var vanilla = cat.goalSelector.getAvailableGoals().stream()
                 .map(net.minecraft.world.entity.ai.goal.WrappedGoal::getGoal)
                 .filter(goal -> goal.getClass().getName().equals("net.minecraft.world.entity.animal.Cat$CatAvoidEntityGoal"))

@@ -35,7 +35,6 @@ public final class CentrifugeScreen extends AbstractContainerScreen<CentrifugeMe
                     leftPos + slot.x, topPos + slot.y);
         }
         float fraction = menu.fraction();
-        // A small illuminated helix fills alongside the card below the rotor.
         for (int row = 0; row < 14; row++) {
             double phase = row * .65 + (menu.running() ? minecraft.level.getGameTime() * .08 : 0);
             int x = 88 + (int) (Math.sin(phase) * 9);

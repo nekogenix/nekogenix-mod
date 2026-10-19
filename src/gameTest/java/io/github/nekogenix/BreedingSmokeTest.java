@@ -22,7 +22,6 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.network.registration.NetworkRegistry;
 
-/** Opt-in client and server breeding check, excluded from the released jar. */
 @EventBusSubscriber(modid = Nekogenix.ID)
 public final class BreedingSmokeTest {
     private static final boolean ENABLED = Boolean.getBoolean("nekogenix.breedingSmokeTest");

@@ -21,7 +21,6 @@ public abstract class PlayerFoodMixin {
 
     @Inject(method = "getFoodData", at = @At("RETURN"))
     private void nekogenix$bindFoodOwner(CallbackInfoReturnable<FoodData> callback) {
-        // Respawning and dimension travel can transfer FoodData to a different player instance.
         ((FelineFoodData) callback.getReturnValue()).nekogenix$setOwner((Player)(Object)this);
     }
 }

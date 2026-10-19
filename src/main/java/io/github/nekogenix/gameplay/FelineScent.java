@@ -45,7 +45,6 @@ public final class FelineScent {
         private static final int DELAY = 100, FADE = 20;
         private int held, previous, strength;
 
-        /** Returns true only when a fresh five second hold activates the sense. */
         public boolean tick(boolean eligible, boolean crouching) {
             previous = strength;
             if (!eligible) { reset(); return false; }

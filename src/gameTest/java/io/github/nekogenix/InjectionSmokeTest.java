@@ -12,7 +12,6 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 
-/** Opt-in injection cancellation check, excluded from the released jar. */
 @EventBusSubscriber(modid = Nekogenix.ID, value = Dist.CLIENT)
 public final class InjectionSmokeTest {
     private static final boolean ENABLED = Boolean.getBoolean("nekogenix.injectionSmokeTest");

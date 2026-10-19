@@ -15,7 +15,6 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.PlayLevelSoundEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
-/** Opt-in nutrition, movement and accessibility check, excluded from the released jar. */
 @EventBusSubscriber(modid = Nekogenix.ID)
 public final class FelineRefinementsSmokeTest {
     private static final boolean ENABLED = Boolean.getBoolean("nekogenix.refinementsSmokeTest");

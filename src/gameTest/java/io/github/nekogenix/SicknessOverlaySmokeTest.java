@@ -11,7 +11,6 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
-/** Opt-in full sickness cycle with framebuffer checks, excluded from the released jar. */
 @EventBusSubscriber(modid = Nekogenix.ID)
 public final class SicknessOverlaySmokeTest {
     private static final boolean ENABLED = Boolean.getBoolean("nekogenix.overlaySmokeTest");

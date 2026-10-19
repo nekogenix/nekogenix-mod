@@ -67,7 +67,6 @@ public final class CatSkin {
                 for (int y = 0; y < 32; y++) for (int x = 0; x < 64; x++) if (SURFACE[y][x]) {
                     int pixel = image.getRGB(x, y);
                     visible |= (pixel >>> 24) != 0;
-                    // Like the vanilla player base layer, keep RGB and force the surface opaque.
                     image.setRGB(x, y, pixel | 0xff000000);
                 }
                 if (!visible) throw new InvalidImageException("skin_empty");
@@ -84,7 +83,6 @@ public final class CatSkin {
 
     private static boolean[][] surface() {
         var pixels = new boolean[32][64];
-        // Minecraft 1.21.1 cat cuboids: texture origin followed by width, height and depth.
         int[][] cubes = {{0, 0, 5, 4, 5}, {20, 0, 4, 16, 6}, {0, 10, 1, 1, 2}, {6, 10, 1, 1, 2},
                 {0, 15, 1, 8, 1}, {4, 15, 1, 8, 1}, {8, 13, 2, 6, 2}, {40, 0, 2, 10, 2}, {0, 24, 3, 2, 2}};
         for (var cube : cubes) {

@@ -43,7 +43,6 @@ public final class VoiceOptions {
                             : Component.translatable("options.percent_value", caption, (int) (value * 100)),
                     OptionInstance.UnitDouble.INSTANCE, ClientConfig.NEKO_VOICE_VOLUME.get(), value -> {
                         ClientConfig.NEKO_VOICE_VOLUME.set(value);
-                        // Vanilla refreshes active channels when a sound slider changes, even while paused.
                         mc.getSoundManager().updateSourceVolume(SoundSource.PLAYERS, mc.options.getSoundSourceVolume(SoundSource.PLAYERS));
                     });
             for (int i = 0; i < list.children().size(); i++) {

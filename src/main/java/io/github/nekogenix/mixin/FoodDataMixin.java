@@ -19,7 +19,6 @@ public abstract class FoodDataMixin implements FelineFoodData {
 
     @Inject(method = "tick", at = @At("HEAD"))
     private void nekogenix$bindTickOwner(Player player, CallbackInfo callback) {
-        // Also bind replacement FoodData instances supplied by other mods.
         nekogenix$owner = player;
     }
 

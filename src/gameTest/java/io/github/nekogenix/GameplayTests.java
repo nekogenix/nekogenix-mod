@@ -337,7 +337,6 @@ public final class GameplayTests {
         player.teleportTo(pos.getX(), pos.getY(), pos.getZ());
         player.setNoGravity(true);
         player.getAbilities().invulnerable = false;
-        // GameTestServer runs world ticks without the dedicated server's network listener loop.
         helper.onEachTick(() -> {
             if (player.server.getPlayerList().getPlayer(player.getUUID()) == player) player.doTick();
         });

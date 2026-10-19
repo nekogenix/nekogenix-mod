@@ -209,7 +209,7 @@ public final class CatSkins {
                     var cached = new CatSkin("custom", Files.readAllBytes(file)).validated();
                     if (cached.hash().equals(hash)) { skin = cached; Files.setLastModifiedTime(file, java.nio.file.attribute.FileTime.fromMillis(System.currentTimeMillis())); }
                 }
-            } catch (Exception ignored) { /* A missing or corrupt cache entry is downloaded again. */ }
+            } catch (Exception ignored) {}
             var cached = skin;
             Minecraft.getInstance().execute(() -> {
                 if (Minecraft.getInstance().getConnection() != expected || !hash.equals(OFFERS.get(player))) return;
@@ -279,7 +279,6 @@ public final class CatSkins {
         if (!helloSent && mc.getConnection().hasChannel(SkinPackets.Hello.TYPE)) {
             helloSent = true; PacketDistributor.sendToServer(new SkinPackets.Hello(mc.getUser().getProfileId()));
         }
-        // Coalesce rapid selections, retaining the most recent choice during the server's upload cooldown.
         if (serverAllowed && loaded && pendingSend && System.currentTimeMillis() >= nextSend) {
             pendingSend = false; nextSend = System.currentTimeMillis() + 2100;
             PacketDistributor.sendToServer(new SkinPackets.Apply(selected));

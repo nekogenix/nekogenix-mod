@@ -12,7 +12,6 @@ public final class CatSkinTemplate {
 
     private static CatSkin create(boolean neutral) throws IOException {
         var image = new BufferedImage(64, 32, BufferedImage.TYPE_INT_ARGB);
-        // UV coordinates and cuboid dimensions from Minecraft 1.21.1's cat model.
         cube(image, 0, 0, 5, 4, 5, 0x70a8cf, neutral);
         cube(image, 20, 0, 4, 16, 6, 0x8879bf, neutral);
         cube(image, 0, 10, 1, 1, 2, 0xda8f92, neutral);
