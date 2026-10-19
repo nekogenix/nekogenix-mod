@@ -59,7 +59,9 @@ public final class Content {
             () -> new SalivaBottleItem(false));
     public static final DeferredItem<SalivaBottleItem> SPLASH_SALIVA = ITEMS.register("splash_bottle_of_cat_saliva",
             () -> new SalivaBottleItem(true));
-    public static final DeferredItem<NekoInjectionItem> INJECTION = ITEMS.register("neko_injection", NekoInjectionItem::new);
+    public static final DeferredItem<NekoInjectionItem> INJECTION = ITEMS.register("neko_injection", () -> new NekoInjectionItem());
+    public static final DeferredItem<Item> NEKO_STABILIZER = ITEMS.registerSimpleItem("neko_stabilizer", new Item.Properties().stacksTo(1));
+    public static final DeferredItem<NekoInjectionItem> STABILIZING_INJECTION = ITEMS.register("stabilizing_injection", () -> new NekoInjectionItem(true));
     public static final DeferredItem<NucleocardItem> BLANK_NUCLEOCARD = ITEMS.register("blank_nucleocard", () -> new NucleocardItem(false));
     public static final DeferredItem<NucleocardItem> CAT_NUCLEOCARD = ITEMS.register("cat_nucleocard", () -> new NucleocardItem(true));
     public static final DeferredBlock<CentrifugeBlock> CENTRIFUGE = BLOCKS.registerBlock("centrifuge", CentrifugeBlock::new,
@@ -79,6 +81,7 @@ public final class Content {
 
     public static final DeferredHolder<MobEffect, MobEffect> SHOCK = effect("injection_shock", MobEffectCategory.HARMFUL, 0xB769A2);
     public static final DeferredHolder<MobEffect, MobEffect> TRANSFORMING = effect("neko_transformation", MobEffectCategory.NEUTRAL, 0xD4A6DE);
+    public static final DeferredHolder<MobEffect, MobEffect> CAT_TRANSFORMING = effect("cat_transformation", MobEffectCategory.NEUTRAL, 0xA98AD4);
     public static final DeferredHolder<MobEffect, MobEffect> AGILITY = effect("feline_agility", MobEffectCategory.BENEFICIAL, 0xA9D6D1);
     public static final DeferredHolder<MobEffect, MobEffect> VISION = effect("feline_vision", MobEffectCategory.BENEFICIAL, 0xBED487);
     public static final DeferredHolder<MobEffect, MobEffect> PAWS = effect("soft_paw_pads", MobEffectCategory.BENEFICIAL, 0xE9B6C9);
@@ -99,6 +102,10 @@ public final class Content {
             () -> AttachmentType.builder(() -> InjectionHandler.ReturnAnimation.NONE).sync(InjectionHandler.ReturnAnimation.STREAM_CODEC).build());
     public static final DeferredHolder<AttachmentType<?>, AttachmentType<Boolean>> FELINE_VOICE = ATTACHMENTS.register("feline_voice",
             () -> AttachmentType.builder(() -> false).sync(ByteBufCodecs.BOOL).build());
+    public static final DeferredHolder<AttachmentType<?>, AttachmentType<Boolean>> CAT_FORM = ATTACHMENTS.register("cat_form",
+            () -> AttachmentType.builder(() -> false).sync(ByteBufCodecs.BOOL).build());
+    public static final DeferredHolder<AttachmentType<?>, AttachmentType<io.github.nekogenix.gameplay.CatForm.Session>> CAT_SIZE = ATTACHMENTS.register("cat_size",
+            () -> AttachmentType.builder(io.github.nekogenix.gameplay.CatForm.Session::new).build());
     public static final DeferredHolder<AttachmentType<?>, AttachmentType<Boolean>> FELINE_DIET = ATTACHMENTS.register("feline_diet",
             () -> AttachmentType.builder(() -> false).sync(ByteBufCodecs.BOOL).build());
     public static final DeferredHolder<AttachmentType<?>, AttachmentType<FelineJump.Session>> FELINE_JUMP = ATTACHMENTS.register("feline_jump",

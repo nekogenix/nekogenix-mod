@@ -36,7 +36,7 @@ public final class PneumaticStandMenu extends AbstractContainerMenu {
     private void addMachineSlot(int inventorySlot, int x, int y) {
         addSlot(new Slot(container, inventorySlot, x, y) {
             @Override public boolean mayPlace(ItemStack stack) {
-                return inventorySlot < 3 ? stack.is(Content.SYRINGE) : inventorySlot == 3 ? stack.is(Content.CAT_NUCLEOCARD) : stack.is(Items.WIND_CHARGE);
+                return inventorySlot < 3 ? stack.is(Content.SYRINGE) : inventorySlot == 3 ? PneumaticStandBlockEntity.isSource(stack) : stack.is(Items.WIND_CHARGE);
             }
             @Override public int getMaxStackSize() { return inventorySlot == 4 ? 64 : 1; }
         });
@@ -54,7 +54,7 @@ public final class PneumaticStandMenu extends AbstractContainerMenu {
         boolean moved;
         if (index < 4) moved = moveItemStackTo(stack, 4, 40, true);
         else if (stack.is(Content.SYRINGE)) moved = moveItemStackTo(stack, 0, 2, false);
-        else if (stack.is(Content.CAT_NUCLEOCARD)) moved = moveItemStackTo(stack, CARD_SLOT, FUEL_SLOT, false);
+        else if (PneumaticStandBlockEntity.isSource(stack)) moved = moveItemStackTo(stack, CARD_SLOT, FUEL_SLOT, false);
         else if (stack.is(Items.WIND_CHARGE)) moved = moveItemStackTo(stack, FUEL_SLOT, 4, false);
         else moved = index < 31 ? moveItemStackTo(stack, 31, 40, false) : moveItemStackTo(stack, 4, 31, false);
         if (!moved) return ItemStack.EMPTY;

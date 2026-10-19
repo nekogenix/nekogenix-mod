@@ -10,7 +10,6 @@ import net.minecraft.world.entity.player.Inventory;
 
 public final class PneumaticStandScreen extends AbstractContainerScreen<PneumaticStandMenu> {
     private static final ResourceLocation TEXTURE = Content.id("textures/gui/pneumatic_stand.png");
-    private static final ResourceLocation CARD_HINT = Content.id("textures/gui/pneumatic_card_slot.png");
     private static final ResourceLocation SYRINGE_HINT = Content.id("textures/gui/pneumatic_syringe_slot.png");
     private static final ResourceLocation FUEL_HINT = Content.id("textures/gui/pneumatic_fuel_slot.png");
 
@@ -19,7 +18,7 @@ public final class PneumaticStandScreen extends AbstractContainerScreen<Pneumati
         graphics.blit(TEXTURE, leftPos, topPos, 0, 0, imageWidth, imageHeight, imageWidth, imageHeight);
         for (int index = 0; index < 4; index++) {
             var slot = menu.getSlot(index);
-            if (!slot.hasItem()) graphics.blit(index < 2 ? SYRINGE_HINT : index == PneumaticStandMenu.CARD_SLOT ? CARD_HINT : FUEL_HINT,
+            if (index != PneumaticStandMenu.CARD_SLOT && !slot.hasItem()) graphics.blit(index < 2 ? SYRINGE_HINT : FUEL_HINT,
                     leftPos + slot.x, topPos + slot.y, 0, 0, 16, 16, 16, 16);
         }
         if (!menu.running()) return;

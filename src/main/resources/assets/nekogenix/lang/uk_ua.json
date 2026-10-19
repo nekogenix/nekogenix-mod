@@ -37,5 +37,11 @@
   "tooltip.nekogenix.blank_nucleocard": "Обробіть із шістьма зразками слини в центрифузі",
   "tooltip.nekogenix.cat_nucleocard": "Помістіть над шприцом у пневматичній стійці",
   "tooltip.nekogenix.nucleocard_return": "Стає порожньою після заповнення до двох шприців",
-  "block.nekogenix.pneumatic_stand": "Пневматична стійка"
+  "block.nekogenix.pneumatic_stand": "Пневматична стійка",
+  "item.nekogenix.neko_stabilizer": "Зілля солодкого аметисту",
+  "item.nekogenix.stabilizing_injection": "Кристалізувальна ін’єкція",
+  "tooltip.nekogenix.cat_stage": "Потім починається котяча трансформація",
+  "tooltip.nekogenix.stabilizing_injection": "Назавжди зупиняє котячу трансформацію, залишаючи вас неко",
+  "tooltip.nekogenix.stabilizing_permanent": "Зупинене перетворення не можна відновити",
+  "effect.nekogenix.cat_transformation": "Котяча трансформація"
 }

@@ -43,7 +43,17 @@ public final class FelineSounds {
             if (players.size() == 1) speaker = players.getFirst();
         }
         if (speaker != null && speaker.getData(Content.FELINE_VOICE)) {
-            event.setSound(Holder.direct(replacement));
+            // Vanilla fall sounds can precede damage, including client predictions of harmless landings.
+            if (replacement == SoundEvents.CAT_HURT) event.setCanceled(true);
+            else event.setSound(Holder.direct(replacement));
+        }
+    }
+
+    @SubscribeEvent
+    public static void hurt(LivingDamageEvent.Post event) {
+        if (event.getEntity() instanceof Player player && !player.level().isClientSide
+                && player.isAlive() && player.getData(Content.FELINE_VOICE) && event.getNewDamage() > 0) {
+            play(player, SoundEvents.CAT_HURT, 1);
         }
     }
 

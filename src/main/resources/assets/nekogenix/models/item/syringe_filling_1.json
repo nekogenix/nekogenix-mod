@@ -1,5 +1,5 @@
 {
-  "parent": "minecraft:item/generated",
+  "parent": "nekogenix:item/syringe_gui",
   "textures": {
     "layer0": "nekogenix:item/syringe_filling_1"
   }

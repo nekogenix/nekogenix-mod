@@ -18,6 +18,8 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 @EventBusSubscriber(modid = Nekogenix.ID)
 public final class InjectionHandler {
+    public static final int APPROACH_TICKS = 10;
+    public static final int NEEDLE_ENTRY_TICKS = 12;
     public static final int FORWARD_TICKS = 80;
     public static final int RETURN_TICKS = 12;
     public static final int TOTAL_TICKS = FORWARD_TICKS + RETURN_TICKS;
@@ -54,8 +56,7 @@ public final class InjectionHandler {
             return;
         }
         if (session.active || session.waitingForRelease || !validPlayer(player)
-                || player.getData(Content.NEKO).phase() != NekoState.Phase.HUMAN
-                || !player.getMainHandItem().is(Content.INJECTION)) return;
+                || !canInject(player, player.getMainHandItem())) return;
         session.stack = player.getMainHandItem();
         session.slot = player.getInventory().selected;
         session.elapsed = 0;
@@ -71,7 +72,7 @@ public final class InjectionHandler {
         Session session = player.getData(Content.INJECTION_SESSION);
         if (!session.active) return;
         if (!validPlayer(player) || player.getInventory().selected != session.slot
-                || player.getMainHandItem() != session.stack || !session.stack.is(Content.INJECTION)) {
+                || player.getMainHandItem() != session.stack || !isInjection(session.stack)) {
             cancel(player, session);
             return;
         }
@@ -89,23 +90,46 @@ public final class InjectionHandler {
             }
             return;
         }
-        session.elapsed++;
-        if (session.elapsed < FORWARD_TICKS && session.elapsed % 20 == 0) {
+        session.elapsed = (int)Math.clamp(player.level().getGameTime() - player.getData(Content.INJECTION_STARTED), 0, TOTAL_TICKS);
+        if (session.elapsed == NEEDLE_ENTRY_TICKS) {
+            sound(player, SoundEvents.HONEY_BLOCK_HIT, .25F, 1.7F);
+            player.hurt(player.damageSources().generic(), 1.0F);
+            if (!player.isAlive()) {
+                cancel(player, session);
+                return;
+            }
+        }
+        if (session.elapsed > NEEDLE_ENTRY_TICKS && session.elapsed < FORWARD_TICKS && session.elapsed % 20 == 0) {
             sound(player, SoundEvents.HONEY_BLOCK_SLIDE, 0.45F, 1.4F - session.elapsed / 160F);
         }
         if (session.elapsed == FORWARD_TICKS) sound(player, SoundEvents.BOTTLE_EMPTY, 0.7F, 1.25F);
         if (session.elapsed < TOTAL_TICKS) return;
-        if (player.getData(Content.NEKO).begin()) {
+        boolean stabilizing = session.stack.is(Content.STABILIZING_INJECTION);
+        NekoState state = player.getData(Content.NEKO);
+        if (stabilizing ? state.stabilize() : state.begin()) {
             FelineSounds.sync(player);
             player.setItemInHand(InteractionHand.MAIN_HAND, Content.USED_SYRINGE.toStack());
-            player.hurt(player.damageSources().generic(), 1.0F);
             TransformationHandler.refreshEffects(player);
             player.serverLevel().sendParticles(ParticleTypes.WITCH, player.getX(), player.getY() + 1,
                     player.getZ(), 15, 0.3, 0.5, 0.3, 0.03);
-            sound(player, SoundEvents.PLAYER_BREATH, 0.9F, 0.65F);
+            sound(player, stabilizing ? SoundEvents.AMETHYST_BLOCK_CHIME : SoundEvents.PLAYER_BREATH, 0.9F, stabilizing ? 1.2F : 0.65F);
         }
         cancel(player, session);
         session.waitingForRelease = true;
+    }
+
+    public static boolean isInjection(ItemStack stack) {
+        return stack.is(Content.INJECTION) || stack.is(Content.STABILIZING_INJECTION);
+    }
+
+    public static boolean isSyringe(ItemStack stack) {
+        return stack.is(Content.SYRINGE) || stack.is(Content.USED_SYRINGE) || isInjection(stack);
+    }
+
+    private static boolean canInject(ServerPlayer player, ItemStack stack) {
+        var phase = player.getData(Content.NEKO).phase();
+        return stack.is(Content.INJECTION) && phase == NekoState.Phase.HUMAN
+                || stack.is(Content.STABILIZING_INJECTION) && phase == NekoState.Phase.CAT_TRANSFORMING;
     }
 
     private static boolean validPlayer(ServerPlayer player) {

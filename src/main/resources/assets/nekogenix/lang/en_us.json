@@ -22,7 +22,7 @@
   "tooltip.nekogenix.vision": "Night vision near unlit areas (16 blocks)",
   "tooltip.nekogenix.paws": "-75% Fall Damage",
   "tooltip.nekogenix.delayed": "Effects begin after 20 minutes",
-  "tooltip.nekogenix.stage_ability": "One random ability at the end of each stage",
+  "tooltip.nekogenix.stage_ability": "One random ability after each stage",
   "options.nekogenix.neko_voice": "Neko Voice",
   "block.nekogenix.centrifuge": "Centrifuge",
   "item.nekogenix.blank_nucleocard": "Blank Nucleocard",
@@ -36,5 +36,11 @@
   "tooltip.nekogenix.blank_nucleocard": "Process with six saliva samples in a Centrifuge",
   "tooltip.nekogenix.cat_nucleocard": "Place above a Syringe in a Pneumatic Stand",
   "tooltip.nekogenix.nucleocard_return": "Returns to a Blank Nucleocard after filling up to two Syringes",
-  "block.nekogenix.pneumatic_stand": "Pneumatic Stand"
+  "block.nekogenix.pneumatic_stand": "Pneumatic Stand",
+  "item.nekogenix.neko_stabilizer": "Potion of Sweet Amethyst",
+  "item.nekogenix.stabilizing_injection": "Crystallizing Injection",
+  "tooltip.nekogenix.cat_stage": "Then Cat Transformation begins",
+  "tooltip.nekogenix.stabilizing_injection": "Permanently stops Cat Transformation, keeping you neko",
+  "tooltip.nekogenix.stabilizing_permanent": "Cannot restart a stabilized transformation",
+  "effect.nekogenix.cat_transformation": "Cat Transformation"
 }

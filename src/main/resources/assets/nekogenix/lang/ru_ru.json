@@ -36,5 +36,11 @@
   "tooltip.nekogenix.blank_nucleocard": "Обработайте с шестью образцами слюны в центрифуге",
   "tooltip.nekogenix.cat_nucleocard": "Поместите над шприцем в пневматической стойке",
   "tooltip.nekogenix.nucleocard_return": "Становится пустой после заполнения до двух шприцев",
-  "block.nekogenix.pneumatic_stand": "Пневматическая стойка"
+  "block.nekogenix.pneumatic_stand": "Пневматическая стойка",
+  "item.nekogenix.neko_stabilizer": "Зелье сладкого аметиста",
+  "item.nekogenix.stabilizing_injection": "Кристаллизующая инъекция",
+  "tooltip.nekogenix.cat_stage": "Затем начинается кото-трансформация",
+  "tooltip.nekogenix.stabilizing_injection": "Навсегда останавливает кото-трансформацию, оставляя вас неко",
+  "tooltip.nekogenix.stabilizing_permanent": "Остановленное превращение нельзя возобновить",
+  "effect.nekogenix.cat_transformation": "Кото-трансформация"
 }

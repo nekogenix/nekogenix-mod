@@ -1,0 +1,6 @@
+{
+  "parent": "nekogenix:item/syringe_gui",
+  "textures": {
+    "layer0": "nekogenix:item/stabilizing_injection_pressed_2"
+  }
+}

@@ -25,7 +25,7 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 @EventBusSubscriber(modid = Nekogenix.ID)
 public final class NekoBreeding {
     public static boolean canFeed(ServerPlayer player) {
-        return TransformationHandler.isNeko(player) && player.getData(Content.BREEDING).canFeed();
+        return player.getData(Content.NEKO).isCat() && player.getData(Content.BREEDING).canFeed();
     }
 
     public static void feed(ServerPlayer player, UUID feeder) {
@@ -36,7 +36,7 @@ public final class NekoBreeding {
     }
 
     private static boolean ready(ServerPlayer player) {
-        return player.isAlive() && !player.isSpectator() && TransformationHandler.isNeko(player)
+        return player.isAlive() && !player.isSpectator() && player.getData(Content.NEKO).isCat()
                 && player.getData(Content.BREEDING).inLove();
     }
 

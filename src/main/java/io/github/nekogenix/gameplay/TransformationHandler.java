@@ -22,6 +22,7 @@ import net.neoforged.bus.api.EventPriority;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
 import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerSpawnPhantomsEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
@@ -64,6 +65,7 @@ public final class TransformationHandler {
 
     public static void refreshEffects(ServerPlayer player) {
         NekoState state = player.getData(Content.NEKO);
+        CatForm.sync(player);
         if (player.getData(Content.FELINE_DIET) != state.isNeko()) player.setData(Content.FELINE_DIET, state.isNeko());
         marker(player, Content.SHOCK, state.phase() == NekoState.Phase.SHOCK,
                 NekoState.SHOCK_DURATION - state.elapsed());
@@ -74,6 +76,7 @@ public final class TransformationHandler {
         }
         marker(player, Content.TRANSFORMING, state.phase() == NekoState.Phase.TRANSFORMING,
                 state.stageRemaining(), state.stage());
+        marker(player, Content.CAT_TRANSFORMING, state.phase() == NekoState.Phase.CAT_TRANSFORMING, state.stageRemaining());
         marker(player, Content.AGILITY, state.has(NekoState.AGILITY), -1);
         marker(player, Content.VISION, state.has(NekoState.VISION), -1);
         marker(player, Content.PAWS, state.has(NekoState.PAWS), -1);
@@ -86,7 +89,7 @@ public final class TransformationHandler {
     private static void marker(ServerPlayer player, Holder<MobEffect> effect, boolean enabled, int duration, int amplifier) {
         MobEffectInstance current = player.getEffect(effect);
         if (enabled && (current == null || current.getAmplifier() != amplifier
-                || effect.is(Content.TRANSFORMING) && Math.abs(current.getDuration() - duration) > 20)) {
+                || (effect.is(Content.TRANSFORMING) || effect.is(Content.CAT_TRANSFORMING)) && Math.abs(current.getDuration() - duration) > 20)) {
             if (current != null) player.removeEffect(effect);
             player.addEffect(new MobEffectInstance(effect, Math.max(-1, duration), amplifier, false, false, true));
         }
@@ -146,8 +149,15 @@ public final class TransformationHandler {
         if (event.getCure() != EffectCures.MILK || !(event.getEntity() instanceof ServerPlayer player)
                 || player.getData(Content.NEKO).phase() == NekoState.Phase.HUMAN) return;
         var effect = event.getEffect();
-        if (effect.is(Content.SHOCK) || effect.is(Content.TRANSFORMING) || effect.is(Content.AGILITY)
+        if (effect.is(Content.SHOCK) || effect.is(Content.TRANSFORMING) || effect.is(Content.CAT_TRANSFORMING) || effect.is(Content.AGILITY)
                 || effect.is(Content.VISION) || effect.is(Content.PAWS)) event.setCanceled(true);
+    }
+
+    @SubscribeEvent
+    public static void fallDistance(LivingFallEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player) || !player.getData(Content.NEKO).isNeko()) return;
+        if (event.getDistance() < 10) event.setCanceled(true);
+        else event.setDistance(event.getDistance() - 6);
     }
 
     @SubscribeEvent
@@ -167,7 +177,7 @@ public final class TransformationHandler {
             NekoState state = player.getData(Content.NEKO);
             boolean wasFeline = state.phase() != NekoState.Phase.HUMAN;
             boolean sickness = state.phase() == NekoState.Phase.SHOCK;
-            if (state.isTransforming()) state.cancelTransformation();
+            if (state.isTransforming() && !state.isNeko()) state.cancelTransformation();
             else if (!player.serverLevel().getLevelData().isHardcore()) state.loseLife();
             if (wasFeline && state.phase() == NekoState.Phase.HUMAN) {
                 var nausea = player.getEffect(MobEffects.CONFUSION);
