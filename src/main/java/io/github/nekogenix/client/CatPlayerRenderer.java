@@ -307,15 +307,24 @@ public final class CatPlayerRenderer extends CatRenderer {
 
         private void hold(Player player, HumanoidArm arm, float partial) {
             InteractionHand hand = arm == player.getMainArm() ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
-            if (player.getItemInHand(hand).isEmpty()) return;
+            float swing = player.swingingArm == hand ? Mth.sin(Mth.sqrt(player.getAttackAnim(partial)) * Mth.PI) : 0;
+            boolean using = player.isUsingItem() && player.getUsedItemHand() == hand;
+            boolean holding = !player.getItemInHand(hand).isEmpty();
+            if (!holding && swing <= 0 && !using) return;
             ModelPart paw = paw(arm);
             float side = arm == HumanoidArm.RIGHT ? -1 : 1;
-            paw.x += side * 1.2F;
-            paw.z -= 1.5F;
-            paw.xRot = paw.xRot * .25F - .65F;
-            paw.zRot += -side * .12F;
-            if (player.swingingArm == hand) paw.xRot -= player.getAttackAnim(partial) * .75F;
-            if (player.isUsingItem() && player.getUsedItemHand() == hand) {
+            if (holding) {
+                paw.x += side * 1.2F;
+                paw.z -= 1.5F;
+                paw.xRot = paw.xRot * .25F - .65F;
+                paw.zRot += -side * .12F;
+            }
+            // Actions bring the active paw forward instead of leaving it spread in the flight pose.
+            float action = using ? 1 : swing;
+            paw.xRot = Mth.lerp(action, paw.xRot, -1.4F);
+            paw.zRot = Mth.lerp(action, paw.zRot, -side * .12F);
+            paw.yRot = -side * swing * .2F;
+            if (using) {
                 switch (player.getUseItem().getUseAnimation()) {
                     case EAT, DRINK -> paw.xRot = -1.2F;
                     case BLOCK, BOW, CROSSBOW, SPEAR, SPYGLASS -> paw.xRot = -1F;

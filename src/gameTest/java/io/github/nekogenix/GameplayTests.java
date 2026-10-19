@@ -259,7 +259,7 @@ public final class GameplayTests {
         FelineSounds.sync(player);
         var hurt = NeoForge.EVENT_BUS.post(new PlayLevelSoundEvent.AtEntity(player,
                 Holder.direct(SoundEvents.PLAYER_HURT), SoundSource.PLAYERS, 1, 1));
-        helper.assertTrue(hurt.getSound().value() == SoundEvents.CAT_HURT, "Feline hurt voice starts during shock");
+        helper.assertTrue(hurt.isCanceled(), "Predicted hurt sounds wait for actual damage during shock");
         for (int stage = 0; stage < 3; stage++) {
             var saved = state.serializeNBT(helper.getLevel().registryAccess());
             saved.putInt("phase", NekoState.Phase.TRANSFORMING.ordinal());

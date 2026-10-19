@@ -17,6 +17,50 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 @PrefixGameTestTemplate(false)
 public final class FelineControlTests {
     @GameTest(template = "empty", timeoutTicks = 100)
+    public static void felineHurtSoundsRequireHealthLoss(GameTestHelper helper) {
+        var player = GameplayTests.player(helper);
+        helper.runAfterDelay(65, () -> {
+            CatTransformationTests.cat(player);
+            io.github.nekogenix.gameplay.FelineSounds.sync(player);
+            player.getFoodData().setFoodLevel(17);
+            int[] sounds = {0};
+            java.util.function.Consumer<net.neoforged.neoforge.event.PlayLevelSoundEvent.AtEntity> listener = event -> {
+                if (event.getEntity() == player && event.getSound().value() == net.minecraft.sounds.SoundEvents.CAT_HURT) sounds[0]++;
+            };
+            var bus = net.neoforged.neoforge.common.NeoForge.EVENT_BUS;
+            bus.addListener(net.neoforged.bus.api.EventPriority.LOWEST, false,
+                    net.neoforged.neoforge.event.PlayLevelSoundEvent.AtEntity.class, listener);
+            try {
+                player.invulnerableTime = 0;
+                player.causeFallDamage(4, 1, player.damageSources().fall());
+                player.playSound(net.minecraft.sounds.SoundEvents.PLAYER_SMALL_FALL, 1, 1);
+                player.playSound(net.minecraft.sounds.SoundEvents.PLAYER_BIG_FALL, 1, 1);
+                helper.assertTrue(sounds[0] == 0, "Harmless and predicted landings do not produce hurt meows");
+                player.causeFallDamage(10, 1, player.damageSources().fall());
+                helper.assertTrue(player.getHealth() == 19.75F && sounds[0] == 1, "Real fall damage produces one hurt sound");
+                player.causeFallDamage(10, 1, player.damageSources().fall());
+                helper.assertTrue(sounds[0] == 1, "Invulnerability frames do not produce another hurt sound");
+                player.invulnerableTime = 0;
+                player.setInvulnerable(true);
+                player.causeFallDamage(20, 1, player.damageSources().fall());
+                helper.assertTrue(sounds[0] == 1, "An immune player does not produce a hurt meow");
+                player.setInvulnerable(false);
+                player.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.ABSORPTION, 200));
+                player.causeFallDamage(10, 1, player.damageSources().fall());
+                helper.assertTrue(player.getHealth() == 19.75F && sounds[0] == 1, "Fully absorbed damage does not produce a hurt meow");
+                player.setAbsorptionAmount(0);
+                player.invulnerableTime = 0;
+                player.hurt(player.damageSources().generic(), 1);
+                helper.assertTrue(sounds[0] == 2, "Other real damage retains its feline hurt sound");
+                helper.succeed();
+            } finally {
+                bus.unregister(listener);
+                GameplayTests.remove(player);
+            }
+        });
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 100)
     public static void completedFormsStartFallDamageAtTenBlocks(GameTestHelper helper) {
         var player = GameplayTests.player(helper);
         player.getFoodData().setFoodLevel(17);
