@@ -5,13 +5,9 @@ import io.github.nekogenix.VoiceSounds;
 import io.github.nekogenix.config.ClientConfig;
 import java.util.Collections;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.OptionInstance;
-import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.components.OptionsList;
 import net.minecraft.client.gui.screens.options.SoundOptionsScreen;
-import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundSource;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -38,13 +34,7 @@ public final class VoiceOptions {
             var voice = mc.options.getSoundSourceOptionInstance(SoundSource.VOICE);
             var anchor = list.findOption(voice);
             if (anchor == null) continue;
-            var option = new OptionInstance<>("options.nekogenix.neko_voice", OptionInstance.noTooltip(),
-                    (caption, value) -> value == 0 ? Options.genericValueLabel(caption, CommonComponents.OPTION_OFF)
-                            : Component.translatable("options.percent_value", caption, (int) (value * 100)),
-                    OptionInstance.UnitDouble.INSTANCE, ClientConfig.NEKO_VOICE_VOLUME.get(), value -> {
-                        ClientConfig.NEKO_VOICE_VOLUME.set(value);
-                        mc.getSoundManager().updateSourceVolume(SoundSource.PLAYERS, mc.options.getSoundSourceVolume(SoundSource.PLAYERS));
-                    });
+            var option = ClientOptions.voiceVolume();
             for (int i = 0; i < list.children().size(); i++) {
                 ContainerObjectSelectionList.Entry<?> row = list.children().get(i);
                 if (!row.children().contains(anchor)) continue;

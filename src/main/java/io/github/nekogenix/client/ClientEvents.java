@@ -20,6 +20,8 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.ModList;
+import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
@@ -129,6 +131,8 @@ public final class ClientEvents {
     public static final class Registration {
         @SubscribeEvent
         public static void setup(net.neoforged.fml.event.lifecycle.FMLClientSetupEvent event) {
+            ModList.get().getModContainerById(Nekogenix.ID).orElseThrow().registerExtensionPoint(IConfigScreenFactory.class,
+                    (container, parent) -> new ModOptionsScreen(parent));
             event.enqueueWork(() -> {
                 for (var item : new net.minecraft.world.item.Item[] {Content.INJECTION.get(), Content.STABILIZING_INJECTION.get()}) ItemProperties.register(item, Content.id("injection_stage"),
                     (stack, level, entity, seed) -> {

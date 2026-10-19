@@ -23,6 +23,7 @@
   "tooltip.nekogenix.paws": "-75% Fall Damage",
   "tooltip.nekogenix.delayed": "Effects begin after 20 minutes",
   "tooltip.nekogenix.stage_ability": "One random ability after each stage",
+  "options.nekogenix.title": "Nekogenix Settings",
   "options.nekogenix.neko_voice": "Neko Voice",
   "block.nekogenix.centrifuge": "Centrifuge",
   "item.nekogenix.blank_nucleocard": "Blank Nucleocard",

@@ -3,7 +3,6 @@ package io.github.nekogenix.client;
 import io.github.nekogenix.Nekogenix;
 import io.github.nekogenix.config.ClientConfig;
 import net.minecraft.client.OptionInstance;
-import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.options.OptionsScreen;
 import net.minecraft.network.chat.Component;
@@ -42,10 +41,7 @@ public final class CameraOptions {
 
         @Override protected void updateMessage() {
             int percent = (int)Math.round(value * 100);
-            var caption = Component.translatable("options.nekogenix.camera_height");
-            setMessage(percent == 0 || percent == 100
-                    ? Options.genericValueLabel(caption, Component.translatable("options.nekogenix.camera_height." + (percent == 0 ? "cat" : "human")))
-                    : Component.translatable("options.percent_value", caption, percent));
+            setMessage(ClientOptions.cameraHeightLabel(percent));
         }
 
         @Override protected void applyValue() {
