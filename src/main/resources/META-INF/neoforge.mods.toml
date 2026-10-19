@@ -2,6 +2,9 @@ modLoader="javafml"
 loaderVersion="[4,)"
 license="PolyForm Noncommercial 1.0.0"
 
+[[mixins]]
+config="nekogenix.mixins.json"
+
 [[mods]]
 modId="nekogenix"
 version="${mod_version}"

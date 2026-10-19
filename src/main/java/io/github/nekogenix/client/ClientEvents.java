@@ -20,6 +20,8 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.ModList;
+import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
@@ -98,11 +100,9 @@ public final class ClientEvents {
         float intensity;
         if (mc.player.hasEffect(Content.SHOCK)) {
             shockWasActive = true;
-            // Reduced distortion uses scaled camera movement instead of the green nausea overlay.
             intensity = mc.options.screenEffectScale().get() < 1 ? 0F : 1.5F;
         } else if (shockWasActive) {
             var nausea = mc.player.getEffect(net.minecraft.world.effect.MobEffects.CONFUSION);
-            // The hidden nausea can outlive the sickness marker by a frame, including at duration zero.
             boolean lingering = nausea != null && !nausea.isVisible() && !nausea.showIcon();
             intensity = lingering || nausea == null ? 0F : 1F;
             if (!lingering) shockWasActive = false;
@@ -131,6 +131,8 @@ public final class ClientEvents {
     public static final class Registration {
         @SubscribeEvent
         public static void setup(net.neoforged.fml.event.lifecycle.FMLClientSetupEvent event) {
+            ModList.get().getModContainerById(Nekogenix.ID).orElseThrow().registerExtensionPoint(IConfigScreenFactory.class,
+                    (container, parent) -> new ModOptionsScreen(parent));
             event.enqueueWork(() -> {
                 for (var item : new net.minecraft.world.item.Item[] {Content.INJECTION.get(), Content.STABILIZING_INJECTION.get()}) ItemProperties.register(item, Content.id("injection_stage"),
                     (stack, level, entity, seed) -> {
@@ -182,7 +184,6 @@ public final class ClientEvents {
                             / (InjectionHandler.NEEDLE_ENTRY_TICKS - InjectionHandler.APPROACH_TICKS), 0, 1);
                     pressure *= 1 - jab;
                     tremor *= 1 - jab;
-                    // The intact needle crosses the lower view boundary while the barrel stays above it.
                     pose.translate(side * (.56F - .45F * approach * retreat), -.52F + (.45072432F * approach - .09F * jab) * retreat + pressure,
                             -.72F - .069F * approach * retreat);
                     pose.mulPose(Axis.YP.rotationDegrees(side * (45F + 45F * approach * retreat)));

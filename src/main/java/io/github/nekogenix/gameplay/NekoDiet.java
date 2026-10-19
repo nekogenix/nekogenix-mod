@@ -106,7 +106,6 @@ public final class NekoDiet {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void beforeEating(LivingEntityUseItemEvent.Tick event) {
-        // Supply native eating with the final values, before FoodData changes on either side.
         if (event.getEntity() instanceof Player player && (player.level().isClientSide || event.getDuration() <= 1)) {
             prepare(player, event.getItem());
         }
@@ -158,7 +157,6 @@ public final class NekoDiet {
         var state = event.getLevel().getBlockState(event.getPos());
         var block = state.getBlock();
         if (!(block instanceof CakeBlock) && !(block instanceof CandleCakeBlock)) return;
-        // Observe vanilla's successful slice consumption without replacing cake, candle or item interactions.
         CAKES.putIfAbsent(player, new CakeMeal(event.getPos().immutable(), state.hasProperty(CakeBlock.BITES) ? state.getValue(CakeBlock.BITES) : 0,
                 player instanceof ServerPlayer server ? server.getStats().getValue(Stats.CUSTOM, Stats.EAT_CAKE_SLICE) : 0,
                 player.getFoodData().getFoodLevel(), player.getFoodData().getSaturationLevel(), player.level().getGameTime()));

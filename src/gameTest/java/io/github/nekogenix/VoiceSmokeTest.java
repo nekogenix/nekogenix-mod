@@ -16,7 +16,6 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.network.registration.NetworkRegistry;
 
-/** Opt-in audio and settings check, excluded from the released jar. */
 @EventBusSubscriber(modid = Nekogenix.ID)
 public final class VoiceSmokeTest {
     private static final boolean ENABLED = Boolean.getBoolean("nekogenix.voiceSmokeTest");

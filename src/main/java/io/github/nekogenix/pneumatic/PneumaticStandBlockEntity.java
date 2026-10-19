@@ -29,7 +29,6 @@ public final class PneumaticStandBlockEntity extends BaseContainerBlockEntity im
     public static final int FUEL = 4;
     public static final int SIZE = 5;
     public static final int PROCESS_TICKS = 400;
-    // Keep saved slot identifiers; slot 1 only holds items from the former center slot.
     private static final int[] SLOTS = {0, 2, CARD, FUEL};
     private NonNullList<ItemStack> items = NonNullList.withSize(SIZE, ItemStack.EMPTY);
     private int progress;
@@ -63,7 +62,6 @@ public final class PneumaticStandBlockEntity extends BaseContainerBlockEntity im
             stand.sound(SoundEvents.BREEZE_SLIDE, .35F, 1.3F);
             stand.sync();
         } else if ((stand.targets & 2) == 0 && (stand.syringes() & ~stand.targets) != 0) {
-            // Keep the pressure already paid for, but start filling the expanded batch together.
             stand.targets = stand.syringes();
             stand.progress = 1;
             stand.sound(SoundEvents.BREEZE_INHALE, .55F, 1.2F);

@@ -77,13 +77,18 @@ public final class CatPlayerRenderer extends CatRenderer {
         });
     }
 
+    @Override
+    public net.minecraft.resources.ResourceLocation getTextureLocation(Cat cat) {
+        var fallback = super.getTextureLocation(cat);
+        return cat instanceof PlayerCat proxy ? io.github.nekogenix.client.skin.CatSkins.texture(proxy.player.getUUID(), fallback) : fallback;
+    }
+
     private void drawHeld(Cat cat, HumanoidArm arm, PoseStack pose, MultiBufferSource buffers, int light, float partial) {
         boolean left = arm == HumanoidArm.LEFT;
         ItemStack stack = arm == cat.getMainArm() ? cat.getMainHandItem() : cat.getOffhandItem();
         if (stack.isEmpty()) return;
         pose.pushPose();
         ((PawModel) model).paw(arm).translateAndRotate(pose);
-        // Align the vanilla palm with the cat's toes, scaling the entire grip as well as the item.
         float scale = stack.getUseAnimation() == net.minecraft.world.item.UseAnim.SPEAR ? .4F : .55F;
         pose.translate(0, 9 / 16F, 1 / 16F);
         pose.scale(scale, scale, scale);
@@ -101,7 +106,6 @@ public final class CatPlayerRenderer extends CatRenderer {
     protected void setupRotations(Cat cat, PoseStack pose, float age, float yaw, float partial, float scale) {
         PlayerCat proxy = (PlayerCat) cat;
         super.setupRotations(cat, pose, age, yaw + proxy.bodyYaw(partial), partial, scale);
-        // A cat is already horizontal; tilt around its center rather than applying the humanoid dive pose.
         pose.translate(0, .35, 0);
         pose.mulPose(Axis.XP.rotationDegrees(-proxy.bodyPitch(partial)));
         pose.mulPose(Axis.ZP.rotationDegrees(proxy.bodyRoll(partial)));
@@ -173,8 +177,6 @@ public final class CatPlayerRenderer extends CatRenderer {
         var player = mc.player;
         if (renderer == null || player == null || !CatForm.active(player) || player.isSpectator() || player.isScoping()) return;
         ItemStack stack = event.getItemStack();
-        // Vanilla controls item transforms, use animations, maps and which hands are visible.
-        // Empty hands and map arms reach the arm event below.
         if (stack.isEmpty() || stack.getItem() instanceof MapItem || player.isInvisible()) return;
         HumanoidArm arm = event.getHand() == InteractionHand.MAIN_HAND ? player.getMainArm() : player.getMainArm().getOpposite();
         float side = arm == HumanoidArm.RIGHT ? 1 : -1;
@@ -194,7 +196,7 @@ public final class CatPlayerRenderer extends CatRenderer {
         pose.mulPose(Axis.ZP.rotationDegrees(-side * swing * 20));
         ModelPart paw = renderer.paw(arm);
         paw.setPos(0, -10, -.5F);
-        paw.render(pose, event.getMultiBufferSource().getBuffer(RenderType.entityCutout(cat.getTextureId())),
+        paw.render(pose, event.getMultiBufferSource().getBuffer(RenderType.entityCutout(renderer.getTextureLocation(cat))),
                 event.getPackedLight(), OverlayTexture.NO_OVERLAY);
         pose.popPose();
     }
@@ -210,7 +212,7 @@ public final class CatPlayerRenderer extends CatRenderer {
         float side = event.getArm() == HumanoidArm.RIGHT ? 1 : -1;
         paw.setPos(-side * 5, 2, -1);
         paw.yScale = 1.2F;
-        paw.render(event.getPoseStack(), event.getMultiBufferSource().getBuffer(RenderType.entityCutout(cat.getTextureId())),
+        paw.render(event.getPoseStack(), event.getMultiBufferSource().getBuffer(RenderType.entityCutout(renderer.getTextureLocation(cat))),
                 event.getPackedLight(), OverlayTexture.NO_OVERLAY);
     }
 
@@ -319,7 +321,6 @@ public final class CatPlayerRenderer extends CatRenderer {
                 paw.xRot = paw.xRot * .25F - .65F;
                 paw.zRot += -side * .12F;
             }
-            // Actions bring the active paw forward instead of leaving it spread in the flight pose.
             float action = using ? 1 : swing;
             paw.xRot = Mth.lerp(action, paw.xRot, -1.4F);
             paw.zRot = Mth.lerp(action, paw.zRot, -side * .12F);
@@ -337,6 +338,7 @@ public final class CatPlayerRenderer extends CatRenderer {
     private static final class PlayerCat extends Cat {
         private final Player player;
         private int poseTick = -1;
+        private float dimensionsScale = Float.NaN;
         private float oldCrouch, crouch, oldAir, air;
         private float oldForward, forward, oldSideways, sideways;
         private float oldVertical, vertical, oldMotion, motion, oldSwim, swim, oldSpeed, speed;
@@ -355,6 +357,10 @@ public final class CatPlayerRenderer extends CatRenderer {
             if (poseTick == player.tickCount) return;
             int ticks = poseTick < 0 ? 1 : Mth.clamp(player.tickCount - poseTick, 1, 4);
             poseTick = player.tickCount;
+            if (dimensionsScale != player.getScale()) {
+                dimensionsScale = player.getScale();
+                refreshDimensions();
+            }
             oldCrouch = crouch; oldAir = air;
             oldForward = forward; oldSideways = sideways;
             oldVertical = vertical; oldMotion = motion; oldSwim = swim; oldSpeed = speed;
@@ -418,6 +424,7 @@ public final class CatPlayerRenderer extends CatRenderer {
         @Override public net.minecraft.world.scores.PlayerTeam getTeam() { return player.getTeam(); }
         @Override public boolean isInvisibleTo(Player viewer) { return player.isInvisibleTo(viewer); }
         @Override public boolean isCrouching() { return player != null && player.isCrouching(); }
+        @Override public boolean isDiscrete() { return player != null && player.isDiscrete(); }
         @Override public HumanoidArm getMainArm() { return player.getMainArm(); }
         @Override public float getScale() { return player == null ? 1 : player.getScale(); }
     }

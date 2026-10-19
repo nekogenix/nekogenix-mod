@@ -17,8 +17,6 @@ public final class CatMovementInput {
         var input = event.getInput();
         if (input.shiftKeyDown || !player.isMovingSlowly() || player.isSwimming()) return;
         float factor = (float)player.getAttributeValue(Attributes.SNEAKING_SPEED);
-        // Low ceilings select a human crawling pose even though the cat fits at full height.
-        // Restore the original input so vanilla can start sprinting normally, including double tap.
         if (factor > 0) {
             input.forwardImpulse = Mth.clamp(input.forwardImpulse / factor, -1, 1);
             input.leftImpulse = Mth.clamp(input.leftImpulse / factor, -1, 1);

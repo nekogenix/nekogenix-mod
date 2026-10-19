@@ -13,8 +13,14 @@ import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsE
 
 final class EffectDisplay implements IClientMobEffectExtensions {
     static void register(RegisterClientExtensionsEvent event) {
-        event.registerMobEffect(new EffectDisplay(), Content.SHOCK, Content.TRANSFORMING, Content.CAT_TRANSFORMING,
-                Content.AGILITY, Content.VISION, Content.PAWS);
+        event.registerMobEffect(new EffectDisplay(), Content.SHOCK, Content.TRANSFORMING, Content.CAT_TRANSFORMING);
+        event.registerMobEffect(new IClientMobEffectExtensions() {
+            @Override
+            public boolean isVisibleInInventory(MobEffectInstance instance) { return false; }
+
+            @Override
+            public boolean isVisibleInGui(MobEffectInstance instance) { return false; }
+        }, Content.AGILITY, Content.VISION, Content.PAWS);
         if (!event.isMobEffectRegistered(MobEffects.NIGHT_VISION.value())) {
             event.registerMobEffect(new IClientMobEffectExtensions() {
                 private boolean visible() {

@@ -104,6 +104,9 @@ public final class Content {
             () -> AttachmentType.builder(() -> false).sync(ByteBufCodecs.BOOL).build());
     public static final DeferredHolder<AttachmentType<?>, AttachmentType<Boolean>> CAT_FORM = ATTACHMENTS.register("cat_form",
             () -> AttachmentType.builder(() -> false).sync(ByteBufCodecs.BOOL).build());
+
+    public static final DeferredHolder<AttachmentType<?>, AttachmentType<io.github.nekogenix.gameplay.CameraProjectiles.View>> CAMERA_VIEW = ATTACHMENTS.register("camera_view",
+            () -> AttachmentType.builder(io.github.nekogenix.gameplay.CameraProjectiles.View::new).build());
     public static final DeferredHolder<AttachmentType<?>, AttachmentType<io.github.nekogenix.gameplay.CatForm.Session>> CAT_SIZE = ATTACHMENTS.register("cat_size",
             () -> AttachmentType.builder(io.github.nekogenix.gameplay.CatForm.Session::new).build());
     public static final DeferredHolder<AttachmentType<?>, AttachmentType<Boolean>> FELINE_DIET = ATTACHMENTS.register("feline_diet",

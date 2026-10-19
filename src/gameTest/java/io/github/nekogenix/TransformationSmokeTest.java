@@ -17,7 +17,6 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.network.registration.NetworkRegistry;
 
-/** Opt-in multiplayer transformation check, excluded from the released jar. */
 @EventBusSubscriber(modid = Nekogenix.ID)
 public final class TransformationSmokeTest {
     private static final boolean ENABLED = Boolean.getBoolean("nekogenix.transformationSmokeTest");

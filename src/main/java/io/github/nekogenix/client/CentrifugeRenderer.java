@@ -51,7 +51,6 @@ public final class CentrifugeRenderer implements BlockEntityRenderer<CentrifugeB
             }
             pose.popPose();
         }
-        // Finish opaque contents before glass writes to the depth buffer.
         for (int slot = 0; slot < 6; slot++) {
             if (machine.getItem(slot).isEmpty()) continue;
             double angle = slot * Math.PI / 3;

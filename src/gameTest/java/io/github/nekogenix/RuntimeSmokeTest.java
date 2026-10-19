@@ -9,7 +9,6 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
-/** Opt-in client and dedicated-server smoke run; this source set is excluded from the released jar. */
 @EventBusSubscriber(modid = Nekogenix.ID)
 public final class RuntimeSmokeTest {
     private static final boolean ENABLED = Boolean.getBoolean("nekogenix.smokeTest");

@@ -46,7 +46,6 @@ public final class NekoState implements INBTSerializable<CompoundTag> {
         return true;
     }
 
-    /** Advances only while the living player actually ticks; daylight and sleep never change this timer. */
     public boolean tick(RandomSource random) {
         if (!isTransforming()) return false;
         elapsed++;
