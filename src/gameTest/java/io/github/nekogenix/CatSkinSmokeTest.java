@@ -2,11 +2,18 @@ package io.github.nekogenix;
 
 import io.github.nekogenix.client.skin.CatSkinScreen;
 import io.github.nekogenix.client.skin.CatSkins;
+import io.github.nekogenix.client.skin.NewCatSkinScreen;
 import io.github.nekogenix.skin.CatSkin;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.OptionsList;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.options.SkinCustomizationScreen;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -21,20 +28,18 @@ public final class CatSkinSmokeTest {
     @EventBusSubscriber(modid = Nekogenix.ID, value = net.neoforged.api.distmarker.Dist.CLIENT)
     public static final class Client {
         private static String capture;
-        private static java.nio.file.Path imported;
+        private static Path imported, rejected, template;
         private static CatSkin testSkin;
-        private static int menuTicks = -1;
-        private static int previousSkins;
+        private static int menuTicks = -1, previousSkins;
 
-        @SubscribeEvent public static void status(net.neoforged.neoforge.client.event.ClientTickEvent.Pre event) {
+        @SubscribeEvent public static void status(net.neoforged.neoforge.client.event.ClientTickEvent.Pre event) throws java.io.IOException {
             if (!ENABLED) return;
-            var mc = Minecraft.getInstance();
-            mc.getToasts().clear();
+            var mc = Minecraft.getInstance(); mc.getToasts().clear();
             if (menuTicks >= 0) {
                 if (++menuTicks == 20) capture = "cat-skins-main-menu.png";
                 if (menuTicks == 30) {
-                    check(mc.screen instanceof CatSkinScreen && mc.level == null, "The library also works outside a world");
-                    Nekogenix.LOGGER.info("Nekogenix skins smoke passed: native menu vanilla library custom PNG preview small window deletion main menu and unlicensed session rejection");
+                    check(mc.screen instanceof NewCatSkinScreen && mc.level == null, "The form also works outside a world");
+                    Nekogenix.LOGGER.info("Nekogenix skins smoke passed: custom texture draft naming UV export cancellation persistence preview deletion and unlicensed session rejection");
                     mc.stop();
                 }
                 return;
@@ -45,58 +50,61 @@ public final class CatSkinSmokeTest {
             if (age == 50) {
                 boolean found = false;
                 for (var child : mc.screen.children()) if (child instanceof OptionsList options) {
-                    for (net.minecraft.client.gui.components.ContainerObjectSelectionList.Entry<?> row : options.children()) for (var entry : row.children()) if (entry instanceof Button button
-                            && button.getMessage().getString().equals(net.minecraft.network.chat.Component.translatable("skins.nekogenix.title").getString())) {
-                        button.onPress(); found = true; break;
-                    }
+                    for (net.minecraft.client.gui.components.ContainerObjectSelectionList.Entry<?> row : options.children()) for (var entry : row.children())
+                        if (entry instanceof Button button && button.getMessage().getString().equals(text("title").getString())) { button.onPress(); found = true; break; }
                     if (found) break;
                 }
                 check(found && mc.screen instanceof CatSkinScreen, "Cat Skin opens from native Skin Customization");
             }
-            if (age == 65 && System.getProperty("nekogenix.rejectedCatSkin") != null) {
-                previousSkins = CatSkins.entries().size();
-                ((CatSkinScreen)mc.screen).onFilesDrop(java.util.List.of(java.nio.file.Path.of(System.getProperty("nekogenix.rejectedCatSkin"))));
-            }
-            if (age == 80) {
-                if (System.getProperty("nekogenix.rejectedCatSkin") != null) {
-                    check(CatSkins.entries().size() == previousSkins && CatSkins.message().getString().contains("250"), "The rejected file reports its width without changing the library");
+            if (age == 65) {
+                previousSkins = CatSkins.entries().size(); button(mc.screen, "import").onPress();
+                check(mc.screen instanceof NewCatSkinScreen, "New Skin opens the draft form");
+                imported = Files.createTempFile("nekogenix-custom-skin-", ".png");
+                rejected = Files.createTempFile("nekogenix-rejected-skin-", ".png");
+                template = Files.createTempFile("nekogenix-template-", ".png");
+                Files.write(rejected, CatSkinTests.png(250, 32, -1));
+                var image = new java.awt.image.BufferedImage(64, 32, java.awt.image.BufferedImage.TYPE_INT_ARGB);
+                for (int y = 0; y < 32; y++) for (int x = 0; x < 64; x++) {
+                    int color = (x / 2 + y / 3) % 5 == 0 ? 0xff61dcc6 : 0xff343044;
+                    if (y == 6 && (x == 6 || x == 9)) color = 0xffdfec74;
+                    image.setRGB(x, y, color);
                 }
-                capture = "cat-skins-library.png";
+                javax.imageio.ImageIO.write(image, "PNG", imported.toFile()); mc.screen.onFilesDrop(List.of(rejected));
             }
-            if (age == 90) {
-                try {
-                    imported = java.nio.file.Files.createTempFile("nekogenix-skin-preview-", ".png");
-                    try (var resource = mc.getResourceManager().open(net.minecraft.resources.ResourceLocation.withDefaultNamespace("textures/entity/cat/ragdoll.png"))) {
-                        java.nio.file.Files.write(imported, resource.readAllBytes());
-                    }
-                    ((CatSkinScreen)mc.screen).onFilesDrop(java.util.List.of(imported));
-                } catch (java.io.IOException e) { throw new IllegalStateException(e); }
+            if (age == 85) {
+                check(CatSkins.entries().size() == previousSkins && !button(mc.screen, "save").active, "Invalid dimensions cannot be saved");
+                capture = "cat-skins-rejected-form.png";
             }
-            if (age == 120) {
-                testSkin = CatSkins.entries().stream().filter(e -> e.name().startsWith("nekogenix-skin-preview-")).map(io.github.nekogenix.client.skin.SkinLibrary.Entry::skin).findFirst().orElseThrow();
-                check(testSkin.variant().equals("custom"), "A PNG imports into the library without affecting the official player skin");
-                previousSkins = CatSkins.entries().size();
-                CatSkins.importFile(imported, skin -> {});
-                capture = "cat-skins-custom.png";
-                ((CatSkinScreen)mc.screen).mouseDragged(50, 100, 0, 40, 0);
+            if (age == 90) mc.screen.onFilesDrop(List.of(imported));
+            if (age == 110) {
+                check(CatSkins.entries().size() == previousSkins && button(mc.screen, "save").active, "A preview does not add anything to the library");
+                name(mc.screen).setValue("Midnight Mint"); ((NewCatSkinScreen)mc.screen).saveTemplate(template);
+                capture = "cat-skins-custom-form.png";
             }
-            if (age == 130) {
-                check(CatSkins.entries().size() == previousSkins, "Reimporting the same file does not duplicate it");
-                mc.options.guiScale().set(4); mc.resizeDisplay(); capture = "cat-skins-small.png";
+            if (age == 115) { mc.options.guiScale().set(4); mc.resizeDisplay(); capture = "cat-skins-small-form.png"; }
+            if (age == 125) {
+                check(name(mc.screen).getValue().equals("Midnight Mint"), "Resizing retains the draft name"); mc.screen.onClose();
+                check(mc.screen instanceof CatSkinScreen && CatSkins.entries().size() == previousSkins, "Cancel discards a draft without saving it");
             }
-            if (age == 160) {
-                check(!CatSkins.licensed(), "A development client without a valid Minecraft session cannot enable cat skins");
-                CatSkins.apply(testSkin);
+            if (age == 130) { button(mc.screen, "import").onPress(); mc.screen.onFilesDrop(List.of(imported)); }
+            if (age == 150) { name(mc.screen).setValue("Midnight Mint"); button(mc.screen, "save").onPress(); }
+            if (age == 165) {
+                check(mc.screen instanceof CatSkinScreen && CatSkins.entries().size() == previousSkins + 1, "Save adds exactly one named custom skin");
+                testSkin = CatSkins.entries().stream().filter(e -> e.name().equals("Midnight Mint")).findFirst().orElseThrow().skin();
+                var restored = new io.github.nekogenix.client.skin.SkinLibrary(mc.gameDirectory.toPath().resolve("nekogenix/cat_skins/library"));
+                check(restored.entries().stream().anyMatch(e -> e.name().equals("Midnight Mint") && e.skin().hash().equals(testSkin.hash())), "The custom texture and its name are persisted");
+                capture = "cat-skins-custom-library.png";
+                check(!CatSkins.licensed(), "The development client has no verified account"); CatSkins.apply(testSkin);
                 check(!CatSkins.selected().hash().equals(testSkin.hash()), "Applying cannot skip the account check");
-                CatSkins.remove(testSkin);
             }
-            if (age == 180) {
-                check(CatSkins.entries().stream().noneMatch(e -> e.skin().hash().equals(testSkin.hash())), "Custom skins can be removed from the library");
-                try { java.nio.file.Files.deleteIfExists(imported); } catch (java.io.IOException e) { throw new IllegalStateException(e); }
-                mc.disconnect(new net.minecraft.client.gui.screens.TitleScreen());
-                mc.options.guiScale().set(2); mc.resizeDisplay();
-                mc.setScreen(new CatSkinScreen(new net.minecraft.client.gui.screens.TitleScreen()));
-                menuTicks = 0;
+            if (age == 175) CatSkins.remove(testSkin);
+            if (age == 195) {
+                check(CatSkins.entries().size() == previousSkins, "Custom skins can be removed");
+                new CatSkin("custom", Files.readAllBytes(template)).validated();
+                Files.copy(template, mc.gameDirectory.toPath().resolve("screenshots/cat-skin-template.png"), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                Files.delete(imported); Files.delete(rejected); Files.delete(template);
+                mc.disconnect(new net.minecraft.client.gui.screens.TitleScreen()); mc.options.guiScale().set(2); mc.resizeDisplay();
+                mc.setScreen(new NewCatSkinScreen(new CatSkinScreen(new net.minecraft.client.gui.screens.TitleScreen()))); menuTicks = 0;
             }
         }
 
@@ -108,6 +116,11 @@ public final class CatSkinSmokeTest {
             } catch (java.io.IOException e) { throw new IllegalStateException(e); }
             capture = null;
         }
+        private static Button button(Screen screen, String key) {
+            return screen.children().stream().filter(e -> e instanceof Button button && button.getMessage().getString().equals(text(key).getString())).map(e -> (Button)e).findFirst().orElseThrow();
+        }
+        private static EditBox name(Screen screen) { return screen.children().stream().filter(e -> e instanceof EditBox).map(e -> (EditBox)e).findFirst().orElseThrow(); }
+        private static Component text(String key) { return Component.translatable("skins.nekogenix." + key); }
         private static void check(boolean valid, String message) { if (!valid) throw new IllegalStateException("Cat skin smoke failed: " + message); }
     }
 }

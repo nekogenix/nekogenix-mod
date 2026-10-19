@@ -79,8 +79,10 @@ public final class CatSkinTests {
             var skin = library.add("My cat", png(64, 32, 0xffaabbcc));
             library.add("Duplicate", skin.skin().png());
             helper.assertTrue(library.entries().size() == 1, "Importing the same PNG does not duplicate it");
+            helper.assertTrue(library.entries().getFirst().name().equals("Duplicate"), "Saving an existing texture uses the chosen name");
             library.select(skin.skin()); library = new SkinLibrary(directory);
             helper.assertTrue(library.selected().hash().equals(skin.skin().hash()), "The selected custom skin is restored on another launch");
+            helper.assertTrue(library.entries().getFirst().name().equals("Duplicate"), "Custom names survive another launch");
             try {
                 library.add("Invalid sheet", png(250, 32, -1));
                 throw new IllegalStateException("Invalid import accepted");

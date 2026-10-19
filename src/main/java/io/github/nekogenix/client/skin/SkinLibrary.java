@@ -43,7 +43,10 @@ public final class SkinLibrary {
     public CatSkin selected() { return selected; }
     public Entry add(String name, byte[] bytes) throws IOException {
         var skin = new CatSkin("custom", CatSkin.normalize(bytes));
-        for (var entry : custom) if (entry.skin.hash().equals(skin.hash())) return entry;
+        for (int i = 0; i < custom.size(); i++) if (custom.get(i).skin.hash().equals(skin.hash())) {
+            var entry = new Entry(cleanName(name), skin);
+            custom.set(i, entry); save(); return entry;
+        }
         if (custom.size() >= 32) throw new IOException("library_full");
         var entry = new Entry(cleanName(name), skin);
         Files.write(directory.resolve(skin.hash() + ".png"), skin.png());
