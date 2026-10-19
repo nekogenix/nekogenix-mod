@@ -77,6 +77,12 @@ public final class CatPlayerRenderer extends CatRenderer {
         });
     }
 
+    @Override
+    public net.minecraft.resources.ResourceLocation getTextureLocation(Cat cat) {
+        var fallback = super.getTextureLocation(cat);
+        return cat instanceof PlayerCat proxy ? io.github.nekogenix.client.skin.CatSkins.texture(proxy.player.getUUID(), fallback) : fallback;
+    }
+
     private void drawHeld(Cat cat, HumanoidArm arm, PoseStack pose, MultiBufferSource buffers, int light, float partial) {
         boolean left = arm == HumanoidArm.LEFT;
         ItemStack stack = arm == cat.getMainArm() ? cat.getMainHandItem() : cat.getOffhandItem();
@@ -194,7 +200,7 @@ public final class CatPlayerRenderer extends CatRenderer {
         pose.mulPose(Axis.ZP.rotationDegrees(-side * swing * 20));
         ModelPart paw = renderer.paw(arm);
         paw.setPos(0, -10, -.5F);
-        paw.render(pose, event.getMultiBufferSource().getBuffer(RenderType.entityCutout(cat.getTextureId())),
+        paw.render(pose, event.getMultiBufferSource().getBuffer(RenderType.entityCutout(renderer.getTextureLocation(cat))),
                 event.getPackedLight(), OverlayTexture.NO_OVERLAY);
         pose.popPose();
     }
@@ -210,7 +216,7 @@ public final class CatPlayerRenderer extends CatRenderer {
         float side = event.getArm() == HumanoidArm.RIGHT ? 1 : -1;
         paw.setPos(-side * 5, 2, -1);
         paw.yScale = 1.2F;
-        paw.render(event.getPoseStack(), event.getMultiBufferSource().getBuffer(RenderType.entityCutout(cat.getTextureId())),
+        paw.render(event.getPoseStack(), event.getMultiBufferSource().getBuffer(RenderType.entityCutout(renderer.getTextureLocation(cat))),
                 event.getPackedLight(), OverlayTexture.NO_OVERLAY);
     }
 
