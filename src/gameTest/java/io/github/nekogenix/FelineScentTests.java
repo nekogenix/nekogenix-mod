@@ -38,7 +38,7 @@ public final class FelineScentTests {
     }
 
     @GameTest(template = "empty")
-    public static void colorsAndCylindricalRange(GameTestHelper helper) {
+    public static void colorsAndBoxRange(GameTestHelper helper) {
         var observer = GameplayTests.player(helper);
         var other = GameplayTests.player(helper);
         helper.assertTrue(FelineScent.color(other) == FelineScent.PLAYER, "Humans are white");
@@ -53,14 +53,17 @@ public final class FelineScentTests {
         var rabbit = EntityType.RABBIT.create(helper.getLevel()); rabbit.setVariant(net.minecraft.world.entity.animal.Rabbit.Variant.EVIL);
         helper.assertTrue(FelineScent.color(rabbit) == FelineScent.HOSTILE, "Only the killer rabbit is dangerous to players");
         observer.setPos(0, 20, 0);
-        other.setPos(20, 25, 0);
-        helper.assertTrue(FelineScent.inRange(observer, other), "Horizontal twenty and vertical five are inclusive and independent");
-        other.setPos(20.01, 20, 0);
-        helper.assertFalse(FelineScent.inRange(observer, other), "More than twenty horizontally is excluded");
-        other.setPos(0, 25.01, 0);
-        helper.assertFalse(FelineScent.inRange(observer, other), "More than five vertically is excluded");
-        other.setPos(15, 20, 15);
-        helper.assertFalse(FelineScent.inRange(observer, other), "Diagonal corners outside the horizontal circle are excluded");
+        for (double x : new double[] {-30, 30}) for (double z : new double[] {-30, 30}) for (double y : new double[] {5, 35}) {
+            other.setPos(x, y, z);
+            helper.assertTrue(FelineScent.inRange(observer, other), "All eight box corners include thirty horizontally and fifteen vertically");
+        }
+        for (double[] outside : new double[][] {{30.01, 20, 0}, {-30.01, 20, 0}, {0, 20, 30.01}, {0, 20, -30.01},
+                {0, 35.01, 0}, {0, 4.99, 0}}) {
+            other.setPos(outside[0], outside[1], outside[2]);
+            helper.assertFalse(FelineScent.inRange(observer, other), "Crossing any box face excludes the target");
+        }
+        other.setPos(25, 20, 25);
+        helper.assertTrue(FelineScent.inRange(observer, other), "The square includes diagonal targets beyond a circular radius of thirty");
         helper.assertFalse(FelineScent.inRange(observer, observer), "The sensing player never outlines themselves");
         GameplayTests.remove(observer); GameplayTests.remove(other);
         helper.succeed();

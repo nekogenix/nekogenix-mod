@@ -31,7 +31,7 @@ public final class FelineScentSmokeTest {
                 var mob = (Mob)types[i].create(level); mob.setNoAi(true); mob.setPersistenceRequired();
                 mob.setPos(xs[i], -60, 125); level.addFreshEntity(mob);
             }
-            for (double[] pos : new double[][] {{128.5, -54.9, 124}, {128.5, -60, 114}}) {
+            for (double[] pos : new double[][] {{128.5, -44.9, 124}, {128.5, -60, 105}}) {
                 var cow = EntityType.COW.create(level); cow.setNoAi(true); cow.setNoGravity(true); cow.setPos(pos[0], pos[1], pos[2]); level.addFreshEntity(cow);
             }
         }

@@ -17,13 +17,13 @@ import net.minecraft.world.entity.player.Player;
 
 public final class FelineScent {
     public static final int HOSTILE = 0xff5555, NEUTRAL = 0xffff55, PASSIVE = 0x55ff55, PLAYER = 0xffffff;
-    public static final int HORIZONTAL_RANGE = 20, VERTICAL_RANGE = 5;
+    public static final int HORIZONTAL_RANGE = 30, VERTICAL_RANGE = 15;
 
     public static boolean inRange(LivingEntity observer, LivingEntity target) {
         double dx = target.getX() - observer.getX(), dz = target.getZ() - observer.getZ();
         return target != observer && (target instanceof Mob || target instanceof Player) && target.isAlive() && !target.isSpectator()
                 && Math.abs(target.getY() - observer.getY()) <= VERTICAL_RANGE
-                && dx * dx + dz * dz <= HORIZONTAL_RANGE * HORIZONTAL_RANGE;
+                && Math.abs(dx) <= HORIZONTAL_RANGE && Math.abs(dz) <= HORIZONTAL_RANGE;
     }
 
     public static int color(LivingEntity entity) {
