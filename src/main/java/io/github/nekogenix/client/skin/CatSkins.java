@@ -42,7 +42,7 @@ public final class CatSkins {
     private static final java.util.ArrayDeque<UUID> DOWNLOADS = new java.util.ArrayDeque<>();
     private static SkinLibrary library;
     private static List<SkinLibrary.Entry> entries = List.of();
-    private static CatSkin selected = CatSkin.DEFAULT;
+    private static CatSkin selected = new CatSkin("tabby", new byte[0]);
     private static boolean loaded, loading, licensed, checking, serverAllowed, helloSent, pendingSend;
     private static Object connection;
     private static int ticks;
@@ -54,7 +54,7 @@ public final class CatSkins {
     public static boolean loaded() { return loaded; }
     public static boolean licensed() { return licensed; }
     public static boolean checking() { return checking; }
-    public static Component message() { return Component.translatable("skins.nekogenix." + message); }
+    public static Component message() { return message.isEmpty() ? Component.empty() : Component.translatable("skins.nekogenix." + message); }
 
     private static Path directory() { return Minecraft.getInstance().gameDirectory.toPath().resolve("nekogenix/cat_skins"); }
     public static void load() {
@@ -108,7 +108,7 @@ public final class CatSkins {
     public static void status(boolean allowed, String reason) {
         serverAllowed = allowed; checking = false;
         if (allowed && reason.equals("wait")) { pendingSend = true; nextSend = System.currentTimeMillis() + 2100; return; }
-        message = List.of("ready", "applied", "license_required", "upload_failed").contains(reason) ? reason : "upload_failed";
+        message = reason.equals("applied") ? "" : List.of("ready", "license_required", "upload_failed").contains(reason) ? reason : "upload_failed";
         if (allowed) licensed = true;
         if (allowed && reason.equals("ready")) { load(); if (loaded) send(); }
     }
@@ -165,6 +165,16 @@ public final class CatSkins {
                 library.remove(skin); var items = library.entries(); var active = library.selected();
                 Minecraft.getInstance().execute(() -> { entries = items; selected = active; message = "deleted"; if (serverAllowed) send(); });
             } catch (Exception e) { fail("storage_failed"); }
+        });
+    }
+
+    public static void rename(CatSkin skin, String name) {
+        if (!loaded || !skin.variant().equals("custom")) return;
+        work(() -> {
+            try {
+                library.rename(skin, name); var items = library.entries();
+                Minecraft.getInstance().execute(() -> { entries = items; message = "renamed"; });
+            } catch (java.io.IOException e) { fail("storage_failed"); }
         });
     }
 

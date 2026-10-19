@@ -55,6 +55,9 @@ public final class CatSkinSmokeTest {
                     if (found) break;
                 }
                 check(found && mc.screen instanceof CatSkinScreen, "Cat Skin opens from native Skin Customization");
+                var done = find(mc.screen, net.minecraft.network.chat.CommonComponents.GUI_DONE);
+                check(done.getWidth() == 200 && done.getHeight() == 20 && done.getX() == (mc.screen.width - 200) / 2, "Done has the centered vanilla size");
+                check(CatSkin.VARIANTS.contains(CatSkins.selected().variant()) && !name(mc.screen).visible, "A vanilla variant is selected and its name is read only");
             }
             if (age == 65) {
                 previousSkins = CatSkins.entries().size(); button(mc.screen, "import").onPress();
@@ -97,9 +100,33 @@ public final class CatSkinSmokeTest {
                 check(!CatSkins.licensed(), "The development client has no verified account"); CatSkins.apply(testSkin);
                 check(!CatSkins.selected().hash().equals(testSkin.hash()), "Applying cannot skip the account check");
             }
-            if (age == 175) CatSkins.remove(testSkin);
+            if (age == 170) {
+                var edit = name(mc.screen); mc.screen.mouseClicked(edit.getX() + 1, edit.getY() + 1, 0);
+                check(edit.isFocused(), "The styled name field can be edited");
+                edit.setValue("Moonlit Mint"); mc.screen.keyPressed(org.lwjgl.glfw.GLFW.GLFW_KEY_ENTER, 0, 0);
+            }
+            if (age == 180) {
+                check(CatSkins.entries().stream().anyMatch(e -> e.name().equals("Moonlit Mint") && e.skin().hash().equals(testSkin.hash())), "Enter saves the new custom name");
+                var edit = name(mc.screen); mc.screen.mouseClicked(edit.getX() + 1, edit.getY() + 1, 0); edit.setValue("Discard this");
+                mc.screen.keyPressed(org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE, 0, 0);
+                check(mc.screen instanceof CatSkinScreen && edit.getValue().equals("Moonlit Mint"), "Escape cancels a name edit without leaving the library");
+                focusCustom(mc.screen); capture = "cat-skins-card-actions.png";
+            }
+            if (age == 185) {
+                mc.screen.keyPressed(org.lwjgl.glfw.GLFW.GLFW_KEY_U, 0, 0);
+                check(!CatSkins.selected().hash().equals(testSkin.hash()), "Card actions preserve account verification");
+                mc.screen.keyPressed(org.lwjgl.glfw.GLFW.GLFW_KEY_DELETE, 0, 0);
+                check(mc.screen instanceof net.minecraft.client.gui.screens.ConfirmScreen, "Deleting a custom skin requires confirmation");
+                find(mc.screen, net.minecraft.network.chat.CommonComponents.GUI_NO).onPress();
+                check(CatSkins.entries().size() == previousSkins + 1, "Cancel keeps the custom skin");
+            }
             if (age == 195) {
+                focusCustom(mc.screen); mc.screen.keyPressed(org.lwjgl.glfw.GLFW.GLFW_KEY_DELETE, 0, 0);
+                find(mc.screen, net.minecraft.network.chat.CommonComponents.GUI_YES).onPress();
+            }
+            if (age == 215) {
                 check(CatSkins.entries().size() == previousSkins, "Custom skins can be removed");
+                check(!name(mc.screen).visible, "After deletion the vanilla name is read only again");
                 new CatSkin("custom", Files.readAllBytes(template)).validated();
                 Files.copy(template, mc.gameDirectory.toPath().resolve("screenshots/cat-skin-template.png"), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
                 Files.delete(imported); Files.delete(rejected); Files.delete(template);
@@ -117,8 +144,10 @@ public final class CatSkinSmokeTest {
             capture = null;
         }
         private static Button button(Screen screen, String key) {
-            return screen.children().stream().filter(e -> e instanceof Button button && button.getMessage().getString().equals(text(key).getString())).map(e -> (Button)e).findFirst().orElseThrow();
+            return find(screen, text(key));
         }
+        private static Button find(Screen screen, Component label) { return screen.children().stream().filter(e -> e instanceof Button button && button.getMessage().getString().equals(label.getString())).map(e -> (Button)e).findFirst().orElseThrow(); }
+        private static void focusCustom(Screen screen) { var card = find(screen, Component.literal("Moonlit Mint")); screen.mouseClicked(card.getX() + 5, card.getY() + 25, 0); }
         private static EditBox name(Screen screen) { return screen.children().stream().filter(e -> e instanceof EditBox).map(e -> (EditBox)e).findFirst().orElseThrow(); }
         private static Component text(String key) { return Component.translatable("skins.nekogenix." + key); }
         private static void check(boolean valid, String message) { if (!valid) throw new IllegalStateException("Cat skin smoke failed: " + message); }

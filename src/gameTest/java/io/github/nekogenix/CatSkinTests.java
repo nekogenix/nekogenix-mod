@@ -76,6 +76,9 @@ public final class CatSkinTests {
         Path directory = Files.createTempDirectory("nekogenix-skin-library-");
         try {
             var library = new SkinLibrary(directory);
+            String initial = library.selected().variant();
+            helper.assertTrue(CatSkin.VARIANTS.contains(initial), "The first selection is a vanilla cat variant");
+            helper.assertTrue(new SkinLibrary(directory).selected().variant().equals(initial), "The initial random selection is persisted immediately");
             var skin = library.add("My cat", png(64, 32, 0xffaabbcc));
             library.add("Duplicate", skin.skin().png());
             helper.assertTrue(library.entries().size() == 1, "Importing the same PNG does not duplicate it");
@@ -83,6 +86,16 @@ public final class CatSkinTests {
             library.select(skin.skin()); library = new SkinLibrary(directory);
             helper.assertTrue(library.selected().hash().equals(skin.skin().hash()), "The selected custom skin is restored on another launch");
             helper.assertTrue(library.entries().getFirst().name().equals("Duplicate"), "Custom names survive another launch");
+            library.rename(skin.skin(), "Renamed cat");
+            library = new SkinLibrary(directory);
+            helper.assertTrue(library.entries().getFirst().name().equals("Renamed cat") && library.selected().hash().equals(skin.skin().hash()),
+                    "Renaming persists without changing the texture or selected skin");
+            try {
+                library.rename(new CatSkin("jellie", new byte[0]), "Not allowed");
+                throw new IllegalStateException("Vanilla skin renamed");
+            } catch (java.io.IOException expected) {
+                helper.assertTrue(library.entries().getFirst().name().equals("Renamed cat"), "Vanilla names cannot change the custom library");
+            }
             try {
                 library.add("Invalid sheet", png(250, 32, -1));
                 throw new IllegalStateException("Invalid import accepted");
@@ -91,7 +104,12 @@ public final class CatSkinTests {
                         "Rejecting an invalid import preserves the existing library and selected skin");
             }
             library.remove(skin.skin());
-            helper.assertTrue(library.entries().isEmpty() && library.selected().variant().equals("default"), "Deleting the active custom skin restores Automatic");
+            helper.assertTrue(library.entries().isEmpty() && CatSkin.VARIANTS.contains(library.selected().variant()), "Deleting the active custom skin restores a saved vanilla variant");
+            Path legacy = directory.resolve("legacy"); Files.createDirectories(legacy);
+            Files.writeString(legacy.resolve("library.json"), "{\"skins\":[],\"selected\":\"default\"}");
+            var migrated = new SkinLibrary(legacy);
+            helper.assertTrue(CatSkin.VARIANTS.contains(migrated.selected().variant())
+                    && new SkinLibrary(legacy).selected().variant().equals(migrated.selected().variant()), "Legacy Automatic selections migrate once and remain stable");
             helper.succeed();
         } finally { remove(directory); }
     }

@@ -13,13 +13,15 @@ public final class SkinLibrary {
     public record Entry(String name, CatSkin skin) {}
     private final Path directory;
     private final List<Entry> custom = new ArrayList<>();
-    private CatSkin selected = CatSkin.DEFAULT;
+    private CatSkin selected = randomSkin();
 
     public SkinLibrary(Path directory) throws IOException {
         this.directory = directory;
         Files.createDirectories(directory);
         var index = directory.resolve("library.json");
-        if (!Files.isRegularFile(index) || Files.size(index) > 64_000) return;
+        if (!Files.isRegularFile(index)) { save(); return; }
+        if (Files.size(index) > 64_000) return;
+        boolean persistSelection = false;
         try (var reader = Files.newBufferedReader(index)) {
             var json = new Gson().fromJson(reader, JsonObject.class);
             for (var value : json.getAsJsonArray("skins")) {
@@ -34,9 +36,13 @@ public final class SkinLibrary {
                 } catch (IOException | RuntimeException ignored) { /* Keep the remaining library usable. */ }
             }
             String active = json.has("selected") ? json.get("selected").getAsString() : "default";
-            if (active.matches("[0-9a-f]{64}")) selected = custom.stream().filter(e -> e.skin.hash().equals(active)).map(Entry::skin).findFirst().orElse(CatSkin.DEFAULT);
-            else selected = new CatSkin(active, new byte[0]);
-        } catch (RuntimeException e) { selected = CatSkin.DEFAULT; }
+            if (active.matches("[0-9a-f]{64}")) {
+                var saved = custom.stream().filter(e -> e.skin.hash().equals(active)).map(Entry::skin).findFirst();
+                if (saved.isPresent()) selected = saved.get(); else persistSelection = true;
+            } else if (CatSkin.VARIANTS.contains(active)) selected = new CatSkin(active, new byte[0]);
+            else persistSelection = true;
+        } catch (RuntimeException e) { return; }
+        if (persistSelection) save();
     }
 
     public List<Entry> entries() { return List.copyOf(custom); }
@@ -52,10 +58,19 @@ public final class SkinLibrary {
         Files.write(directory.resolve(skin.hash() + ".png"), skin.png());
         custom.add(entry); save(); return entry;
     }
-    public void select(CatSkin skin) throws IOException { selected = skin; save(); }
+    public void select(CatSkin skin) throws IOException { selected = skin.variant().equals("default") ? randomSkin() : skin; save(); }
+    public void rename(CatSkin skin, String name) throws IOException {
+        if (!skin.variant().equals("custom")) throw new IOException("not_custom");
+        for (int i = 0; i < custom.size(); i++) if (custom.get(i).skin.hash().equals(skin.hash())) {
+            var previous = custom.set(i, new Entry(cleanName(name), custom.get(i).skin));
+            try { save(); } catch (IOException e) { custom.set(i, previous); throw e; }
+            return;
+        }
+        throw new IOException("skin_not_found");
+    }
     public void remove(CatSkin skin) throws IOException {
         custom.removeIf(entry -> entry.skin.hash().equals(skin.hash()));
-        if (selected.hash().equals(skin.hash()) && selected.variant().equals("custom")) selected = CatSkin.DEFAULT;
+        if (selected.hash().equals(skin.hash()) && selected.variant().equals("custom")) selected = randomSkin();
         save(); Files.deleteIfExists(directory.resolve(skin.hash() + ".png"));
     }
     private void save() throws IOException {
@@ -74,5 +89,8 @@ public final class SkinLibrary {
     private static String cleanName(String name) {
         String clean = name.replaceAll("[\\p{Cntrl}§]", "").strip();
         return clean.isEmpty() ? "Custom Skin" : clean.substring(0, Math.min(32, clean.length()));
+    }
+    private static CatSkin randomSkin() {
+        return new CatSkin(CatSkin.VARIANTS.get(java.util.concurrent.ThreadLocalRandom.current().nextInt(CatSkin.VARIANTS.size())), new byte[0]);
     }
 }
