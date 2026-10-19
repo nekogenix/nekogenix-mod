@@ -76,7 +76,7 @@ public final class CatSkinSmokeTest {
                 for (int y = 0; y < 32; y++) for (int x = 0; x < 64; x++) {
                     int color = (x / 2 + y / 3) % 5 == 0 ? 0xff61dcc6 : 0xff343044;
                     if (y == 6 && (x == 6 || x == 9)) color = 0xffdfec74;
-                    image.setRGB(x, y, color);
+                    image.setRGB(x, y, color & 0x00ffffff | 0x01000000);
                 }
                 javax.imageio.ImageIO.write(image, "PNG", imported.toFile()); mc.screen.onFilesDrop(List.of(rejected));
             }

@@ -46,6 +46,48 @@ public final class CatSkinTests {
     }
 
     @GameTest(template = "empty")
+    public static void transparentBodyPixelsBecomeOpaque(GameTestHelper helper) throws Exception {
+        var image = new java.awt.image.BufferedImage(64, 32, java.awt.image.BufferedImage.TYPE_INT_ARGB);
+        for (int y = 0; y < 32; y++) for (int x = 0; x < 64; x++) image.setRGB(x, y, 0x00123456);
+        image.setRGB(6, 6, 0x01778899);
+        var encoded = new java.io.ByteArrayOutputStream(); javax.imageio.ImageIO.write(image, "PNG", encoded);
+        byte[] normalized = CatSkin.normalize(encoded.toByteArray());
+        var result = javax.imageio.ImageIO.read(new java.io.ByteArrayInputStream(normalized));
+        helper.assertTrue(result.getRGB(6, 6) == 0xff778899, "A single barely visible pixel becomes fully opaque without recoloring");
+        int[][] points = {{7, 7}, {27, 10}, {2, 12}, {8, 12}, {1, 18}, {5, 18}, {10, 18}, {42, 5}, {3, 26}};
+        for (var point : points) helper.assertTrue(result.getRGB(point[0], point[1]) == 0xff123456,
+                "Every body part is present even where its PNG was completely transparent");
+        helper.assertTrue(result.getRGB(63, 31) == 0x00123456, "Unused texture space stays unchanged");
+        helper.assertTrue(java.util.Arrays.equals(normalized, CatSkin.normalize(normalized)), "Opacity normalization is stable across client server and cache validation");
+        image.setRGB(6, 6, 0); image.setRGB(63, 31, 0xffffffff);
+        encoded.reset(); javax.imageio.ImageIO.write(image, "PNG", encoded);
+        try {
+            CatSkin.normalize(encoded.toByteArray());
+            throw new IllegalStateException("A pixel outside the cat surface bypassed empty skin validation");
+        } catch (CatSkin.InvalidImageException expected) { /* Unused pixels cannot make an empty skin valid. */ }
+
+        var palette = new java.awt.image.IndexColorModel(8, 2, new byte[] {17, 68}, new byte[] {34, 85}, new byte[] {51, 102}, new byte[] {1, 0});
+        var indexed = new java.awt.image.BufferedImage(64, 32, java.awt.image.BufferedImage.TYPE_BYTE_INDEXED, palette);
+        encoded.reset(); javax.imageio.ImageIO.write(indexed, "PNG", encoded);
+        var opaque = javax.imageio.ImageIO.read(new java.io.ByteArrayInputStream(CatSkin.normalize(encoded.toByteArray())));
+        helper.assertTrue(opaque.getRGB(7, 7) == 0xff112233, "Indexed PNG transparency cannot bypass opacity normalization");
+        Path directory = Files.createTempDirectory("nekogenix-skin-opacity-");
+        try {
+            var old = new CatSkin("custom", encoded.toByteArray());
+            Files.write(directory.resolve(old.hash() + ".png"), old.png());
+            Files.writeString(directory.resolve("library.json"), "{\"skins\":[{\"name\":\"Old cat\",\"hash\":\"" + old.hash()
+                    + "\"}],\"selected\":\"" + old.hash() + "\"}");
+            var migrated = new SkinLibrary(directory);
+            helper.assertTrue(!migrated.selected().hash().equals(old.hash()) && migrated.selected().hash().equals(old.validated().hash()),
+                    "The existing selected texture migrates to its opaque version without losing the selection");
+            migrated = new SkinLibrary(directory);
+            helper.assertTrue(migrated.entries().getFirst().name().equals("Old cat") && migrated.selected().hash().equals(old.validated().hash()),
+                    "Migrated names selection and texture files survive another launch");
+        } finally { remove(directory); }
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
     public static void ownerActivityCleanupAndDeduplication(GameTestHelper helper) throws Exception {
         Path directory = Files.createTempDirectory("nekogenix-skin-store-");
         try {

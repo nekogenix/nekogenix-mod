@@ -22,6 +22,7 @@ public final class SkinLibrary {
         if (!Files.isRegularFile(index)) { save(); return; }
         if (Files.size(index) > 64_000) return;
         boolean persistSelection = false;
+        var loaded = new java.util.HashMap<String, CatSkin>();
         try (var reader = Files.newBufferedReader(index)) {
             var json = new Gson().fromJson(reader, JsonObject.class);
             for (var value : json.getAsJsonArray("skins")) {
@@ -32,13 +33,19 @@ public final class SkinLibrary {
                     if (!hash.matches("[0-9a-f]{64}")) continue;
                     Path image = directory.resolve(hash + ".png");
                     if (!Files.isRegularFile(image) || Files.size(image) > CatSkin.MAX_BYTES) continue;
-                    custom.add(new Entry(cleanName(item.get("name").getAsString()), new CatSkin("custom", Files.readAllBytes(image)).validated()));
+                    var skin = new CatSkin("custom", Files.readAllBytes(image)).validated();
+                    if (!skin.hash().equals(hash)) {
+                        Files.write(directory.resolve(skin.hash() + ".png"), skin.png());
+                        persistSelection = true;
+                    }
+                    custom.add(new Entry(cleanName(item.get("name").getAsString()), skin));
+                    loaded.put(hash, skin);
                 } catch (IOException | RuntimeException ignored) { /* Keep the remaining library usable. */ }
             }
             String active = json.has("selected") ? json.get("selected").getAsString() : "default";
             if (active.matches("[0-9a-f]{64}")) {
-                var saved = custom.stream().filter(e -> e.skin.hash().equals(active)).map(Entry::skin).findFirst();
-                if (saved.isPresent()) selected = saved.get(); else persistSelection = true;
+                var saved = loaded.get(active);
+                if (saved != null) selected = saved; else persistSelection = true;
             } else if (CatSkin.VARIANTS.contains(active)) selected = new CatSkin(active, new byte[0]);
             else persistSelection = true;
         } catch (RuntimeException e) { return; }

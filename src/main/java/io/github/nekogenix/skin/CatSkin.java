@@ -3,6 +3,7 @@ package io.github.nekogenix.skin;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.awt.image.BufferedImage;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
@@ -12,6 +13,7 @@ import javax.imageio.stream.MemoryCacheImageInputStream;
 
 public final class CatSkin {
     public static final int MAX_BYTES = 16_384;
+    private static final boolean[][] SURFACE = surface();
     public static final List<String> VARIANTS = List.of("tabby", "black", "red", "siamese", "british_shorthair",
             "calico", "persian", "ragdoll", "white", "jellie", "all_black");
     public static final CatSkin DEFAULT = new CatSkin("default", new byte[0]);
@@ -58,9 +60,16 @@ public final class CatSkin {
                 if (!reader.getFormatName().equalsIgnoreCase("png")) throw new InvalidImageException("skin_format");
                 int width = reader.getWidth(0), height = reader.getHeight(0);
                 if (width != 64 || height != 32) throw new InvalidImageException("skin_dimensions", width, height);
-                var image = reader.read(0);
+                var source = reader.read(0);
+                var image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+                image.setRGB(0, 0, width, height, source.getRGB(0, 0, width, height, null, 0, width), 0, width);
                 boolean visible = false;
-                for (int y = 0; y < 32; y++) for (int x = 0; x < 64; x++) visible |= (image.getRGB(x, y) >>> 24) != 0;
+                for (int y = 0; y < 32; y++) for (int x = 0; x < 64; x++) if (SURFACE[y][x]) {
+                    int pixel = image.getRGB(x, y);
+                    visible |= (pixel >>> 24) != 0;
+                    // Like the vanilla player base layer, keep RGB and force the surface opaque.
+                    image.setRGB(x, y, pixel | 0xff000000);
+                }
                 if (!visible) throw new InvalidImageException("skin_empty");
                 var output = new ByteArrayOutputStream();
                 ImageIO.write(image, "PNG", output);
@@ -71,5 +80,18 @@ public final class CatSkin {
             if (e instanceof InvalidImageException invalid) throw invalid;
             var invalid = new InvalidImageException("skin_format"); invalid.initCause(e); throw invalid;
         }
+    }
+
+    private static boolean[][] surface() {
+        var pixels = new boolean[32][64];
+        // Minecraft 1.21.1 cat cuboids: texture origin followed by width, height and depth.
+        int[][] cubes = {{0, 0, 5, 4, 5}, {20, 0, 4, 16, 6}, {0, 10, 1, 1, 2}, {6, 10, 1, 1, 2},
+                {0, 15, 1, 8, 1}, {4, 15, 1, 8, 1}, {8, 13, 2, 6, 2}, {40, 0, 2, 10, 2}, {0, 24, 3, 2, 2}};
+        for (var cube : cubes) {
+            int u = cube[0], v = cube[1], w = cube[2], h = cube[3], d = cube[4];
+            for (int y = v; y < v + d; y++) for (int x = u + d; x < u + d + 2 * w; x++) pixels[y][x] = true;
+            for (int y = v + d; y < v + d + h; y++) for (int x = u; x < u + 2 * (w + d); x++) pixels[y][x] = true;
+        }
+        return pixels;
     }
 }
