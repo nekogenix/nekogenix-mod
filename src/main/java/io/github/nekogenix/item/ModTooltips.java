@@ -15,7 +15,8 @@ final class ModTooltips {
     static void injection(Item.TooltipContext context, List<Component> tooltip) {
         PotionContents.addPotionTooltip(List.of(
                 new MobEffectInstance(Content.SHOCK, NekoState.SHOCK_DURATION),
-                new MobEffectInstance(Content.TRANSFORMING, 4 * NekoState.DAY)), tooltip::add, 1F, context.tickRate());
+                new MobEffectInstance(Content.TRANSFORMING, 3 * NekoState.DAY),
+                new MobEffectInstance(Content.CAT_TRANSFORMING, NekoState.DAY)), tooltip::add, 1F, context.tickRate());
         line(tooltip, "injection_use", ChatFormatting.GRAY);
         line(tooltip, "stages", ChatFormatting.GRAY);
         line(tooltip, "stage_ability", ChatFormatting.GRAY);

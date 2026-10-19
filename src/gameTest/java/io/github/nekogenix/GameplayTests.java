@@ -66,42 +66,48 @@ public final class GameplayTests {
         helper.succeed();
     }
 
-    @GameTest(template = "empty", timeoutTicks = 180)
+    @GameTest(template = "empty", timeoutTicks = 250)
     public static void injectionCancellationAndCompletion(GameTestHelper helper) {
         ServerPlayer player = player(helper);
+        player.getFoodData().setFoodLevel(17);
         ItemStack injection = Content.INJECTION.toStack();
         player.setItemInHand(InteractionHand.MAIN_HAND, injection);
-        InjectionHandler.input(player, true);
-        helper.runAfterDelay(20, () -> {
+        helper.runAfterDelay(65, () -> InjectionHandler.input(player, true));
+        helper.runAfterDelay(71, () -> helper.assertTrue(player.getHealth() == 20F,
+                "The approach before needle contact does not hurt"));
+        helper.runAfterDelay(77, () -> helper.assertTrue(player.getHealth() == 19F
+                && player.getData(Content.NEKO).phase() == NekoState.Phase.HUMAN,
+                "Needle contact hurts before any transformation begins"));
+        helper.runAfterDelay(85, () -> {
             InjectionHandler.input(player, false);
             helper.assertTrue(player.getMainHandItem() == injection, "Interrupted injection is not consumed");
             helper.assertTrue(player.getData(Content.NEKO).phase() == NekoState.Phase.HUMAN, "Cancellation does not transform");
             helper.assertTrue(player.getData(Content.INJECTION_RETURN).started() >= 0,
                     "Releasing starts a synchronized return instead of clearing the animation");
         });
-        helper.runAfterDelay(25, () -> {
+        helper.runAfterDelay(90, () -> {
             InjectionHandler.input(player, false);
             helper.assertTrue(player.getData(Content.INJECTION_STARTED) >= 0,
                     "Repeated release does not interrupt the return animation");
         });
-        helper.runAfterDelay(34, () -> {
+        helper.runAfterDelay(99, () -> {
             helper.assertTrue(player.getData(Content.INJECTION_STARTED) == -1
                     && player.getData(Content.INJECTION_RETURN).started() == -1,
                     "The cancelled animation finishes and clears its transient state");
-            helper.assertTrue(player.getMainHandItem() == injection && player.getHealth() == 20F
+            helper.assertTrue(player.getMainHandItem() == injection && player.getHealth() == 19F
                     && player.getData(Content.NEKO).phase() == NekoState.Phase.HUMAN,
-                    "Returning to a full syringe does not consume it or apply injection effects");
+                    "Returning retains the contact damage without consuming the syringe or applying transformation");
         });
-        for (int tick : new int[] {35, 55, 75, 95, 115}) {
+        for (int tick : new int[] {100, 120, 140, 160, 180}) {
             helper.runAfterDelay(tick, () -> InjectionHandler.input(player, true));
         }
-        helper.runAfterDelay(120, () -> {
+        helper.runAfterDelay(185, () -> {
             helper.assertTrue(player.getMainHandItem().is(Content.INJECTION), "Reverse animation precedes used syringe");
         });
-        helper.runAfterDelay(132, () -> {
+        helper.runAfterDelay(197, () -> {
             helper.assertTrue(player.getMainHandItem().is(Content.USED_SYRINGE), "Completed injection becomes used syringe");
             helper.assertTrue(player.getData(Content.NEKO).phase() == NekoState.Phase.SHOCK, "Injection starts shock");
-            helper.assertTrue(player.getHealth() == 19F, "Injection deals exactly one health point");
+            helper.assertTrue(player.getHealth() == 18F, "Each needle entry hurts once and completion adds no extra damage");
             remove(player);
             helper.succeed();
         });
@@ -266,7 +272,7 @@ public final class GameplayTests {
             helper.assertTrue(count == stage + 1, "Each completed stage grants one distinct ability");
         }
         TransformationHandler.refreshEffects(player);
-        helper.assertTrue(state.isNeko() && player.getEffect(Content.TRANSFORMING).getAmplifier() == 3, "Stage three unlocks all abilities and starts stage four");
+        helper.assertTrue(state.isNeko() && !player.hasEffect(Content.TRANSFORMING) && player.hasEffect(Content.CAT_TRANSFORMING), "Three neko stages give way to a separate Cat Transformation");
         var death = NeoForge.EVENT_BUS.post(new PlayLevelSoundEvent.AtPosition(player.level(), player.position(),
                 Holder.direct(SoundEvents.PLAYER_DEATH), SoundSource.PLAYERS, 1, 1));
         helper.assertTrue(death.getSound().value() == SoundEvents.CAT_DEATH, "Server voice events identify their player");

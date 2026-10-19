@@ -26,7 +26,7 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 @PrefixGameTestTemplate(false)
 public final class CatTransformationTests {
     @GameTest(template = "empty")
-    public static void fourthStageAndPermanentStabilization(GameTestHelper helper) {
+    public static void catTransformationAndPermanentStabilization(GameTestHelper helper) {
         var state = new NekoState();
         state.begin();
         for (int i = 0; i < NekoState.SHOCK_DURATION + 3 * NekoState.DAY; i++) state.tick(helper.getLevel().random);
@@ -42,7 +42,7 @@ public final class CatTransformationTests {
         helper.assertTrue(restored.phase() == NekoState.Phase.NEKO && restored.lives() == 9 && !restored.isCat(), "Saved stabilization retains neko form indefinitely");
         restored.deserializeNBT(helper.getLevel().registryAccess(), finalTick);
         restored.tick(helper.getLevel().random);
-        helper.assertTrue(restored.isCat() && restored.has(7) && restored.lives() == 9 && !restored.stabilize(), "The unstabilized fourth stage completes into a cat");
+        helper.assertTrue(restored.isCat() && restored.has(7) && restored.lives() == 9 && !restored.stabilize(), "The unstabilized Cat Transformation completes into a cat");
         var old = new CompoundTag();
         old.putInt("phase", 3); old.putInt("elapsed", 72000); old.putInt("abilities", 7); old.putInt("lives", 6);
         restored.deserializeNBT(helper.getLevel().registryAccess(), old);
@@ -52,7 +52,7 @@ public final class CatTransformationTests {
     }
 
     @GameTest(template = "empty")
-    public static void fourthStageDeathsAndCatDimensions(GameTestHelper helper) {
+    public static void catTransformationDeathsAndCrouching(GameTestHelper helper) {
         ServerPlayer player = GameplayTests.player(helper);
         set(player, NekoState.Phase.CAT_TRANSFORMING, 500, 9);
         helper.assertFalse(NekoBreeding.canFeed(player), "An unstabilized neko cannot enter love mode");
@@ -60,11 +60,17 @@ public final class CatTransformationTests {
         player = player.server.getPlayerList().respawn(player, false, Entity.RemovalReason.KILLED);
         var state = player.getData(Content.NEKO);
         helper.assertTrue(state.phase() == NekoState.Phase.CAT_TRANSFORMING && state.elapsed() == 500 && state.lives() == 8,
-                "Death during stage four spends one life without resetting the stage");
+                "Death during Cat Transformation spends one life without resetting the stage");
         cat(player);
         CatForm.tick(new PlayerTickEvent.Post(player));
-        helper.assertTrue(Math.abs(player.getBbHeight() - .7F) < .001 && Math.abs(player.getEyeHeight() - .35F) < .001
+        helper.assertTrue(Math.abs(player.getBbHeight() - .7F) < .001 && Math.abs(player.getEyeHeight() - CatForm.STANDING_EYE_HEIGHT) < .001
                 && player.getData(Content.CAT_FORM), "Cat form changes the collision box eye height and synchronized appearance");
+        player.setPose(net.minecraft.world.entity.Pose.CROUCHING);
+        helper.assertTrue(Math.abs(player.getEyeHeight() - CatForm.CROUCHING_EYE_HEIGHT) < .001,
+                "Crouching lowers the feline viewpoint to its former height");
+        player.setPose(net.minecraft.world.entity.Pose.STANDING);
+        helper.assertTrue(player.getEyeHeight() > CatForm.CROUCHING_EYE_HEIGHT,
+                "Standing restores the raised feline viewpoint");
         helper.assertTrue(NekoBreeding.canFeed(player), "Only full cat players can be fed for love mode");
         for (int i = 0; i < 9; i++) state.loseLife();
         TransformationHandler.refreshEffects(player);
@@ -75,21 +81,24 @@ public final class CatTransformationTests {
         helper.succeed();
     }
 
-    @GameTest(template = "empty", timeoutTicks = 150)
-    public static void stabilizingInjectionOnlyWorksDuringStageFour(GameTestHelper helper) {
+    @GameTest(template = "empty", timeoutTicks = 220)
+    public static void crystallizingInjectionOnlyStopsCatTransformation(GameTestHelper helper) {
         var player = GameplayTests.player(helper);
+        player.getFoodData().setFoodLevel(17);
         player.setItemInHand(InteractionHand.MAIN_HAND, Content.STABILIZING_INJECTION.toStack());
         InjectionHandler.input(player, true);
         helper.assertTrue(player.getData(Content.INJECTION_STARTED) == -1, "Humans cannot consume stabilizing injection");
         set(player, NekoState.Phase.CAT_TRANSFORMING, 1000, 7);
-        for (int tick : new int[] {1, 21, 41, 61, 81}) helper.runAfterDelay(tick, () -> InjectionHandler.input(player, true));
-        helper.runAfterDelay(100, () -> {
+        for (int tick : new int[] {66, 86, 106, 126, 146}) helper.runAfterDelay(tick, () -> InjectionHandler.input(player, true));
+        helper.runAfterDelay(77, () -> helper.assertTrue(player.getHealth() == 19F,
+                "Crystallizing injection damage also happens at needle contact"));
+        helper.runAfterDelay(165, () -> {
             helper.assertTrue(player.getData(Content.NEKO).phase() == NekoState.Phase.NEKO && player.getData(Content.NEKO).lives() == 7
-                    && player.getMainHandItem().is(Content.USED_SYRINGE), "Stabilization retains abilities and remaining lives and returns a used syringe");
+                    && player.getMainHandItem().is(Content.USED_SYRINGE) && player.getHealth() == 19F, "Stabilization retains abilities and remaining lives and returns a used syringe");
             InjectionHandler.input(player, false);
             player.setItemInHand(InteractionHand.MAIN_HAND, Content.INJECTION.toStack());
             InjectionHandler.input(player, true);
-            helper.assertTrue(player.getData(Content.INJECTION_STARTED) == -1, "Neko injection cannot resume a stabilized fourth stage");
+            helper.assertTrue(player.getData(Content.INJECTION_STARTED) == -1, "Neko injection cannot resume a stabilized Cat Transformation");
             cat(player);
             player.setItemInHand(InteractionHand.MAIN_HAND, Content.STABILIZING_INJECTION.toStack());
             InjectionHandler.input(player, true);
@@ -99,7 +108,7 @@ public final class CatTransformationTests {
         });
     }
 
-    @GameTest(template = "empty", timeoutTicks = 850)
+    @GameTest(template = "empty", timeoutTicks = 450)
     public static void brewingAndOneBottleFillExactlyOneSyringe(GameTestHelper helper) {
         var level = helper.getLevel();
         var brewingPos = helper.absolutePos(new BlockPos(2, 2, 2));
@@ -107,14 +116,10 @@ public final class CatTransformationTests {
         var brewing = (BrewingStandBlockEntity) level.getBlockEntity(brewingPos);
         helper.assertTrue(brewing.canPlaceItem(0, Items.HONEY_BOTTLE.getDefaultInstance()), "The brewing bottle slot accepts honey for custom recipes");
         brewing.setItem(0, Items.HONEY_BOTTLE.getDefaultInstance());
-        brewing.setItem(3, Items.FERMENTED_SPIDER_EYE.getDefaultInstance());
+        brewing.setItem(3, Items.AMETHYST_SHARD.getDefaultInstance());
         brewing.setItem(4, Items.BLAZE_POWDER.getDefaultInstance());
-        helper.runAfterDelay(410, () -> {
-            helper.assertTrue(brewing.getItem(0).is(Content.STABILIZING_SOLUTION), "Honey and fermented spider eye brew into solution in a real brewing stand");
-            brewing.setItem(3, Items.AMETHYST_SHARD.getDefaultInstance());
-        });
-        helper.runAfterDelay(825, () -> {
-            helper.assertTrue(brewing.getItem(0).is(Content.NEKO_STABILIZER), "Amethyst refines the solution into stabilizer");
+        helper.runAfterDelay(425, () -> {
+            helper.assertTrue(brewing.getItem(0).is(Content.NEKO_STABILIZER), "Honey and amethyst brew directly into Potion of Sweet Amethyst");
             var pos = brewingPos.east(3);
             level.setBlockAndUpdate(pos, Content.PNEUMATIC_STAND.get().defaultBlockState());
             var stand = (PneumaticStandBlockEntity) level.getBlockEntity(pos);

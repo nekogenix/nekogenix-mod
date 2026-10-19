@@ -12,8 +12,7 @@ import net.neoforged.neoforge.event.brewing.RegisterBrewingRecipesEvent;
 public final class StabilizerBrewing {
     @SubscribeEvent
     public static void brewing(RegisterBrewingRecipesEvent event) {
-        event.getBuilder().addRecipe(Ingredient.of(Items.HONEY_BOTTLE), Ingredient.of(Items.FERMENTED_SPIDER_EYE), Content.STABILIZING_SOLUTION.toStack());
-        event.getBuilder().addRecipe(Ingredient.of(Content.STABILIZING_SOLUTION.get()), Ingredient.of(Items.AMETHYST_SHARD), Content.NEKO_STABILIZER.toStack());
+        event.getBuilder().addRecipe(Ingredient.of(Items.HONEY_BOTTLE), Ingredient.of(Items.AMETHYST_SHARD), Content.NEKO_STABILIZER.toStack());
     }
 
     private StabilizerBrewing() {}

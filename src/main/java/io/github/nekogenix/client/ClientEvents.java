@@ -161,14 +161,14 @@ public final class ClientEvents {
                     float age = elapsed(player, partial);
                     if (age < 0 || age >= InjectionHandler.TOTAL_TICKS) return false;
                     float side = arm == HumanoidArm.RIGHT ? 1 : -1;
-                    float approach = Mth.clamp(age / 10F, 0, 1);
+                    float approach = Mth.clamp(age / InjectionHandler.NEEDLE_ENTRY_TICKS, 0, 1);
                     float retreat = age < 80 ? 1 : 1 - (age - 80) / 12F;
                     float pressure = Mth.sin(age * .48F) * .006F;
                     float tremor = Mth.cos(age * .48F) * .4F;
                     var returning = player.getData(Content.INJECTION_RETURN);
                     if (returning.started() >= 0) {
                         retreat = returning.remaining(player.level().getGameTime(), partial);
-                        approach = Mth.clamp(returning.progress() / 10F, 0, 1);
+                        approach = Mth.clamp(returning.progress() / (float) InjectionHandler.NEEDLE_ENTRY_TICKS, 0, 1);
                         pressure *= retreat;
                         tremor *= retreat;
                     }

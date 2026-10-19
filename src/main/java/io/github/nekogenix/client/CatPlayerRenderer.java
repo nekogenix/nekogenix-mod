@@ -28,6 +28,7 @@ import net.minecraft.world.entity.animal.Cat;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.MapItem;
 import net.minecraft.world.scores.Team;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -35,6 +36,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RenderHandEvent;
+import net.neoforged.neoforge.client.event.RenderArmEvent;
 import net.neoforged.neoforge.client.event.RenderPlayerEvent;
 import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
 
@@ -70,15 +72,17 @@ public final class CatPlayerRenderer extends CatRenderer {
         if (stack.isEmpty()) return;
         pose.pushPose();
         ((PawModel) model).paw(arm).translateAndRotate(pose);
-        pose.translate(0, .45, .02);
-        ItemDisplayContext context = left ? ItemDisplayContext.THIRD_PERSON_LEFT_HAND : ItemDisplayContext.THIRD_PERSON_RIGHT_HAND;
-        float modelYaw = Minecraft.getInstance().getItemRenderer().getModel(stack, cat.level(), cat, 0)
-                .getTransforms().getTransform(context).rotation.y;
-        pose.mulPose(Axis.XP.rotationDegrees(180));
-        pose.mulPose(Axis.YP.rotationDegrees((left ? 1 : -1) * modelYaw));
-        pose.mulPose(Axis.ZP.rotationDegrees((left ? -1 : 1) * cat.getAttackAnim(partial) * 40));
-        pose.scale(.55F, .55F, .55F);
-        items.renderItem(cat, stack, context, left, pose, buffers, light);
+        // Align the vanilla palm with the cat's toes, scaling the entire grip as well as the item.
+        float scale = stack.getUseAnimation() == net.minecraft.world.item.UseAnim.SPEAR ? .4F : .55F;
+        pose.translate(0, 9 / 16F, 1 / 16F);
+        pose.scale(scale, scale, scale);
+        pose.translate((left ? -1 : 1) / 16F, -10 / 16F, 0);
+        pose.mulPose(Axis.XP.rotationDegrees(-90));
+        pose.mulPose(Axis.YP.rotationDegrees(180));
+        pose.translate((left ? -1 : 1) / 16F, .125, -.625);
+        Player player = ((PlayerCat) cat).player;
+        items.renderItem(player, stack, left ? ItemDisplayContext.THIRD_PERSON_LEFT_HAND : ItemDisplayContext.THIRD_PERSON_RIGHT_HAND,
+                left, pose, buffers, light);
         pose.popPose();
     }
 
@@ -107,6 +111,7 @@ public final class CatPlayerRenderer extends CatRenderer {
             cat = new PlayerCat(player);
             CATS.put(player.getUUID(), cat);
         }
+        cat.updatePose();
         cat.setPos(player.position());
         cat.setYRot(player.getYRot());
         cat.yRotO = player.yRotO;
@@ -136,11 +141,6 @@ public final class CatPlayerRenderer extends CatRenderer {
         event.setCanceled(true);
         PlayerCat cat = proxy(player);
         float partial = event.getPartialTick();
-        // The visual cat never enters the world; the player remains authoritative for movement and inventory.
-        if (cat.lastWalkTick != player.tickCount) {
-            cat.walkAnimation.update(player.walkAnimation.speed(), 1F);
-            cat.lastWalkTick = player.tickCount;
-        }
         renderer.render(cat, Mth.rotLerp(partial, player.yRotO, player.getYRot()), partial,
                 event.getPoseStack(), event.getMultiBufferSource(), event.getPackedLight());
     }
@@ -149,47 +149,60 @@ public final class CatPlayerRenderer extends CatRenderer {
     public static void hand(RenderHandEvent event) {
         var mc = Minecraft.getInstance();
         var player = mc.player;
-        if (renderer == null || player == null || !CatForm.active(player) || player.isSpectator()) return;
-        event.setCanceled(true);
-        boolean main = event.getHand() == InteractionHand.MAIN_HAND;
-        HumanoidArm arm = main ? player.getMainArm() : player.getMainArm().getOpposite();
-        boolean left = arm == HumanoidArm.LEFT;
-        float side = left ? -1 : 1;
+        if (renderer == null || player == null || !CatForm.active(player) || player.isSpectator() || player.isScoping()) return;
+        ItemStack stack = event.getItemStack();
+        // Vanilla controls item transforms, use animations, maps and which hands are visible.
+        // Empty hands and map arms reach the arm event below.
+        if (stack.isEmpty() || stack.getItem() instanceof MapItem || player.isInvisible()) return;
+        HumanoidArm arm = event.getHand() == InteractionHand.MAIN_HAND ? player.getMainArm() : player.getMainArm().getOpposite();
+        float side = arm == HumanoidArm.RIGHT ? 1 : -1;
+        PlayerCat cat = proxy(player);
+        float crouch = cat.crouch(event.getPartialTick());
+        float air = cat.air(event.getPartialTick());
         PoseStack pose = event.getPoseStack();
         pose.pushPose();
         float swing = Mth.sin(Mth.sqrt(event.getSwingProgress()) * Mth.PI);
-        pose.translate(side * (.42 - swing * .12), -.42 - event.getEquipProgress() * .55 + swing * .12, -.65);
+        pose.translate(side * (.56 - swing * .16 + air * .04), -.52 - event.getEquipProgress() * .6
+                + swing * .12 - crouch * .04 + air * .035, -.72 + crouch * .025);
         if (player.isUsingItem() && player.getUsedItemHand() == event.getHand()) {
-            float use = player.getUseItemRemainingTicks() - event.getPartialTick();
-            switch (event.getItemStack().getUseAnimation()) {
-                case EAT, DRINK -> {
-                    pose.translate(-side * .18, .14 + Math.abs(Mth.cos(use * .65F)) * .025, .12);
-                    pose.mulPose(Axis.ZP.rotationDegrees(side * 20));
-                }
-                case BLOCK -> pose.mulPose(Axis.YP.rotationDegrees(side * 35));
-                case BOW, CROSSBOW, SPEAR -> pose.translate(-side * .14, .08, .12);
+            switch (stack.getUseAnimation()) {
+                case EAT, DRINK -> pose.translate(side * -.18, .16, .12);
+                case BLOCK -> pose.translate(side * -.12, .08, .05);
+                case BOW, CROSSBOW, SPEAR -> pose.translate(side * -.22, .08, .06);
                 default -> {}
             }
         }
-        if (!player.isInvisible()) {
-            pose.pushPose();
-            pose.mulPose(Axis.XP.rotationDegrees(180));
-            pose.mulPose(Axis.YP.rotationDegrees(side * -12));
-            pose.scale(1.15F, 1.15F, 1.15F);
-            ModelPart paw = left ? renderer.leftPaw : renderer.rightPaw;
-            paw.resetPose();
-            paw.setPos(0, 0, 0);
-            paw.render(pose, event.getMultiBufferSource().getBuffer(RenderType.entityCutout(proxy(player).getTextureId())),
-                    event.getPackedLight(), OverlayTexture.NO_OVERLAY);
-            pose.popPose();
-        }
-        pose.translate(0, .04, -.12);
-        pose.mulPose(Axis.YP.rotationDegrees(side * 40));
-        pose.mulPose(Axis.ZP.rotationDegrees(side * (-10 - swing * 25)));
-        pose.scale(.8F, .8F, .8F);
-        renderer.items.renderItem(player, event.getItemStack(), left ? ItemDisplayContext.FIRST_PERSON_LEFT_HAND : ItemDisplayContext.FIRST_PERSON_RIGHT_HAND,
-                left, pose, event.getMultiBufferSource(), event.getPackedLight());
+        pose.mulPose(Axis.ZP.rotationDegrees(side * (air * 16 - crouch * 5 - swing * 20)));
+        ModelPart paw = renderer.paw(arm);
+        paw.setPos(0, -10, -.5F);
+        paw.render(pose, event.getMultiBufferSource().getBuffer(RenderType.entityCutout(cat.getTextureId())),
+                event.getPackedLight(), OverlayTexture.NO_OVERLAY);
         pose.popPose();
+    }
+
+    @SubscribeEvent
+    public static void arm(RenderArmEvent event) {
+        var player = event.getPlayer();
+        if (renderer == null || !CatForm.active(player) || player.isSpectator()) return;
+        event.setCanceled(true);
+        if (player.isInvisible()) return;
+        var mc = Minecraft.getInstance();
+        float partial = mc.getTimer().getGameTimeDeltaPartialTick(false);
+        PlayerCat cat = proxy(player);
+        ModelPart paw = renderer.paw(event.getArm());
+        float side = event.getArm() == HumanoidArm.RIGHT ? 1 : -1;
+        paw.setPos(-side * 5, 2 + cat.crouch(partial) * .5F, -1);
+        paw.yScale = 1.2F;
+        paw.zRot = side * (cat.air(partial) * .24F - cat.crouch(partial) * .08F);
+        paw.xRot = -cat.air(partial) * .15F;
+        paw.render(event.getPoseStack(), event.getMultiBufferSource().getBuffer(RenderType.entityCutout(cat.getTextureId())),
+                event.getPackedLight(), OverlayTexture.NO_OVERLAY);
+    }
+
+    private ModelPart paw(HumanoidArm arm) {
+        ModelPart paw = arm == HumanoidArm.LEFT ? leftPaw : rightPaw;
+        paw.resetPose();
+        return paw;
     }
 
     @SubscribeEvent
@@ -203,11 +216,62 @@ public final class CatPlayerRenderer extends CatRenderer {
     private static final class PawModel extends CatModel<Cat> {
         private PawModel(ModelPart root) { super(root); }
         private ModelPart paw(HumanoidArm arm) { return arm == HumanoidArm.LEFT ? leftFrontLeg : rightFrontLeg; }
+
+        @Override
+        public void prepareMobModel(Cat cat, float walk, float speed, float partial) {
+            leftFrontLeg.resetPose(); rightFrontLeg.resetPose();
+            leftHindLeg.resetPose(); rightHindLeg.resetPose();
+            super.prepareMobModel(cat, walk, speed, partial);
+        }
+
+        @Override
+        public void setupAnim(Cat cat, float walk, float speed, float age, float yaw, float pitch) {
+            PlayerCat proxy = (PlayerCat) cat;
+            Player player = proxy.player;
+            float partial = Mth.clamp(age - cat.tickCount, 0, 1);
+            super.setupAnim(cat, player.walkAnimation.position(partial), player.walkAnimation.speed(partial), age, yaw, pitch);
+            float air = proxy.air(partial);
+            float stride = Math.min(1, player.walkAnimation.speed(partial)) * .85F * (1 - air);
+            float phase = player.walkAnimation.position(partial) * (player.isSprinting() ? 1.45F : .9F);
+            float hindOffset = player.isSprinting() ? .65F : .2F;
+            rightFrontLeg.xRot = Mth.cos(phase) * stride;
+            leftFrontLeg.xRot = Mth.cos(phase + Mth.PI) * stride;
+            rightHindLeg.xRot = Mth.cos(phase + Mth.PI + hindOffset) * stride;
+            leftHindLeg.xRot = Mth.cos(phase + hindOffset) * stride;
+            rightFrontLeg.zRot = air * .3F;
+            leftFrontLeg.zRot = -air * .3F;
+            rightHindLeg.zRot = air * .25F;
+            leftHindLeg.zRot = -air * .25F;
+            rightFrontLeg.xRot -= air * .22F; leftFrontLeg.xRot -= air * .22F;
+            rightHindLeg.xRot += air * .22F; leftHindLeg.xRot += air * .22F;
+            hold(player, HumanoidArm.RIGHT, partial);
+            hold(player, HumanoidArm.LEFT, partial);
+        }
+
+        private void hold(Player player, HumanoidArm arm, float partial) {
+            InteractionHand hand = arm == player.getMainArm() ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
+            if (player.getItemInHand(hand).isEmpty()) return;
+            ModelPart paw = paw(arm);
+            float side = arm == HumanoidArm.RIGHT ? -1 : 1;
+            paw.x += side * 1.2F;
+            paw.z -= 1.5F;
+            paw.xRot = paw.xRot * .25F - .65F;
+            paw.zRot += -side * .12F;
+            if (player.swingingArm == hand) paw.xRot -= player.getAttackAnim(partial) * .75F;
+            if (player.isUsingItem() && player.getUsedItemHand() == hand) {
+                switch (player.getUseItem().getUseAnimation()) {
+                    case EAT, DRINK -> paw.xRot = -1.2F;
+                    case BLOCK, BOW, CROSSBOW, SPEAR, SPYGLASS -> paw.xRot = -1F;
+                    default -> {}
+                }
+            }
+        }
     }
 
     private static final class PlayerCat extends Cat {
         private final Player player;
-        private int lastWalkTick = -1;
+        private int poseTick = -1;
+        private float oldCrouch, crouch, oldAir, air;
         private PlayerCat(Player player) {
             super(EntityType.CAT, player.level());
             this.player = player;
@@ -215,6 +279,17 @@ public final class CatPlayerRenderer extends CatRenderer {
             var variants = net.minecraft.core.registries.BuiltInRegistries.CAT_VARIANT;
             setVariant(variants.getHolder(Math.floorMod(player.getUUID().hashCode(), variants.size())).orElseThrow());
         }
+        private void updatePose() {
+            if (poseTick == player.tickCount) return;
+            int ticks = poseTick < 0 ? 1 : Mth.clamp(player.tickCount - poseTick, 1, 4);
+            poseTick = player.tickCount;
+            oldCrouch = crouch; oldAir = air;
+            crouch = Mth.lerp(1 - (float)Math.pow(.6, ticks), crouch, player.isCrouching() ? 1 : 0);
+            boolean airborne = !player.onGround() && !player.isInWaterOrBubble() && !player.onClimbable() && !player.isPassenger();
+            air = Mth.lerp(1 - (float)Math.pow(.6, ticks), air, airborne ? 1 : 0);
+        }
+        private float crouch(float partial) { return Mth.lerp(partial, oldCrouch, crouch); }
+        private float air(float partial) { return Mth.lerp(partial, oldAir, air); }
         @Override public Component getDisplayName() { return player.getDisplayName(); }
         @Override public Component getName() { return player.getName(); }
         @Override public net.minecraft.world.scores.PlayerTeam getTeam() { return player.getTeam(); }

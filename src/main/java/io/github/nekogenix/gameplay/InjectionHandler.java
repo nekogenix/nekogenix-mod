@@ -18,6 +18,7 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 @EventBusSubscriber(modid = Nekogenix.ID)
 public final class InjectionHandler {
+    public static final int NEEDLE_ENTRY_TICKS = 10;
     public static final int FORWARD_TICKS = 80;
     public static final int RETURN_TICKS = 12;
     public static final int TOTAL_TICKS = FORWARD_TICKS + RETURN_TICKS;
@@ -89,6 +90,13 @@ public final class InjectionHandler {
             return;
         }
         session.elapsed++;
+        if (session.elapsed == NEEDLE_ENTRY_TICKS) {
+            player.hurt(player.damageSources().generic(), 1.0F);
+            if (!player.isAlive()) {
+                cancel(player, session);
+                return;
+            }
+        }
         if (session.elapsed < FORWARD_TICKS && session.elapsed % 20 == 0) {
             sound(player, SoundEvents.HONEY_BLOCK_SLIDE, 0.45F, 1.4F - session.elapsed / 160F);
         }
@@ -99,7 +107,6 @@ public final class InjectionHandler {
         if (stabilizing ? state.stabilize() : state.begin()) {
             FelineSounds.sync(player);
             player.setItemInHand(InteractionHand.MAIN_HAND, Content.USED_SYRINGE.toStack());
-            player.hurt(player.damageSources().generic(), 1.0F);
             TransformationHandler.refreshEffects(player);
             player.serverLevel().sendParticles(ParticleTypes.WITCH, player.getX(), player.getY() + 1,
                     player.getZ(), 15, 0.3, 0.5, 0.3, 0.03);

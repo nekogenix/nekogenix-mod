@@ -24,6 +24,11 @@
       "type": "minecraft:single",
       "resource": "minecraft:mob_effect/slow_falling",
       "sprite": "nekogenix:soft_paw_pads"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:mob_effect/luck",
+      "sprite": "nekogenix:cat_transformation"
     }
   ]
 }

@@ -12,6 +12,9 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 @EventBusSubscriber(modid = Nekogenix.ID)
 public final class CatForm {
+    public static final float STANDING_EYE_HEIGHT = .43F;
+    public static final float CROUCHING_EYE_HEIGHT = .35F;
+
     public static final class Session {
         private boolean cat;
     }
@@ -40,7 +43,8 @@ public final class CatForm {
     @SubscribeEvent
     public static void size(EntityEvent.Size event) {
         if (event.getEntity() instanceof Player player && player.isAddedToLevel() && active(player)) {
-            event.setNewSize(EntityType.CAT.getDimensions().scale(player.getScale()));
+            event.setNewSize(EntityType.CAT.getDimensions().withEyeHeight(event.getPose() == net.minecraft.world.entity.Pose.CROUCHING
+                    ? CROUCHING_EYE_HEIGHT : STANDING_EYE_HEIGHT).scale(player.getScale()));
         }
     }
 

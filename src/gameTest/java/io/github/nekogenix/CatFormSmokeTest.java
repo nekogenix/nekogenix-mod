@@ -16,23 +16,25 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 @EventBusSubscriber(modid = Nekogenix.ID)
 public final class CatFormSmokeTest {
     private static final boolean ENABLED = Boolean.getBoolean("nekogenix.catSmokeTest");
+    private static final boolean PREVIEW = Boolean.getBoolean("nekogenix.catPreview");
     private static final BlockPos STAND = new BlockPos(128, -60, 128);
 
     @SubscribeEvent
     public static void server(PlayerTickEvent.Post event) {
         if (!ENABLED || !(event.getEntity() instanceof ServerPlayer player)) return;
-        int age = player.tickCount;
+        int age = player.tickCount + (PREVIEW ? 530 : 0);
         var level = player.serverLevel();
-        if (age == 30) {
+        if (age == 30 || PREVIEW && player.tickCount == 20) {
             level.setDayTime(6000);
             level.setWeatherParameters(12000, 0, false, false);
             player.removeAllEffects();
             player.getData(Content.NEKO).deserializeNBT(level.registryAccess(), new net.minecraft.nbt.CompoundTag());
             io.github.nekogenix.gameplay.TransformationHandler.refreshEffects(player);
-            player.setGameMode(GameType.CREATIVE);
-            player.getAbilities().flying = true;
+            player.setGameMode(GameType.SURVIVAL);
+            player.getAbilities().flying = false;
+            player.getFoodData().setFoodLevel(17);
             player.onUpdateAbilities();
-            player.teleportTo(level, 128.5, -59.0, 125.0, 0, 0);
+            player.teleportTo(level, 128.5, -60, 125.0, 0, 0);
             player.setItemInHand(InteractionHand.MAIN_HAND, Content.INJECTION.toStack());
             if (level.getBlockEntity(STAND) instanceof PneumaticStandBlockEntity previous) previous.clearContent();
             level.setBlockAndUpdate(STAND, Blocks.AIR.defaultBlockState());
@@ -42,6 +44,12 @@ public final class CatFormSmokeTest {
             for (int i = 0; i < 5; i++) player.getInventory().setItem(9 + i, new ItemStack(new net.minecraft.world.item.Item[] {
                     Content.SYRINGE.get(), Content.USED_SYRINGE.get(), Content.INJECTION.get(), Content.STABILIZING_INJECTION.get(), Content.NEKO_STABILIZER.get()}[i]));
         }
+        if (PREVIEW && player.tickCount == 20) {
+            CatTransformationTests.set(player, NekoState.Phase.NEKO, 0, 8);
+            player.setHealth(17);
+        }
+        if (PREVIEW && age == 830) player.setItemInHand(InteractionHand.MAIN_HAND, Items.FILLED_MAP.getDefaultInstance());
+        if (PREVIEW && age == 870) Nekogenix.LOGGER.info("Nekogenix cat server smoke passed: feline presentation preview");
         if (age == 340) {
             player.removeAllEffects();
             CatTransformationTests.set(player, NekoState.Phase.CAT_TRANSFORMING, 400, 8);
@@ -51,22 +59,48 @@ public final class CatFormSmokeTest {
             player.setGameMode(GameType.SURVIVAL);
             player.getAbilities().invulnerable = true;
             player.onUpdateAbilities();
-            check(player.getData(Content.NEKO).phase() == NekoState.Phase.NEKO, "A real client stabilized stage four");
+            check(player.getHealth() == 17F, "Three needle contacts hurt once each without extra completion damage");
+            check(player.getData(Content.NEKO).phase() == NekoState.Phase.NEKO, "A real client stabilized Cat Transformation");
             CatTransformationTests.set(player, NekoState.Phase.CAT_TRANSFORMING, NekoState.DAY - 1, 8);
-            player.setItemInHand(InteractionHand.MAIN_HAND, Items.DIAMOND_PICKAXE.getDefaultInstance());
-            player.setItemInHand(InteractionHand.OFF_HAND, Items.TORCH.getDefaultInstance());
+            player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+            player.setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
             player.getAbilities().flying = false;
             player.onUpdateAbilities();
             player.teleportTo(level, 128.5, -60, 125, 0, 0);
         }
-        if (age == 760) {
+        if (age == 650) {
+            player.setItemInHand(InteractionHand.MAIN_HAND, Items.DIAMOND_PICKAXE.getDefaultInstance());
+            player.setItemInHand(InteractionHand.OFF_HAND, Items.TORCH.getDefaultInstance());
+        }
+        if (age == 675) {
+            player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+            player.setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
+        }
+        if (age == 750) {
+            player.setGameMode(GameType.CREATIVE);
+            player.getAbilities().flying = true;
+            player.onUpdateAbilities();
+            player.teleportTo(level, 128.5, -57, 125, 0, 15);
+        }
+        if (age == 790) {
+            player.setGameMode(GameType.SURVIVAL);
+            player.getAbilities().invulnerable = true;
+            player.getAbilities().flying = false;
+            player.onUpdateAbilities();
+            player.teleportTo(level, 128.5, -60, 125, 0, 15);
+        }
+        if (age == 1230) {
+            player.setItemInHand(InteractionHand.MAIN_HAND, Items.FILLED_MAP.getDefaultInstance());
+            player.setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
+        }
+        if (!PREVIEW && age == 760) {
             var stand = (PneumaticStandBlockEntity) level.getBlockEntity(STAND);
             stand.setItem(0, Content.SYRINGE.toStack());
             stand.setItem(2, Content.SYRINGE.toStack());
             stand.setItem(3, Content.NEKO_STABILIZER.toStack());
             stand.setItem(4, Items.WIND_CHARGE.getDefaultInstance());
         }
-        if (age == 820) player.openMenu((PneumaticStandBlockEntity) level.getBlockEntity(STAND));
+        if (!PREVIEW && age == 820) player.openMenu((PneumaticStandBlockEntity) level.getBlockEntity(STAND));
         if (age == 1190) {
             check(player.getData(Content.NEKO).isCat() && Math.abs(player.getBbHeight() - .7F) < .001,
                     "Full cat form retains server collision dimensions");
@@ -84,6 +118,7 @@ public final class CatFormSmokeTest {
         private static boolean sawCatRender;
         private static boolean sawPaw;
         private static int windSounds;
+        private static int emptyMainArms, emptyOffArms;
 
         @SubscribeEvent
         public static void render(net.neoforged.neoforge.client.event.RenderLivingEvent.Post<?, ?> event) {
@@ -92,9 +127,14 @@ public final class CatFormSmokeTest {
         }
 
         @SubscribeEvent(priority = net.neoforged.bus.api.EventPriority.LOWEST, receiveCanceled = true)
-        public static void paw(net.neoforged.neoforge.client.event.RenderHandEvent event) {
+        public static void paw(net.neoforged.neoforge.client.event.RenderArmEvent event) {
             var player = net.minecraft.client.Minecraft.getInstance().player;
-            if (ENABLED && player != null && player.getData(Content.CAT_FORM) && event.isCanceled()) sawPaw = true;
+            if (!ENABLED || player == null || !player.getData(Content.CAT_FORM) || !event.isCanceled()) return;
+            sawPaw = true;
+            if (player.tickCount + (PREVIEW ? 530 : 0) >= 600 && player.tickCount + (PREVIEW ? 530 : 0) < 625) {
+                if (event.getArm() == player.getMainArm()) emptyMainArms++;
+                else emptyOffArms++;
+            }
         }
 
         @SubscribeEvent
@@ -107,8 +147,9 @@ public final class CatFormSmokeTest {
             if (!ENABLED) return;
             var mc = net.minecraft.client.Minecraft.getInstance();
             if (mc.player == null || mc.level == null) return;
-            int age = mc.player.tickCount;
-            mc.options.setCameraType(age >= 630 && age <= 675 ? net.minecraft.client.CameraType.THIRD_PERSON_FRONT : net.minecraft.client.CameraType.FIRST_PERSON);
+            if (PREVIEW && mc.player.tickCount < 25) return;
+            int age = mc.player.tickCount + (PREVIEW ? 530 : 0);
+            mc.options.setCameraType((age >= 655 && age < 665 || age >= 680 && age <= 730) ? net.minecraft.client.CameraType.THIRD_PERSON_FRONT : net.minecraft.client.CameraType.FIRST_PERSON);
             mc.options.hideGui = false;
             mc.options.fov().set(70);
             mc.options.screenEffectScale().set(0D);
@@ -116,23 +157,50 @@ public final class CatFormSmokeTest {
             if (age == 85 || age == 205 || age == 445) needle(mc);
             if (age == 85 || age == 105 || age == 205 || age == 445) capture(mc, "cat-injection-" + age + ".png");
             if (age == 300) check(mc.player.getMainHandItem().is(Content.USED_SYRINGE) && mc.player.hasEffect(Content.SHOCK), "Neko injection still completes");
-            if (age == 530) check(!mc.player.hasEffect(Content.TRANSFORMING) && mc.player.getMainHandItem().is(Content.USED_SYRINGE), "Stabilization clears stage four and returns a used syringe");
+            if (age == 530) check(!mc.player.hasEffect(Content.CAT_TRANSFORMING) && mc.player.getMainHandItem().is(Content.USED_SYRINGE), "Stabilization clears Cat Transformation and returns a used syringe");
             if (age == 620) {
-                check(mc.player.getData(Content.CAT_FORM) && Math.abs(mc.player.getEyeHeight() - .35F) < .001,
+                check(mc.player.getData(Content.CAT_FORM) && Math.abs(mc.player.getEyeHeight() - io.github.nekogenix.gameplay.CatForm.STANDING_EYE_HEIGHT) < .001,
                         "Cat form and camera height arrive on the real client");
                 capture(mc, "cat-first-person.png");
 
             }
-            if (age == 660) capture(mc, "cat-third-person.png");
-            if (age == 690) {
-                check(sawCatRender && sawPaw, "Third person cat renderer and first person paws both run");
-                mc.setScreen(new net.minecraft.client.gui.screens.inventory.InventoryScreen(mc.player));
+            if (age == 625) {
+                check(emptyMainArms > 0 && emptyOffArms == 0, "The unused empty offhand stays hidden");
+                mc.options.keyShift.setDown(true);
             }
-            if (age == 710) capture(mc, "cat-inventory.png");
-            if (age == 730) {
-                mc.player.closeContainer();
-
-                mc.player.setXRot(15);
+            if (age == 645) {
+                check(Math.abs(mc.player.getEyeHeight() - io.github.nekogenix.gameplay.CatForm.CROUCHING_EYE_HEIGHT) < .001,
+                        "Crouching lowers the client eye height");
+                double eye = mc.gameRenderer.getMainCamera().getPosition().y - mc.player.getY();
+                check(Math.abs(eye - io.github.nekogenix.gameplay.CatForm.CROUCHING_EYE_HEIGHT) < .005,
+                        "The actual camera smoothly reaches the crouched eye height");
+                capture(mc, "cat-crouching.png");
+                mc.options.keyShift.setDown(false);
+            }
+            if (age == 660) capture(mc, "cat-third-person.png");
+            if (age == 670) capture(mc, "cat-held-first-person.png");
+            if (age == 679) {
+                mc.player.setYRot(90); mc.player.yRotO = 90;
+                mc.player.yBodyRot = mc.player.yBodyRotO = 90;
+            }
+            mc.options.keyUp.setDown(age >= 680 && age < 710);
+            mc.options.keySprint.setDown(age >= 680 && age < 710);
+            mc.options.keyJump.setDown(age == 716 || age == 735);
+            if (age == 690 || age == 694) capture(mc, "cat-running-" + age + ".png");
+            if (age == 721 || age == 727 || age == 741) capture(mc, "cat-airborne-" + age + ".png");
+            if (age == 745) check(sawCatRender && sawPaw, "Cat body paws and both viewpoints render successfully");
+            if (PREVIEW && age >= 800) {
+                if (age == 800) mc.setScreen(new GripPreview(false));
+                if (age == 820) capture(mc, "cat-item-grips-front.png");
+                if (age == 840) mc.player.closeContainer();
+                if (age == 850) capture(mc, "cat-map-paws.png");
+                if (age == 860) mc.setScreen(new GripPreview(true));
+                if (age == 870) {
+                    capture(mc, "cat-item-grips-side.png");
+                    Nekogenix.LOGGER.info("Nekogenix cat client smoke passed: native grips running crouching airborne paws and hidden empty offhand");
+                }
+                if (age >= 880) mc.stop();
+                return;
             }
             if (age == 770 || age == 810) capture(mc, "cat-pneumatic-wind-" + age + ".png");
             if (age == 950) {
@@ -152,7 +220,42 @@ public final class CatFormSmokeTest {
                 capture(mc, "cat-pneumatic-complete.png");
                 Nekogenix.LOGGER.info("Nekogenix cat client smoke passed: both injections cat model paws inventory camera and pneumatic recipe");
             }
-            if (age >= 1220) mc.stop();
+            if (age == 1210) mc.setScreen(new GripPreview(false));
+            if (age == 1220) capture(mc, "cat-item-grips-front.png");
+            if (age == 1240) mc.player.closeContainer();
+            if (age == 1250) capture(mc, "cat-map-paws.png");
+            if (age == 1260) mc.setScreen(new GripPreview(true));
+            if (age == 1270) capture(mc, "cat-item-grips-side.png");
+            if (age >= 1280) mc.stop();
+        }
+
+        private static final class GripPreview extends net.minecraft.client.gui.screens.Screen {
+            private final boolean side;
+            private GripPreview(boolean side) { super(net.minecraft.network.chat.Component.literal("Feline item grips")); this.side = side; }
+            @Override public boolean isPauseScreen() { return false; }
+            @Override public void render(net.minecraft.client.gui.GuiGraphics graphics, int mouseX, int mouseY, float partial) {
+                graphics.fill(0, 0, width, height, 0xff75828b);
+                var player = minecraft.player;
+                var main = player.getMainHandItem(); var off = player.getOffhandItem();
+                var items = new net.minecraft.world.item.Item[] {Items.DIAMOND_PICKAXE, Items.DIAMOND_SWORD, Items.DIAMOND_AXE, Items.DIAMOND_SHOVEL,
+                        Items.BOW, Items.CROSSBOW, Items.SHIELD, Items.TRIDENT, Items.FISHING_ROD, Items.SPYGLASS, Items.APPLE,
+                        Items.STONE, Items.TORCH, Items.POTION, Content.STABILIZING_INJECTION.get(), Items.FILLED_MAP};
+                int cellWidth = width / 4, cellHeight = height / 4;
+                try {
+                    player.setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
+                    for (int i = 0; i < items.length; i++) {
+                        int x = i % 4 * cellWidth, y = i / 4 * cellHeight;
+                        player.setItemInHand(InteractionHand.MAIN_HAND, items[i].getDefaultInstance());
+                        graphics.drawString(font, items[i].getDescription(), x + 3, y + 3, 0xffffff, false);
+                        net.minecraft.client.gui.screens.inventory.InventoryScreen.renderEntityInInventoryFollowsAngle(graphics,
+                                x + 2, y + 13, x + cellWidth - 2, y + cellHeight, (int)(cellHeight * .7), 0,
+                                side ? 3.3F : .8F, .2F, player);
+                    }
+                } finally {
+                    player.setItemInHand(InteractionHand.MAIN_HAND, main);
+                    player.setItemInHand(InteractionHand.OFF_HAND, off);
+                }
+            }
         }
 
         private static void needle(net.minecraft.client.Minecraft mc) {

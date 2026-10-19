@@ -73,8 +73,9 @@ public final class TransformationHandler {
             player.addEffect(new MobEffectInstance(MobEffects.CONFUSION,
                     NekoState.SHOCK_DURATION - state.elapsed(), 0, false, false, false));
         }
-        marker(player, Content.TRANSFORMING, state.phase() == NekoState.Phase.TRANSFORMING || state.phase() == NekoState.Phase.CAT_TRANSFORMING,
+        marker(player, Content.TRANSFORMING, state.phase() == NekoState.Phase.TRANSFORMING,
                 state.stageRemaining(), state.stage());
+        marker(player, Content.CAT_TRANSFORMING, state.phase() == NekoState.Phase.CAT_TRANSFORMING, state.stageRemaining());
         marker(player, Content.AGILITY, state.has(NekoState.AGILITY), -1);
         marker(player, Content.VISION, state.has(NekoState.VISION), -1);
         marker(player, Content.PAWS, state.has(NekoState.PAWS), -1);
@@ -87,7 +88,7 @@ public final class TransformationHandler {
     private static void marker(ServerPlayer player, Holder<MobEffect> effect, boolean enabled, int duration, int amplifier) {
         MobEffectInstance current = player.getEffect(effect);
         if (enabled && (current == null || current.getAmplifier() != amplifier
-                || effect.is(Content.TRANSFORMING) && Math.abs(current.getDuration() - duration) > 20)) {
+                || (effect.is(Content.TRANSFORMING) || effect.is(Content.CAT_TRANSFORMING)) && Math.abs(current.getDuration() - duration) > 20)) {
             if (current != null) player.removeEffect(effect);
             player.addEffect(new MobEffectInstance(effect, Math.max(-1, duration), amplifier, false, false, true));
         }
@@ -147,7 +148,7 @@ public final class TransformationHandler {
         if (event.getCure() != EffectCures.MILK || !(event.getEntity() instanceof ServerPlayer player)
                 || player.getData(Content.NEKO).phase() == NekoState.Phase.HUMAN) return;
         var effect = event.getEffect();
-        if (effect.is(Content.SHOCK) || effect.is(Content.TRANSFORMING) || effect.is(Content.AGILITY)
+        if (effect.is(Content.SHOCK) || effect.is(Content.TRANSFORMING) || effect.is(Content.CAT_TRANSFORMING) || effect.is(Content.AGILITY)
                 || effect.is(Content.VISION) || effect.is(Content.PAWS)) event.setCanceled(true);
     }
 
