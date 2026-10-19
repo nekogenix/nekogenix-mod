@@ -12,7 +12,7 @@ public final class NekoState implements INBTSerializable<CompoundTag> {
     public static final int AGILITY = 1;
     public static final int VISION = 2;
     public static final int PAWS = 4;
-    public enum Phase { HUMAN, SHOCK, TRANSFORMING, NEKO }
+    public enum Phase { HUMAN, SHOCK, TRANSFORMING, NEKO, CAT_TRANSFORMING, CAT }
 
     private Phase phase = Phase.HUMAN;
     private int elapsed;
@@ -23,10 +23,18 @@ public final class NekoState implements INBTSerializable<CompoundTag> {
 
     public Phase phase() { return phase; }
     public int elapsed() { return elapsed; }
-    public boolean isNeko() { return phase == Phase.NEKO; }
-    public boolean isTransforming() { return phase == Phase.SHOCK || phase == Phase.TRANSFORMING; }
+    public boolean isNeko() { return phase == Phase.NEKO || phase == Phase.CAT_TRANSFORMING || phase == Phase.CAT; }
+    public boolean isTransforming() { return phase == Phase.SHOCK || phase == Phase.TRANSFORMING || phase == Phase.CAT_TRANSFORMING; }
+    public boolean isCat() { return phase == Phase.CAT; }
+    public int lives() { return lives; }
+    public boolean stabilize() {
+        if (phase != Phase.CAT_TRANSFORMING) return false;
+        phase = Phase.NEKO;
+        elapsed = 0;
+        return true;
+    }
     public boolean has(int ability) { return (abilities & ability) != 0; }
-    public int stage() { return phase == Phase.TRANSFORMING ? Math.min(2, elapsed / DAY) : 0; }
+    public int stage() { return phase == Phase.CAT_TRANSFORMING ? 3 : phase == Phase.TRANSFORMING ? Math.min(2, elapsed / DAY) : 0; }
     public int stageRemaining() { return DAY - elapsed % DAY; }
 
     public boolean begin() {
@@ -40,10 +48,15 @@ public final class NekoState implements INBTSerializable<CompoundTag> {
 
     /** Advances only while the living player actually ticks; daylight and sleep never change this timer. */
     public boolean tick(RandomSource random) {
-        if (phase == Phase.HUMAN || phase == Phase.NEKO) return false;
+        if (!isTransforming()) return false;
         elapsed++;
         if (phase == Phase.SHOCK && elapsed >= SHOCK_DURATION) {
             phase = Phase.TRANSFORMING;
+            elapsed = 0;
+            return true;
+        }
+        if (phase == Phase.CAT_TRANSFORMING && elapsed >= DAY) {
+            phase = Phase.CAT;
             elapsed = 0;
             return true;
         }
@@ -57,7 +70,8 @@ public final class NekoState implements INBTSerializable<CompoundTag> {
                 }
             }
             if (elapsed >= 3 * DAY) {
-                phase = Phase.NEKO;
+                phase = Phase.CAT_TRANSFORMING;
+                elapsed = 0;
                 lives = 9;
             }
             return true;
@@ -72,7 +86,7 @@ public final class NekoState implements INBTSerializable<CompoundTag> {
     }
 
     public void cancelTransformation() {
-        if (isTransforming()) reset();
+        if (isTransforming() && !isNeko()) reset();
     }
 
     private void reset() {

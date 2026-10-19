@@ -24,7 +24,7 @@ public final class RuntimeSmokeTest {
 
     @SubscribeEvent
     public static void stage(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
-        if (!ENABLED || Boolean.getBoolean("nekogenix.voiceSmokeTest") || Boolean.getBoolean("nekogenix.transformationSmokeTest")
+        if (!ENABLED || Boolean.getBoolean("nekogenix.catSmokeTest") || Boolean.getBoolean("nekogenix.voiceSmokeTest") || Boolean.getBoolean("nekogenix.transformationSmokeTest")
                 || Boolean.getBoolean("nekogenix.injectionSmokeTest")
                 || Boolean.getBoolean("nekogenix.centrifugeSmokeTest")
                 || Boolean.getBoolean("nekogenix.cauldronSmokeTest")
@@ -77,7 +77,7 @@ public final class RuntimeSmokeTest {
             mc.options.pauseOnLostFocus = false;
             mc.getTutorial().setStep(net.minecraft.client.tutorial.TutorialSteps.NONE);
             if (mc.player == null || mc.level == null) return;
-            if (Boolean.getBoolean("nekogenix.injectionSmokeTest") || Boolean.getBoolean("nekogenix.centrifugeSmokeTest")
+            if (Boolean.getBoolean("nekogenix.catSmokeTest") || Boolean.getBoolean("nekogenix.injectionSmokeTest") || Boolean.getBoolean("nekogenix.centrifugeSmokeTest")
                     || Boolean.getBoolean("nekogenix.cauldronSmokeTest") || Boolean.getBoolean("nekogenix.refinementsSmokeTest")
                     || Boolean.getBoolean("nekogenix.overlaySmokeTest")) return;
             int age = mc.player.tickCount;

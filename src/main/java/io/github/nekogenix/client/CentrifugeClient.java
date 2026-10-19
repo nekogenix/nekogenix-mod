@@ -27,18 +27,22 @@ public final class CentrifugeClient {
             event.enqueueWork(() -> {
                 var property = Content.id("brewing_progress");
                 net.minecraft.client.renderer.item.ItemProperties.register(Content.CAT_NUCLEOCARD.get(), property,
-                        (stack, level, entity, seed) -> brewingFrame(stack, true));
+                        (stack, level, entity, seed) -> brewingFrame(stack, true, false));
                 net.minecraft.client.renderer.item.ItemProperties.register(Content.SYRINGE.get(), property,
-                        (stack, level, entity, seed) -> brewingFrame(stack, false));
+                        (stack, level, entity, seed) -> brewingFrame(stack, false, false));
+                net.minecraft.client.renderer.item.ItemProperties.register(Content.SYRINGE.get(), Content.id("stabilizing_progress"),
+                        (stack, level, entity, seed) -> brewingFrame(stack, false, true));
+                net.minecraft.client.renderer.item.ItemProperties.register(Content.NEKO_STABILIZER.get(), property,
+                        (stack, level, entity, seed) -> brewingFrame(stack, true, true));
             });
         }
     }
 
-    private static float brewingFrame(net.minecraft.world.item.ItemStack stack, boolean card) {
+    private static float brewingFrame(net.minecraft.world.item.ItemStack stack, boolean card, boolean stabilizing) {
         var mc = Minecraft.getInstance();
         if (!(mc.screen instanceof PneumaticStandScreen screen)) return 0;
         var menu = screen.getMenu();
-        if (!menu.running() || !menu.getSlot(PneumaticStandMenu.CARD_SLOT).getItem().is(Content.CAT_NUCLEOCARD)) return 0;
+        if (!menu.running() || !menu.getSlot(PneumaticStandMenu.CARD_SLOT).getItem().is(stabilizing ? Content.NEKO_STABILIZER : Content.CAT_NUCLEOCARD)) return 0;
         boolean active = card ? stack == menu.getSlot(PneumaticStandMenu.CARD_SLOT).getItem()
                 : menu.filling(0) && stack == menu.getSlot(0).getItem() || menu.filling(1) && stack == menu.getSlot(1).getItem();
         return active ? Math.min(7, (int) (menu.fraction() * 8)) : 0;

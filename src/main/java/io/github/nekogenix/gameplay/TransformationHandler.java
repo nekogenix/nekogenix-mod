@@ -64,6 +64,7 @@ public final class TransformationHandler {
 
     public static void refreshEffects(ServerPlayer player) {
         NekoState state = player.getData(Content.NEKO);
+        CatForm.sync(player);
         if (player.getData(Content.FELINE_DIET) != state.isNeko()) player.setData(Content.FELINE_DIET, state.isNeko());
         marker(player, Content.SHOCK, state.phase() == NekoState.Phase.SHOCK,
                 NekoState.SHOCK_DURATION - state.elapsed());
@@ -72,7 +73,7 @@ public final class TransformationHandler {
             player.addEffect(new MobEffectInstance(MobEffects.CONFUSION,
                     NekoState.SHOCK_DURATION - state.elapsed(), 0, false, false, false));
         }
-        marker(player, Content.TRANSFORMING, state.phase() == NekoState.Phase.TRANSFORMING,
+        marker(player, Content.TRANSFORMING, state.phase() == NekoState.Phase.TRANSFORMING || state.phase() == NekoState.Phase.CAT_TRANSFORMING,
                 state.stageRemaining(), state.stage());
         marker(player, Content.AGILITY, state.has(NekoState.AGILITY), -1);
         marker(player, Content.VISION, state.has(NekoState.VISION), -1);
@@ -167,7 +168,7 @@ public final class TransformationHandler {
             NekoState state = player.getData(Content.NEKO);
             boolean wasFeline = state.phase() != NekoState.Phase.HUMAN;
             boolean sickness = state.phase() == NekoState.Phase.SHOCK;
-            if (state.isTransforming()) state.cancelTransformation();
+            if (state.isTransforming() && !state.isNeko()) state.cancelTransformation();
             else if (!player.serverLevel().getLevelData().isHardcore()) state.loseLife();
             if (wasFeline && state.phase() == NekoState.Phase.HUMAN) {
                 var nausea = player.getEffect(MobEffects.CONFUSION);

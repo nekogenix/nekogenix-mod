@@ -16,13 +16,13 @@
   "effect.nekogenix.feline_vision": "Кошачье зрение",
   "effect.nekogenix.soft_paw_pads": "Мягкие подушечки лап",
   "tooltip.nekogenix.injection_use": "Удерживайте ЛКМ для введения",
-  "tooltip.nekogenix.stages": "Три стадии по 20 минут",
+  "tooltip.nekogenix.stages": "Четыре стадии по 20 минут",
   "tooltip.nekogenix.agility": "+100% к скорости бега и передвижения крадучись",
   "tooltip.nekogenix.double_jump": "Второй прыжок: Прыгучесть II",
   "tooltip.nekogenix.vision": "Ночное зрение рядом с неосвещёнными местами (16 блоков)",
   "tooltip.nekogenix.paws": "-75% урона от падения",
   "tooltip.nekogenix.delayed": "Эффекты наступят через 20 минут",
-  "tooltip.nekogenix.stage_ability": "В конце каждой — случайная способность",
+  "tooltip.nekogenix.stage_ability": "По случайной способности за первые три стадии",
   "options.nekogenix.neko_voice": "Неко голос",
   "block.nekogenix.centrifuge": "Центрифуга",
   "item.nekogenix.blank_nucleocard": "Пустая нуклеокарта",
@@ -36,5 +36,11 @@
   "tooltip.nekogenix.blank_nucleocard": "Обработайте с шестью образцами слюны в центрифуге",
   "tooltip.nekogenix.cat_nucleocard": "Поместите над шприцем в пневматической стойке",
   "tooltip.nekogenix.nucleocard_return": "Становится пустой после заполнения до двух шприцев",
-  "block.nekogenix.pneumatic_stand": "Пневматическая стойка"
+  "block.nekogenix.pneumatic_stand": "Пневматическая стойка",
+  "item.nekogenix.stabilizing_solution": "Стабилизирующий раствор",
+  "item.nekogenix.neko_stabilizer": "Неко-стабилизатор",
+  "item.nekogenix.stabilizing_injection": "Стабилизирующая инъекция",
+  "tooltip.nekogenix.cat_stage": "Стадия IV: превращение в кошку без стабилизатора",
+  "tooltip.nekogenix.stabilizing_injection": "Навсегда останавливает стадию IV, оставляя вас неко",
+  "tooltip.nekogenix.stabilizing_permanent": "Остановленное превращение нельзя возобновить"
 }

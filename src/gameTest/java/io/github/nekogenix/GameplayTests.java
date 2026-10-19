@@ -113,6 +113,7 @@ public final class GameplayTests {
         NekoState state = player.getData(Content.NEKO);
         state.begin();
         for (int i = 0; i < 73200; i++) state.tick(helper.getLevel().random);
+        state.stabilize();
         eat(player, Items.APPLE.getDefaultInstance());
         helper.runAfterDelay(36, () -> {
             helper.assertTrue(player.getFoodData().getFoodLevel() == 2, "Neko apple restores two food points");
@@ -265,7 +266,7 @@ public final class GameplayTests {
             helper.assertTrue(count == stage + 1, "Each completed stage grants one distinct ability");
         }
         TransformationHandler.refreshEffects(player);
-        helper.assertTrue(state.isNeko() && !player.hasEffect(Content.TRANSFORMING), "Stage three ends in full transformation");
+        helper.assertTrue(state.isNeko() && player.getEffect(Content.TRANSFORMING).getAmplifier() == 3, "Stage three unlocks all abilities and starts stage four");
         var death = NeoForge.EVENT_BUS.post(new PlayLevelSoundEvent.AtPosition(player.level(), player.position(),
                 Holder.direct(SoundEvents.PLAYER_DEATH), SoundSource.PLAYERS, 1, 1));
         helper.assertTrue(death.getSound().value() == SoundEvents.CAT_DEATH, "Server voice events identify their player");

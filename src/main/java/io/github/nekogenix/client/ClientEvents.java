@@ -55,7 +55,7 @@ public final class ClientEvents {
     @SubscribeEvent
     public static void input(InputEvent.InteractionKeyMappingTriggered event) {
         var player = Minecraft.getInstance().player;
-        if (event.isAttack() && player != null && player.getMainHandItem().is(Content.INJECTION)) {
+        if (event.isAttack() && player != null && InjectionHandler.isInjection(player.getMainHandItem())) {
             event.setCanceled(true);
             event.setSwingHand(false);
         }
@@ -67,7 +67,7 @@ public final class ClientEvents {
         if (mc.player == null || mc.level == null) { held = false; return; }
         sicknessDistortion(mc);
         boolean down = mc.screen == null && mc.player.isAlive() && !mc.player.isSpectator()
-                && mc.player.getMainHandItem().is(Content.INJECTION) && mc.options.keyAttack.isDown();
+                && InjectionHandler.isInjection(mc.player.getMainHandItem()) && mc.options.keyAttack.isDown();
         if (down != held || down && ++ticks % 20 == 0) {
             PacketDistributor.sendToServer(new InjectionInput(down));
             held = down;
@@ -131,12 +131,14 @@ public final class ClientEvents {
     public static final class Registration {
         @SubscribeEvent
         public static void setup(net.neoforged.fml.event.lifecycle.FMLClientSetupEvent event) {
-            event.enqueueWork(() -> ItemProperties.register(Content.INJECTION.get(), Content.id("injection_stage"),
+            event.enqueueWork(() -> {
+                for (var item : new net.minecraft.world.item.Item[] {Content.INJECTION.get(), Content.STABILIZING_INJECTION.get()}) ItemProperties.register(item, Content.id("injection_stage"),
                     (stack, level, entity, seed) -> {
                         float age = elapsed(entity, 0);
                         if (age < 0 || age >= InjectionHandler.TOTAL_TICKS || entity.getMainHandItem() != stack) return 0;
                         return age < 80 ? (int) age / 20 : 4 + Math.min(3, ((int) age - 80) / 3);
-                    }));
+                    });
+            });
         }
 
         @SubscribeEvent
@@ -161,8 +163,8 @@ public final class ClientEvents {
                     float side = arm == HumanoidArm.RIGHT ? 1 : -1;
                     float approach = Mth.clamp(age / 10F, 0, 1);
                     float retreat = age < 80 ? 1 : 1 - (age - 80) / 12F;
-                    float pressure = Mth.sin(age * .48F) * .025F;
-                    float tremor = Mth.cos(age * .48F) * 2;
+                    float pressure = Mth.sin(age * .48F) * .006F;
+                    float tremor = Mth.cos(age * .48F) * .4F;
                     var returning = player.getData(Content.INJECTION_RETURN);
                     if (returning.started() >= 0) {
                         retreat = returning.remaining(player.level().getGameTime(), partial);
@@ -170,14 +172,14 @@ public final class ClientEvents {
                         pressure *= retreat;
                         tremor *= retreat;
                     }
-                    pose.translate(side * (.56F - .32F * approach * retreat), -.52F + .29F * approach * retreat + pressure,
-                            -.72F + .25F * approach * retreat);
-                    pose.mulPose(Axis.YP.rotationDegrees(side * (45F + 35F * approach * retreat)));
-                    pose.mulPose(Axis.ZP.rotationDegrees(side * (-28F * approach * retreat)));
-                    pose.mulPose(Axis.XP.rotationDegrees(-20F * approach * retreat + tremor));
+                    pose.translate(side * (.56F - .52F * approach * retreat), -.52F + .46F * approach * retreat + pressure,
+                            -.72F + .37F * approach * retreat);
+                    pose.mulPose(Axis.YP.rotationDegrees(side * (45F + 100F * approach * retreat)));
+                    pose.mulPose(Axis.ZP.rotationDegrees(side * (162F * approach * retreat)));
+                    pose.mulPose(Axis.XP.rotationDegrees(30F * approach * retreat + tremor));
                     return true;
                 }
-            }, Content.INJECTION.get());
+            }, Content.INJECTION.get(), Content.STABILIZING_INJECTION.get());
         }
     }
 

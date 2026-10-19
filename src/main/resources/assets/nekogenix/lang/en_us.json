@@ -16,13 +16,13 @@
   "effect.nekogenix.feline_vision": "Feline Vision",
   "effect.nekogenix.soft_paw_pads": "Soft Paw Pads",
   "tooltip.nekogenix.injection_use": "Hold Left Click to inject",
-  "tooltip.nekogenix.stages": "Three stages of 20 minutes each",
+  "tooltip.nekogenix.stages": "Four stages of 20 minutes each",
   "tooltip.nekogenix.agility": "+100% Sprinting and Sneaking Speed",
   "tooltip.nekogenix.double_jump": "Second jump: Jump Boost II",
   "tooltip.nekogenix.vision": "Night vision near unlit areas (16 blocks)",
   "tooltip.nekogenix.paws": "-75% Fall Damage",
   "tooltip.nekogenix.delayed": "Effects begin after 20 minutes",
-  "tooltip.nekogenix.stage_ability": "One random ability at the end of each stage",
+  "tooltip.nekogenix.stage_ability": "One random ability after each of the first three stages",
   "options.nekogenix.neko_voice": "Neko Voice",
   "block.nekogenix.centrifuge": "Centrifuge",
   "item.nekogenix.blank_nucleocard": "Blank Nucleocard",
@@ -36,5 +36,11 @@
   "tooltip.nekogenix.blank_nucleocard": "Process with six saliva samples in a Centrifuge",
   "tooltip.nekogenix.cat_nucleocard": "Place above a Syringe in a Pneumatic Stand",
   "tooltip.nekogenix.nucleocard_return": "Returns to a Blank Nucleocard after filling up to two Syringes",
-  "block.nekogenix.pneumatic_stand": "Pneumatic Stand"
+  "block.nekogenix.pneumatic_stand": "Pneumatic Stand",
+  "item.nekogenix.stabilizing_solution": "Stabilizing Solution",
+  "item.nekogenix.neko_stabilizer": "Neko Stabilizer",
+  "item.nekogenix.stabilizing_injection": "Stabilizing Injection",
+  "tooltip.nekogenix.cat_stage": "Stage IV: become a Cat unless stabilized",
+  "tooltip.nekogenix.stabilizing_injection": "Permanently stops stage IV, keeping you neko",
+  "tooltip.nekogenix.stabilizing_permanent": "Cannot restart a stabilized transformation"
 }

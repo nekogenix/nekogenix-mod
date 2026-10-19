@@ -17,13 +17,13 @@
   "effect.nekogenix.feline_vision": "Котячий зір",
   "effect.nekogenix.soft_paw_pads": "М’які подушечки лап",
   "tooltip.nekogenix.injection_use": "Утримуйте ЛКМ для введення",
-  "tooltip.nekogenix.stages": "Три стадії по 20 хвилин",
+  "tooltip.nekogenix.stages": "Чотири стадії по 20 хвилин",
   "tooltip.nekogenix.agility": "+100% до швидкості бігу та пересування навприсядки",
   "tooltip.nekogenix.double_jump": "Другий стрибок: Стрибучість II",
   "tooltip.nekogenix.vision": "Нічний зір поблизу неосвітлених місць (16 блоків)",
   "tooltip.nekogenix.paws": "-75% шкоди від падіння",
   "tooltip.nekogenix.delayed": "Ефекти настануть через 20 хвилин",
-  "tooltip.nekogenix.stage_ability": "Наприкінці кожної — випадкова здібність",
+  "tooltip.nekogenix.stage_ability": "По випадковій здібності за перші три стадії",
   "options.nekogenix.neko_voice": "Неко голос",
   "block.nekogenix.centrifuge": "Центрифуга",
   "item.nekogenix.blank_nucleocard": "Порожня нуклеокарта",
@@ -37,5 +37,11 @@
   "tooltip.nekogenix.blank_nucleocard": "Обробіть із шістьма зразками слини в центрифузі",
   "tooltip.nekogenix.cat_nucleocard": "Помістіть над шприцом у пневматичній стійці",
   "tooltip.nekogenix.nucleocard_return": "Стає порожньою після заповнення до двох шприців",
-  "block.nekogenix.pneumatic_stand": "Пневматична стійка"
+  "block.nekogenix.pneumatic_stand": "Пневматична стійка",
+  "item.nekogenix.stabilizing_solution": "Стабілізувальний розчин",
+  "item.nekogenix.neko_stabilizer": "Неко-стабілізатор",
+  "item.nekogenix.stabilizing_injection": "Стабілізувальна ін’єкція",
+  "tooltip.nekogenix.cat_stage": "Стадія IV: перетворення на кішку без стабілізатора",
+  "tooltip.nekogenix.stabilizing_injection": "Назавжди зупиняє стадію IV, залишаючи вас неко",
+  "tooltip.nekogenix.stabilizing_permanent": "Зупинене перетворення не можна відновити"
 }

@@ -1,0 +1,50 @@
+{
+  "parent": "nekogenix:item/syringe_gui",
+  "textures": {
+    "layer0": "nekogenix:item/stabilizing_injection"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "nekogenix:injection_stage": 1
+      },
+      "model": "nekogenix:item/stabilizing_injection_pressed_1"
+    },
+    {
+      "predicate": {
+        "nekogenix:injection_stage": 2
+      },
+      "model": "nekogenix:item/stabilizing_injection_pressed_2"
+    },
+    {
+      "predicate": {
+        "nekogenix:injection_stage": 3
+      },
+      "model": "nekogenix:item/stabilizing_injection_pressed_3"
+    },
+    {
+      "predicate": {
+        "nekogenix:injection_stage": 4
+      },
+      "model": "nekogenix:item/syringe_pressed_3"
+    },
+    {
+      "predicate": {
+        "nekogenix:injection_stage": 5
+      },
+      "model": "nekogenix:item/syringe_pressed_2"
+    },
+    {
+      "predicate": {
+        "nekogenix:injection_stage": 6
+      },
+      "model": "nekogenix:item/syringe_pressed_1"
+    },
+    {
+      "predicate": {
+        "nekogenix:injection_stage": 7
+      },
+      "model": "nekogenix:item/syringe"
+    }
+  ]
+}

@@ -15,16 +15,23 @@ final class ModTooltips {
     static void injection(Item.TooltipContext context, List<Component> tooltip) {
         PotionContents.addPotionTooltip(List.of(
                 new MobEffectInstance(Content.SHOCK, NekoState.SHOCK_DURATION),
-                new MobEffectInstance(Content.TRANSFORMING, 3 * NekoState.DAY)), tooltip::add, 1F, context.tickRate());
+                new MobEffectInstance(Content.TRANSFORMING, 4 * NekoState.DAY)), tooltip::add, 1F, context.tickRate());
         line(tooltip, "injection_use", ChatFormatting.GRAY);
         line(tooltip, "stages", ChatFormatting.GRAY);
         line(tooltip, "stage_ability", ChatFormatting.GRAY);
+        line(tooltip, "cat_stage", ChatFormatting.GRAY);
         tooltip.add(CommonComponents.EMPTY);
         tooltip.add(Component.translatable("potion.whenDrank").withStyle(ChatFormatting.DARK_PURPLE));
         line(tooltip, "agility", ChatFormatting.BLUE);
         line(tooltip, "double_jump", ChatFormatting.BLUE);
         line(tooltip, "vision", ChatFormatting.BLUE);
         line(tooltip, "paws", ChatFormatting.BLUE);
+    }
+
+    static void stabilizer(List<Component> tooltip) {
+        line(tooltip, "injection_use", ChatFormatting.GRAY);
+        line(tooltip, "stabilizing_injection", ChatFormatting.BLUE);
+        line(tooltip, "stabilizing_permanent", ChatFormatting.GRAY);
     }
 
     static void saliva(Item.TooltipContext context, List<Component> tooltip) {

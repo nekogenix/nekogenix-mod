@@ -54,8 +54,7 @@ public final class InjectionHandler {
             return;
         }
         if (session.active || session.waitingForRelease || !validPlayer(player)
-                || player.getData(Content.NEKO).phase() != NekoState.Phase.HUMAN
-                || !player.getMainHandItem().is(Content.INJECTION)) return;
+                || !canInject(player, player.getMainHandItem())) return;
         session.stack = player.getMainHandItem();
         session.slot = player.getInventory().selected;
         session.elapsed = 0;
@@ -71,7 +70,7 @@ public final class InjectionHandler {
         Session session = player.getData(Content.INJECTION_SESSION);
         if (!session.active) return;
         if (!validPlayer(player) || player.getInventory().selected != session.slot
-                || player.getMainHandItem() != session.stack || !session.stack.is(Content.INJECTION)) {
+                || player.getMainHandItem() != session.stack || !isInjection(session.stack)) {
             cancel(player, session);
             return;
         }
@@ -95,17 +94,29 @@ public final class InjectionHandler {
         }
         if (session.elapsed == FORWARD_TICKS) sound(player, SoundEvents.BOTTLE_EMPTY, 0.7F, 1.25F);
         if (session.elapsed < TOTAL_TICKS) return;
-        if (player.getData(Content.NEKO).begin()) {
+        boolean stabilizing = session.stack.is(Content.STABILIZING_INJECTION);
+        NekoState state = player.getData(Content.NEKO);
+        if (stabilizing ? state.stabilize() : state.begin()) {
             FelineSounds.sync(player);
             player.setItemInHand(InteractionHand.MAIN_HAND, Content.USED_SYRINGE.toStack());
             player.hurt(player.damageSources().generic(), 1.0F);
             TransformationHandler.refreshEffects(player);
             player.serverLevel().sendParticles(ParticleTypes.WITCH, player.getX(), player.getY() + 1,
                     player.getZ(), 15, 0.3, 0.5, 0.3, 0.03);
-            sound(player, SoundEvents.PLAYER_BREATH, 0.9F, 0.65F);
+            sound(player, stabilizing ? SoundEvents.AMETHYST_BLOCK_CHIME : SoundEvents.PLAYER_BREATH, 0.9F, stabilizing ? 1.2F : 0.65F);
         }
         cancel(player, session);
         session.waitingForRelease = true;
+    }
+
+    public static boolean isInjection(ItemStack stack) {
+        return stack.is(Content.INJECTION) || stack.is(Content.STABILIZING_INJECTION);
+    }
+
+    private static boolean canInject(ServerPlayer player, ItemStack stack) {
+        var phase = player.getData(Content.NEKO).phase();
+        return stack.is(Content.INJECTION) && phase == NekoState.Phase.HUMAN
+                || stack.is(Content.STABILIZING_INJECTION) && phase == NekoState.Phase.CAT_TRANSFORMING;
     }
 
     private static boolean validPlayer(ServerPlayer player) {
