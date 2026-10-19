@@ -36,6 +36,9 @@ public final class Nekogenix {
 
     private static void network(RegisterPayloadHandlersEvent event) {
         io.github.nekogenix.skin.SkinPackets.register(event);
+        event.registrar("1").playToServer(io.github.nekogenix.network.CameraViewInput.TYPE,
+                io.github.nekogenix.network.CameraViewInput.STREAM_CODEC,
+                (payload, context) -> io.github.nekogenix.gameplay.CameraProjectiles.receive(context.player(), payload.height()));
         event.registrar("1").playToServer(AirJumpInput.TYPE, AirJumpInput.STREAM_CODEC,
                 (payload, context) -> io.github.nekogenix.gameplay.FelineJump.jump(context.player()));
         event.registrar("1").playToServer(InjectionInput.TYPE, InjectionInput.STREAM_CODEC,

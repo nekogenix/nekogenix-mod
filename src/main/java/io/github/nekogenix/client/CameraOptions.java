@@ -28,14 +28,14 @@ public final class CameraOptions {
         private final AbstractWidget anchor;
 
         HeightSlider(AbstractWidget anchor) {
-            super(anchor.getX(), anchor.getY() + anchor.getHeight() + 4, anchor.getWidth(), anchor.getHeight(), Component.empty(), ClientConfig.CAMERA_HEIGHT.get() / 100.0);
+            super(anchor.getX(), anchor.getY() + anchor.getHeight() + 4, anchor.getWidth(), anchor.getHeight(), Component.empty(), ClientConfig.cameraHeight() / 100.0);
             this.anchor = anchor;
             updateMessage();
         }
 
         @Override public void renderWidget(net.minecraft.client.gui.GuiGraphics graphics, int mouseX, int mouseY, float partial) {
             setPosition(anchor.getX(), anchor.getY() + anchor.getHeight() + 4);
-            value = ClientConfig.CAMERA_HEIGHT.get() / 100.0;
+            value = ClientConfig.cameraHeight() / 100.0;
             updateMessage();
             super.renderWidget(graphics, mouseX, mouseY, partial);
         }

@@ -12,5 +12,6 @@ public abstract class CameraTargetingMixin {
     @Inject(method = "pick(F)V", at = @At("RETURN"))
     private void nekogenix$target(float partial, CallbackInfo callback) {
         CameraTargeting.update(partial);
+        io.github.nekogenix.client.CameraHeight.syncForTick();
     }
 }

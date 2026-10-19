@@ -6,7 +6,7 @@ public final class ClientConfig {
     public static final ModConfigSpec SPEC;
     public static final ModConfigSpec.DoubleValue NEKO_VOICE_VOLUME;
     public static final ModConfigSpec.IntValue CAMERA_HEIGHT;
-    public static final ModConfigSpec.BooleanValue CAMERA_CAT_FORM;
+    private static final ModConfigSpec.BooleanValue LEGACY_CAT_CAMERA;
 
     static {
         var builder = new ModConfigSpec.Builder() {
@@ -15,8 +15,17 @@ public final class ClientConfig {
         };
         NEKO_VOICE_VOLUME = builder.defineInRange("nekoVoiceVolume", 1.0, 0.0, 1.0);
         CAMERA_HEIGHT = builder.defineInRange("cameraHeight", 100, 0, 100);
-        CAMERA_CAT_FORM = builder.define("cameraCatForm", false);
+        LEGACY_CAT_CAMERA = builder.define("cameraCatForm", false);
         SPEC = builder.build();
+    }
+
+    public static int cameraHeight() {
+        if (LEGACY_CAT_CAMERA.get()) {
+            LEGACY_CAT_CAMERA.set(false);
+            CAMERA_HEIGHT.set(100);
+            SPEC.save();
+        }
+        return CAMERA_HEIGHT.get();
     }
 
     private ClientConfig() {}
