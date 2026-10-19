@@ -93,5 +93,8 @@
   "skins.nekogenix.variant.ragdoll": "Рэгдолл",
   "skins.nekogenix.variant.white": "Белый",
   "skins.nekogenix.variant.jellie": "Джелли",
-  "skins.nekogenix.variant.all_black": "Чёрный"
+  "skins.nekogenix.variant.all_black": "Чёрный",
+  "options.nekogenix.camera_height": "Высота камеры",
+  "options.nekogenix.camera_height.cat": "Кот",
+  "options.nekogenix.camera_height.human": "Человек"
 }
