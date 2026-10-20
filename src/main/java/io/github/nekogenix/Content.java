@@ -131,7 +131,25 @@ public final class Content {
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> TAB = TABS.register("nekogenix",
             () -> CreativeModeTab.builder().title(Component.translatable("itemGroup.nekogenix"))
                     .icon(() -> INJECTION.toStack()).displayItems((parameters, output) -> {
-                        ITEMS.getEntries().forEach(item -> output.accept(item.get()));
+                        output.accept(CENTRIFUGE_ITEM);
+                        output.accept(PNEUMATIC_ITEM);
+                        output.accept(COTTON_SWAB);
+                        output.accept(SALIVA_SWAB);
+                        output.accept(SALIVA_BOTTLE);
+                        output.accept(SPLASH_SALIVA);
+                        output.accept(LINGERING_SALIVA);
+                        output.accept(BLANK_NUCLEOCARD);
+                        output.accept(CAT_NUCLEOCARD);
+                        output.accept(NEEDLE);
+                        output.accept(BARREL);
+                        output.accept(PLUNGER);
+                        output.accept(SYRINGE);
+                        output.accept(USED_SYRINGE);
+                        output.accept(INJECTION);
+                        output.accept(STABILIZING_INJECTION);
+                        output.accept(NEKO_STABILIZER);
+                        output.accept(SPLASH_SWEET_AMETHYST);
+                        output.accept(LINGERING_SWEET_AMETHYST);
                     }).build());
 
     private static DeferredHolder<MobEffect, MobEffect> effect(String name, MobEffectCategory category, int color) {
