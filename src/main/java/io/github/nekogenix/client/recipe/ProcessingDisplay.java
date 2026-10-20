@@ -27,7 +27,7 @@ public record ProcessingDisplay(ResourceLocation id, Machine machine, List<Slot>
         Machine(String path, String title, int height, int ticks) { this.path = path; this.title = title; this.height = height; this.ticks = ticks; }
         public ResourceLocation id() { return Content.id(path); }
         public Component title() { return Component.translatable(title); }
-        public int width() { return 242; }
+        public int width() { return this == PNEUMATIC ? 208 : 242; }
         public int height() { return height; }
         public int ticks() { return ticks; }
         public ItemStack icon() { return (this == CENTRIFUGE ? Content.CENTRIFUGE_ITEM : Content.PNEUMATIC_ITEM).toStack(); }
@@ -67,10 +67,10 @@ public record ProcessingDisplay(ResourceLocation id, Machine machine, List<Slot>
                 var slots = new ArrayList<Slot>();
                 slots.add(new Slot(Role.INPUT, "fuel", 17, 17, List.of(Items.WIND_CHARGE.getDefaultInstance()), false));
                 slots.add(input("source", 79, 17, recipe.source()));
-                slots.add(output("remainder", 212, 17, recipe.remainder(), true));
+                slots.add(output("remainder", 168, 17, recipe.remainder(), true));
                 for (int i = 0; i < count; i++) {
                     slots.add(new Slot(Role.INPUT, "syringe_" + i, 56 + 46 * i, 51, List.of(Content.SYRINGE.toStack()), false));
-                    slots.add(output("injection_" + i, count == 1 ? 212 : 194 + 22 * i, 51, recipe.result(), false));
+                    slots.add(output("injection_" + i, 168 + (2 * i - count + 1) * 11, 51, recipe.result(), false));
                 }
                 displays.add(new ProcessingDisplay(holder.id().withSuffix("_" + count), Machine.PNEUMATIC, slots, count));
             }

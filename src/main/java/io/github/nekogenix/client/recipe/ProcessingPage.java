@@ -27,10 +27,11 @@ public final class ProcessingPage {
         for (var slot : display.slots()) {
             if (slot.role() == ProcessingDisplay.Role.OUTPUT) slot(graphics, slot.x(), slot.y());
         }
-        arrow(graphics, 177, machine == ProcessingDisplay.Machine.CENTRIFUGE ? 65 : 53, progress);
-        if (machine == ProcessingDisplay.Machine.PNEUMATIC) arrow(graphics, 177, 19, progress);
+        boolean pneumatic = machine == ProcessingDisplay.Machine.PNEUMATIC;
+        arrow(graphics, pneumatic ? 132 : 177, pneumatic ? 53 : 65, progress);
+        if (pneumatic) arrow(graphics, 132, 19, progress);
         var duration = Component.translatable("recipe.nekogenix.duration", machine.ticks() / 20);
-        graphics.drawString(mc.font, duration, 220 - mc.font.width(duration) / 2,
+        graphics.drawString(mc.font, duration, (pneumatic ? 176 : 220) - mc.font.width(duration) / 2,
                 machine == ProcessingDisplay.Machine.CENTRIFUGE ? 147 : 78, 0xff555555, false);
     }
 
