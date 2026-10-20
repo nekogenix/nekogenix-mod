@@ -126,6 +126,30 @@ public final class FelineRefinementsTests {
     }
 
     @GameTest(template = "empty")
+    public static void airJumpRequiresEnoughFoodUnlessCreative(GameTestHelper helper) {
+        var player = GameplayTests.player(helper);
+        TransformationTests.setState(player, 4);
+        for (int food : new int[] {0, 6, 7}) {
+            player.getFoodData().setFoodLevel(food);
+            player.setOnGround(true);
+            player.jumpFromGround();
+            player.setOnGround(false);
+            helper.assertTrue(FelineJump.jump(player) == (food > 6), "Air jump uses the sprint hunger threshold at " + food);
+        }
+        player.getFoodData().setFoodLevel(20);
+        player.setOnGround(true); player.jumpFromGround(); player.setOnGround(false);
+        player.getFoodData().setFoodLevel(6);
+        helper.assertFalse(FelineJump.jump(player), "Becoming hungry after takeoff blocks the second jump");
+        player.setGameMode(net.minecraft.world.level.GameType.CREATIVE);
+        player.getFoodData().setFoodLevel(0);
+        player.setOnGround(true); player.jumpFromGround(); player.setOnGround(false);
+        helper.assertTrue(FelineJump.jump(player), "Creative air jumps do not require food");
+        helper.assertTrue(FelineJump.canStartFlight(player), "Creative flight remains available after a hungry air jump");
+        GameplayTests.remove(player);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
     public static void creativeJumpAndFlightStateAreSeparate(GameTestHelper helper) {
         var player = GameplayTests.player(helper);
         TransformationTests.setState(player, 4);

@@ -68,11 +68,11 @@ public final class FelineScentSmokeTest {
                 if (TIGHT && age == 35) io.github.nekogenix.config.ClientConfig.CAMERA_HEIGHT.set(100);
                 if (age == 40 || age == 215 || age == 260) mc.options.keyShift.setDown(true);
                 if (TIGHT && age == 80) {
-                    check(mc.player.isShiftKeyDown() && !mc.player.isCrouching(), "The crouch key is held while the low ceiling prevents the native crouching pose");
+                    check(mc.player.isShiftKeyDown() && mc.player.isCrouching(), "A cat can crouch even under a low ceiling");
                     check(mc.gameRenderer.getMainCamera().getPosition().y - mc.player.getY() < .8, "The selected Human camera is lowered by the roof");
                 }
                 if (TIGHT && age == 125) check(sniffs == 0, "The ability cannot activate before its delay");
-                if (TIGHT && age == 190) check(sniffs == 1, "Scent activates even though the cat cannot physically crouch");
+                if (TIGHT && age == 190) check(sniffs == 1, "Scent activates while the cat crouches under a low ceiling");
                 if (TIGHT && age == 228) check(sniffs == 1, "Resuming during fade does not repeat the activation delay or sound");
                 if (TIGHT && age == 365) check(sniffs == 2, "After fading out the next activation requires a fresh delay");
                 if (age == 125) capture = "scent-before-delay.png";
@@ -90,7 +90,7 @@ public final class FelineScentSmokeTest {
                 if (age >= 410 && reloaded) {
                     check(mc.player.getData(Content.CAT_FORM), "The local observer remains a full cat");
                     Nekogenix.LOGGER.info("Nekogenix scent client smoke passed: timed crouching fades recovery resize and resource reload"); mc.stop();
-                    if (TIGHT) Nekogenix.LOGGER.info("Nekogenix tight scent smoke passed: blocked crouching pose lowered Human camera five second activation fade and recovery");
+                    if (TIGHT) Nekogenix.LOGGER.info("Nekogenix tight scent smoke passed: native crouching pose lowered Human camera five second activation fade and recovery");
                 }
             }
             if (age > 30) for (var entity : mc.level.entitiesForRendering()) {

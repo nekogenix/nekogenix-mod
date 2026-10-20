@@ -110,13 +110,23 @@ public final class TransformationHandler {
             state.visionOwned = false;
         }
         if (!dark) {
-            if (state.visionOwned) player.removeEffect(MobEffects.NIGHT_VISION);
-            state.visionOwned = false;
+            if (state.visionOwned && current != null && !current.endsWithin(20)) {
+                player.removeEffect(MobEffects.NIGHT_VISION);
+                applyVision(player, state, 20);
+            }
+            if (current == null) state.visionOwned = false;
         } else if (current == null || state.visionOwned && current.getDuration() < 260) {
-            state.applyingVision = true;
-            player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 320, 0, true, false, false));
-            state.applyingVision = false;
+            applyVision(player, state, 320);
+        }
+    }
+
+    private static void applyVision(ServerPlayer player, NekoState state, int duration) {
+        state.applyingVision = true;
+        try {
+            player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, duration, 0, true, false, false));
             state.visionOwned = true;
+        } finally {
+            state.applyingVision = false;
         }
     }
 

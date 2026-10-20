@@ -24,6 +24,7 @@ public final class FelineJump {
         boolean agility = player.level().isClientSide ? player.hasEffect(Content.AGILITY)
                 : player.getData(Content.NEKO).has(NekoState.AGILITY);
         return agility && player.isAlive() && !player.isSpectator() && !player.getAbilities().flying
+                && (player.getAbilities().mayfly || player.getFoodData().getFoodLevel() > 6)
                 && !player.isPassenger() && !player.isFallFlying() && !player.onClimbable()
                 && !player.isInWaterOrBubble() && !player.isInLava();
     }

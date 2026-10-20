@@ -16,6 +16,20 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 @GameTestHolder(Nekogenix.ID)
 @PrefixGameTestTemplate(false)
 public final class PneumaticStandTests {
+    @GameTest(template = "empty")
+    public static void pneumaticRecipeUsesIronRedstoneBreezeAndSmoothStone(GameTestHelper helper) {
+        var level = helper.getLevel();
+        var recipe = (net.minecraft.world.item.crafting.CraftingRecipe)level.getRecipeManager().byKey(Content.id("pneumatic_stand")).orElseThrow().value();
+        var items = new java.util.ArrayList<>(java.util.List.of(Items.IRON_INGOT.getDefaultInstance(), Items.IRON_INGOT.getDefaultInstance(), Items.IRON_INGOT.getDefaultInstance(),
+                Items.REDSTONE.getDefaultInstance(), Items.BREEZE_ROD.getDefaultInstance(), Items.REDSTONE.getDefaultInstance(),
+                Items.SMOOTH_STONE.getDefaultInstance(), Items.SMOOTH_STONE.getDefaultInstance(), Items.SMOOTH_STONE.getDefaultInstance()));
+        var input = net.minecraft.world.item.crafting.CraftingInput.of(3, 3, items);
+        helper.assertTrue(recipe.matches(input, level) && recipe.assemble(input, level.registryAccess()).is(Content.PNEUMATIC_STAND.get().asItem()), "The requested three by three recipe crafts the pneumatic stand");
+        items.set(7, Items.COBBLESTONE.getDefaultInstance());
+        helper.assertFalse(recipe.matches(net.minecraft.world.item.crafting.CraftingInput.of(3, 3, items), level), "Cobblestone cannot replace smooth stone");
+        helper.succeed();
+    }
+
     @GameTest(template = "empty", timeoutTicks = 20)
     public static void addingSecondSyringeRestartsTheWholeBatch(GameTestHelper helper) {
         restartBatch(helper, false);
