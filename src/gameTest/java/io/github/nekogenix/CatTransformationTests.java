@@ -95,6 +95,8 @@ public final class CatTransformationTests {
         helper.runAfterDelay(80, () -> helper.assertTrue(player.getHealth() == 19F,
                 "Crystallizing injection damage also happens at needle contact"));
         helper.runAfterDelay(165, () -> {
+            helper.assertTrue(player.hasEffect(Content.CRYSTALLIZATION) && player.getEffect(Content.CRYSTALLIZATION).getDuration() > 1180,
+                    "Successful stabilization also grants sixty seconds of Crystallization");
             helper.assertTrue(player.getData(Content.NEKO).phase() == NekoState.Phase.NEKO && player.getData(Content.NEKO).lives() == 7
                     && player.getMainHandItem().is(Content.USED_SYRINGE) && player.getHealth() == 19F, "Stabilization retains abilities and remaining lives and returns a used syringe");
             InjectionHandler.input(player, false);

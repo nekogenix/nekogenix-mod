@@ -107,6 +107,8 @@ public final class InjectionHandler {
         boolean stabilizing = session.stack.is(Content.STABILIZING_INJECTION);
         NekoState state = player.getData(Content.NEKO);
         if (stabilizing ? state.stabilize() : state.begin()) {
+            if (stabilizing) player.addEffect(new net.minecraft.world.effect.MobEffectInstance(Content.CRYSTALLIZATION,
+                    CrystallizationEffect.DURATION, 0, false, false, true));
             FelineSounds.sync(player);
             player.setItemInHand(InteractionHand.MAIN_HAND, Content.USED_SYRINGE.toStack());
             TransformationHandler.refreshEffects(player);

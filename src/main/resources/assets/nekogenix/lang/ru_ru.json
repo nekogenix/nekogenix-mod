@@ -98,5 +98,8 @@
   "ability.nekogenix.feline_scent": "Кошачий нюх",
   "options.nekogenix.camera_height": "Высота камеры",
   "options.nekogenix.camera_height.cat": "Кот",
-  "options.nekogenix.camera_height.human": "Человек"
+  "options.nekogenix.camera_height.human": "Человек",
+  "effect.nekogenix.sweetness": "Сладость",
+  "effect.nekogenix.crystallization": "Кристаллизация",
+  "tooltip.nekogenix.sweetness": "Плавно восполняет голод и насыщение до максимума"
 }

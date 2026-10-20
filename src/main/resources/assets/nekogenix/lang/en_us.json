@@ -98,5 +98,8 @@
   "ability.nekogenix.feline_scent": "Feline Scent",
   "options.nekogenix.camera_height": "Camera Height",
   "options.nekogenix.camera_height.cat": "Cat",
-  "options.nekogenix.camera_height.human": "Human"
+  "options.nekogenix.camera_height.human": "Human",
+  "effect.nekogenix.sweetness": "Sweetness",
+  "effect.nekogenix.crystallization": "Crystallization",
+  "tooltip.nekogenix.sweetness": "Gradually restores food and saturation to full"
 }
