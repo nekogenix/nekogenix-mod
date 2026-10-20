@@ -1,6 +1,8 @@
 package io.github.nekogenix.centrifuge;
 
 import io.github.nekogenix.Content;
+import io.github.nekogenix.recipe.CentrifugeRecipe;
+import io.github.nekogenix.recipe.ProcessingRecipes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -88,8 +90,12 @@ public final class CentrifugeBlockEntity extends BaseContainerBlockEntity implem
             machine.progress++;
             machine.items.get(FUEL).shrink(machine.progress * REDSTONE_PER_CARD / PROCESS_TICKS - consumed);
             if (machine.progress >= PROCESS_TICKS) {
-                for (int slot = 0; slot < BOTTLES; slot++) machine.items.set(slot, Items.GLASS_BOTTLE.getDefaultInstance());
-                machine.items.set(CARD, Content.CAT_NUCLEOCARD.toStack());
+                var recipe = machine.recipe();
+                if (recipe != null) {
+                    var result = recipe.assemble(new CentrifugeRecipe.Input(machine), level.registryAccess());
+                    for (int slot = 0; slot < BOTTLES; slot++) machine.items.set(slot, Items.GLASS_BOTTLE.getDefaultInstance());
+                    machine.items.set(CARD, result);
+                }
                 machine.progress = 0;
                 machine.sound(SoundEvents.AMETHYST_BLOCK_CHIME, .8F, 1.2F);
                 machine.updateLid();
@@ -105,8 +111,12 @@ public final class CentrifugeBlockEntity extends BaseContainerBlockEntity implem
     private boolean ready() {
         if (!getItem(CARD).is(Content.BLANK_NUCLEOCARD) || !getItem(FUEL).is(Items.REDSTONE)
                 || getItem(FUEL).getCount() < REDSTONE_PER_CARD) return false;
-        for (int slot = 0; slot < BOTTLES; slot++) if (!getItem(slot).is(Content.SALIVA_BOTTLE) || getItem(slot).getCount() != 1) return false;
-        return true;
+        return recipe() != null;
+    }
+
+    private CentrifugeRecipe recipe() {
+        return level.getRecipeManager().getRecipeFor(ProcessingRecipes.CENTRIFUGING.get(), new CentrifugeRecipe.Input(this), level)
+                .map(net.minecraft.world.item.crafting.RecipeHolder::value).orElse(null);
     }
 
     private void sound(SoundEvent sound, float volume, float pitch) { level.playSound(null, worldPosition, sound, SoundSource.BLOCKS, volume, pitch); }

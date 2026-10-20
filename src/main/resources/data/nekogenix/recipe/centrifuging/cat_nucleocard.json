@@ -1,0 +1,6 @@
+{
+  "type": "nekogenix:centrifuging",
+  "sample": { "item": "nekogenix:bottle_of_cat_saliva" },
+  "card": { "item": "nekogenix:blank_nucleocard" },
+  "result": { "id": "nekogenix:cat_nucleocard" }
+}

@@ -1,6 +1,8 @@
 package io.github.nekogenix.pneumatic;
 
 import io.github.nekogenix.Content;
+import io.github.nekogenix.recipe.PneumaticRecipe;
+import io.github.nekogenix.recipe.ProcessingRecipes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -49,7 +51,7 @@ public final class PneumaticStandBlockEntity extends BaseContainerBlockEntity im
             stand.returnCenterItem();
             if (!isSource(stand.getItem(CARD)) || !stand.getItem(FUEL).is(Items.WIND_CHARGE)) return;
             stand.targets = (stand.getItem(0).is(Content.SYRINGE) ? 1 : 0) | (stand.getItem(2).is(Content.SYRINGE) ? 4 : 0);
-            if (stand.targets == 0) return;
+            if (stand.targets == 0 || stand.recipe() == null) return;
             stand.stabilizing = stand.getItem(CARD).is(Content.NEKO_STABILIZER);
             stand.progress = 1;
             stand.items.get(FUEL).shrink(1);
@@ -67,8 +69,11 @@ public final class PneumaticStandBlockEntity extends BaseContainerBlockEntity im
             stand.sound(SoundEvents.BREEZE_INHALE, .55F, 1.2F);
             stand.sync();
         } else if (++stand.progress >= PROCESS_TICKS) {
-            for (int slot = 0; slot < 3; slot++) if ((stand.targets & 1 << slot) != 0) stand.items.set(slot, stand.stabilizing ? Content.STABILIZING_INJECTION.toStack() : Content.INJECTION.toStack());
-            stand.items.set(CARD, stand.stabilizing ? new ItemStack(Items.GLASS_BOTTLE) : Content.BLANK_NUCLEOCARD.toStack());
+            var recipe = stand.recipe();
+            if (recipe != null) {
+                for (int slot = 0; slot < 3; slot++) if ((stand.targets & 1 << slot) != 0) stand.items.set(slot, recipe.result().copy());
+                stand.items.set(CARD, recipe.remainder().copy());
+            }
             stand.progress = 0;
             stand.targets = 0;
             stand.returnCenterItem();
@@ -84,6 +89,12 @@ public final class PneumaticStandBlockEntity extends BaseContainerBlockEntity im
 
     private int syringes() {
         return (getItem(0).is(Content.SYRINGE) ? 1 : 0) | (getItem(2).is(Content.SYRINGE) ? 4 : 0);
+    }
+
+    private PneumaticRecipe recipe() {
+        return level.getRecipeManager().getRecipeFor(ProcessingRecipes.PNEUMATIC_FILLING.get(),
+                new net.minecraft.world.item.crafting.SingleRecipeInput(getItem(CARD)), level)
+                .map(net.minecraft.world.item.crafting.RecipeHolder::value).orElse(null);
     }
 
     private boolean validInputs() {
