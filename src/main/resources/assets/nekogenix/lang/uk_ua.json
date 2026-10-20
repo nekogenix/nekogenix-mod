@@ -100,7 +100,11 @@
   "options.nekogenix.camera_height": "Висота камери",
   "options.nekogenix.camera_height.cat": "Кіт",
   "options.nekogenix.camera_height.human": "Людина",
-  "effect.nekogenix.sweetness": "Солодкість",
+  "effect.nekogenix.sweetness": "Кристалічна солодкість",
   "effect.nekogenix.crystallization": "Кристалізація",
-  "tooltip.nekogenix.sweetness": "Поступово відновлює голод і насичення до максимуму"
+  "tooltip.nekogenix.sweetness": "Поступово відновлює голод і насичення до максимуму",
+  "item.nekogenix.lingering_bottle_of_cat_saliva": "Осідаюча пляшечка котячої слини",
+  "item.nekogenix.splash_potion_of_sweet_amethyst": "Вибухове зілля солодкого аметисту",
+  "item.nekogenix.lingering_potion_of_sweet_amethyst": "Осідаюче зілля солодкого аметисту",
+  "effect.nekogenix.cat_saliva_exposure": "Вплив котячої слини"
 }

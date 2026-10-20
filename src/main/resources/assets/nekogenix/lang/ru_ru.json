@@ -99,7 +99,11 @@
   "options.nekogenix.camera_height": "Высота камеры",
   "options.nekogenix.camera_height.cat": "Кот",
   "options.nekogenix.camera_height.human": "Человек",
-  "effect.nekogenix.sweetness": "Сладость",
+  "effect.nekogenix.sweetness": "Кристалльная сладость",
   "effect.nekogenix.crystallization": "Кристаллизация",
-  "tooltip.nekogenix.sweetness": "Плавно восполняет голод и насыщение до максимума"
+  "tooltip.nekogenix.sweetness": "Плавно восполняет голод и насыщение до максимума",
+  "item.nekogenix.lingering_bottle_of_cat_saliva": "Туманная бутылочка кошачьей слюны",
+  "item.nekogenix.splash_potion_of_sweet_amethyst": "Взрывное зелье сладкого аметиста",
+  "item.nekogenix.lingering_potion_of_sweet_amethyst": "Туманное зелье сладкого аметиста",
+  "effect.nekogenix.cat_saliva_exposure": "Воздействие кошачьей слюны"
 }

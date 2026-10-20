@@ -99,7 +99,11 @@
   "options.nekogenix.camera_height": "Camera Height",
   "options.nekogenix.camera_height.cat": "Cat",
   "options.nekogenix.camera_height.human": "Human",
-  "effect.nekogenix.sweetness": "Sweetness",
+  "effect.nekogenix.sweetness": "Crystalline Sweetness",
   "effect.nekogenix.crystallization": "Crystallization",
-  "tooltip.nekogenix.sweetness": "Gradually restores food and saturation to full"
+  "tooltip.nekogenix.sweetness": "Gradually restores food and saturation to full",
+  "item.nekogenix.lingering_bottle_of_cat_saliva": "Lingering Bottle of Cat Saliva",
+  "item.nekogenix.splash_potion_of_sweet_amethyst": "Splash Potion of Sweet Amethyst",
+  "item.nekogenix.lingering_potion_of_sweet_amethyst": "Lingering Potion of Sweet Amethyst",
+  "effect.nekogenix.cat_saliva_exposure": "Cat Saliva Exposure"
 }

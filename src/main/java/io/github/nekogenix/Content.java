@@ -61,6 +61,9 @@ public final class Content {
             () -> new SalivaBottleItem(true));
     public static final DeferredItem<NekoInjectionItem> INJECTION = ITEMS.register("neko_injection", () -> new NekoInjectionItem());
     public static final DeferredItem<Item> NEKO_STABILIZER = ITEMS.register("neko_stabilizer", io.github.nekogenix.item.SweetAmethystItem::new);
+    public static final DeferredItem<io.github.nekogenix.item.ThrownBottleItem> LINGERING_SALIVA = ITEMS.register("lingering_bottle_of_cat_saliva", () -> new io.github.nekogenix.item.ThrownBottleItem(false, true));
+    public static final DeferredItem<io.github.nekogenix.item.ThrownBottleItem> SPLASH_SWEET_AMETHYST = ITEMS.register("splash_potion_of_sweet_amethyst", () -> new io.github.nekogenix.item.ThrownBottleItem(true, false));
+    public static final DeferredItem<io.github.nekogenix.item.ThrownBottleItem> LINGERING_SWEET_AMETHYST = ITEMS.register("lingering_potion_of_sweet_amethyst", () -> new io.github.nekogenix.item.ThrownBottleItem(true, true));
     public static final DeferredItem<NekoInjectionItem> STABILIZING_INJECTION = ITEMS.register("stabilizing_injection", () -> new NekoInjectionItem(true));
     public static final DeferredItem<NucleocardItem> BLANK_NUCLEOCARD = ITEMS.register("blank_nucleocard", () -> new NucleocardItem(false));
     public static final DeferredItem<NucleocardItem> CAT_NUCLEOCARD = ITEMS.register("cat_nucleocard", () -> new NucleocardItem(true));
@@ -87,6 +90,7 @@ public final class Content {
     public static final DeferredHolder<MobEffect, MobEffect> PAWS = effect("soft_paw_pads", MobEffectCategory.BENEFICIAL, 0xE9B6C9);
     public static final DeferredHolder<MobEffect, MobEffect> SWEETNESS = EFFECTS.register("sweetness", io.github.nekogenix.gameplay.SweetnessEffect::new);
     public static final DeferredHolder<MobEffect, MobEffect> CRYSTALLIZATION = EFFECTS.register("crystallization", io.github.nekogenix.gameplay.CrystallizationEffect::new);
+    public static final DeferredHolder<MobEffect, MobEffect> SALIVA_CLOUD = EFFECTS.register("cat_saliva_exposure", io.github.nekogenix.gameplay.SalivaCloudEffect::new);
 
     public static final DeferredHolder<EntityType<?>, EntityType<SalivaProjectile>> SALIVA_PROJECTILE = ENTITIES.register("saliva_bottle",
             () -> EntityType.Builder.<SalivaProjectile>of(SalivaProjectile::new, MobCategory.MISC)

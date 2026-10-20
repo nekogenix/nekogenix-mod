@@ -38,8 +38,12 @@ final class ModTooltips {
     }
 
     static void sweetAmethyst(Item.TooltipContext context, List<Component> tooltip) {
+        sweetAmethyst(context, tooltip, 1F);
+    }
+
+    static void sweetAmethyst(Item.TooltipContext context, List<Component> tooltip, float durationScale) {
         PotionContents.addPotionTooltip(List.of(new MobEffectInstance(Content.SWEETNESS,
-                io.github.nekogenix.gameplay.SweetnessEffect.DURATION)), tooltip::add, 1F, context.tickRate());
+                io.github.nekogenix.gameplay.SweetnessEffect.DURATION)), tooltip::add, durationScale, context.tickRate());
         line(tooltip, "sweetness", ChatFormatting.BLUE);
     }
 
