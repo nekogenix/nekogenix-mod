@@ -10,13 +10,18 @@ import net.minecraft.world.phys.Vec3;
 
 public final class CameraGeometry {
     public static double requested(Player player, int percent) {
-        double human = player.isCrouching() ? 1.27 : Player.STANDING_DIMENSIONS.eyeHeight();
-        double cat = player.isCrouching() ? CatForm.CROUCHING_EYE_HEIGHT : CatForm.STANDING_EYE_HEIGHT;
-        double height = Mth.lerp(Mth.clamp(percent, 0, 100) / 100.0, cat, human) * player.getScale();
+        double height = Mth.lerp(Mth.clamp(percent, 0, 100) / 100.0,
+                CatForm.STANDING_EYE_HEIGHT, Player.STANDING_DIMENSIONS.eyeHeight()) * player.getScale() - crouchOffset(player, percent);
         if (!CatForm.active(player) && player.getPose() != Pose.STANDING && player.getPose() != Pose.CROUCHING) {
             height = Math.min(height, player.getEyeHeight());
         }
         return height;
+    }
+
+    public static double crouchOffset(Player player, int percent) {
+        return player.isCrouching() ? Mth.lerp(Mth.clamp(percent, 0, 100) / 100.0,
+                CatForm.STANDING_EYE_HEIGHT - CatForm.CROUCHING_EYE_HEIGHT,
+                Player.STANDING_DIMENSIONS.eyeHeight() - 1.27) * player.getScale() : 0;
     }
 
     public static double ceiling(Player player, Vec3 feet, double height) {
