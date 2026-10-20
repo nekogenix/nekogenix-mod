@@ -50,8 +50,9 @@ public final class InjectionHandsSmokeTest {
                 && player.getData(Content.NEKO).phase() == NekoState.Phase.HUMAN && player.getHealth() == 19,
                 "Right-click offhand cancellation preserves the opposite item");
         if (age == 455) check(player.getMainHandItem().is(Content.USED_SYRINGE) && player.getOffhandItem().is(Content.USED_SYRINGE)
-                && player.getData(Content.NEKO).stageDuration() == 6000 && player.getHealth() == 18,
-                "Both real input buttons complete a paired dose and accelerate the server state");
+                && player.getData(Content.NEKO).stageDuration() == 6000 && player.getHealth() == 18
+                && player.getEffect(Content.SHOCK).getDuration() > 3450,
+                "Both real input buttons complete a paired dose with accelerated stages and three-minute sickness");
         if (age == 665) check(player.getMainHandItem().isEmpty() && player.getOffhandItem().is(Content.USED_SYRINGE)
                 && player.getData(Content.NEKO).phase() == NekoState.Phase.NEKO && player.hasEffect(Content.CRYSTALLIZATION),
                 "The left-hand crystallizing injection stabilizes and applies its own effect");

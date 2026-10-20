@@ -108,5 +108,6 @@
   "effect.nekogenix.cat_saliva_exposure": "Воздействие кошачьей слюны",
   "tooltip.nekogenix.dual_injection": "Зажмите обе кнопки мыши с инъекцией в каждой руке",
   "tooltip.nekogenix.dual_stages": "Две дозы: стадии и кото-трансформация по 5 минут",
+  "tooltip.nekogenix.dual_sickness": "Две дозы: Неко болезнь длится 3 минуты",
   "death.attack.nekogenix.injection": "%1$s не пережил инъекцию"
 }

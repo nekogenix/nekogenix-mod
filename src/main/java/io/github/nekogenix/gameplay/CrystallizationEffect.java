@@ -49,8 +49,8 @@ public final class CrystallizationEffect extends MobEffect {
             if (strength > .05F) level.sendParticles(PARTICLE, entity.getX(), entity.getY() + entity.getBbHeight() * .65,
                     entity.getZ(), 2, entity.getBbWidth() * .5, entity.getBbHeight() * .3, entity.getBbWidth() * .5, .025);
         }
-        if (strength >= .9F && entity.tickCount % 80 == 0) {
-            entity.hurt(entity.damageSources().magic(), 1);
+        if (strength >= .9F && entity.tickCount % 20 == 0) {
+            entity.hurt(entity.damageSources().magic(), 2);
             level.playSound(null, entity, SoundEvents.AMETHYST_BLOCK_STEP, SoundSource.PLAYERS, .5F, .7F);
         }
         if (effect.getDuration() == 1) level.playSound(null, entity, SoundEvents.AMETHYST_BLOCK_BREAK, SoundSource.PLAYERS, .5F, 1.2F);

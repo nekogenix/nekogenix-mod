@@ -108,5 +108,6 @@
   "effect.nekogenix.cat_saliva_exposure": "Cat Saliva Exposure",
   "tooltip.nekogenix.dual_injection": "Hold both mouse buttons with a dose in each hand",
   "tooltip.nekogenix.dual_stages": "Two doses: stages and Cat Transformation last 5 min",
+  "tooltip.nekogenix.dual_sickness": "Two doses: Neko Sickness lasts 3 minutes",
   "death.attack.nekogenix.injection": "%1$s died during an injection"
 }

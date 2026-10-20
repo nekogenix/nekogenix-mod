@@ -35,6 +35,7 @@ public final class NekoState implements INBTSerializable<CompoundTag> {
         return true;
     }
     public boolean has(int ability) { return (abilities & ability) != 0; }
+    public int sicknessDuration() { return accelerated ? 3 * SHOCK_DURATION : SHOCK_DURATION; }
     public int stageDuration() { return accelerated ? DAY / 4 : DAY; }
     public int stage() { return phase == Phase.TRANSFORMING ? Math.min(2, elapsed / stageDuration()) : 0; }
     public int stageRemaining() { return stageDuration() - elapsed % stageDuration(); }
@@ -58,7 +59,7 @@ public final class NekoState implements INBTSerializable<CompoundTag> {
     public boolean tick(RandomSource random) {
         if (!isTransforming()) return false;
         elapsed++;
-        if (phase == Phase.SHOCK && elapsed >= SHOCK_DURATION) {
+        if (phase == Phase.SHOCK && elapsed >= sicknessDuration()) {
             phase = Phase.TRANSFORMING;
             elapsed = 0;
             return true;

@@ -19,9 +19,15 @@ public final class InjectionHandsTests {
         helper.assertFalse(state.accelerate(), "Humans cannot acquire acceleration without an injection");
         state.begin();
         helper.assertTrue(state.accelerate() && !state.accelerate(), "A second dose accelerates exactly once");
-        for (int i = 0; i < NekoState.SHOCK_DURATION; i++) state.tick(helper.getLevel().random);
+        for (int i = 0; i < 3599; i++) state.tick(helper.getLevel().random);
+        NekoState sick = new NekoState();
+        sick.deserializeNBT(helper.getLevel().registryAccess(), state.serializeNBT(helper.getLevel().registryAccess()));
+        state = sick;
+        helper.assertTrue(state.phase() == NekoState.Phase.SHOCK && state.sicknessDuration() == 3600 && state.elapsed() == 3599,
+                "Double-dose sickness lasts three minutes and retains its remaining time across saves");
+        state.tick(helper.getLevel().random);
         helper.assertTrue(state.phase() == NekoState.Phase.TRANSFORMING && state.stageRemaining() == 6000,
-                "Sickness keeps its normal duration and each accelerated stage lasts five minutes");
+                "Transformation starts after three minutes and each accelerated stage lasts five minutes");
         for (int stage = 1; stage <= 3; stage++) {
             for (int i = 0; i < 5999; i++) state.tick(helper.getLevel().random);
             helper.assertTrue(Integer.bitCount(state.serializeNBT(helper.getLevel().registryAccess()).getInt("abilities")) == stage - 1,
@@ -76,6 +82,9 @@ public final class InjectionHandsTests {
                     && player.getOffhandItem().is(Content.USED_SYRINGE), "Both complete doses produce used syringes");
             helper.assertTrue(player.getData(Content.NEKO).phase() == NekoState.Phase.SHOCK
                     && player.getData(Content.NEKO).stageDuration() == 6000, "Two doses accelerate one transformation");
+            helper.assertTrue(player.getEffect(Content.SHOCK).getDuration() > 3550
+                    && player.getEffect(net.minecraft.world.effect.MobEffects.CONFUSION).getDuration() > 3550,
+                    "Both sickness and its hidden nausea extend to three minutes when the second dose completes");
             helper.assertTrue(player.getHealth() == 18 && InjectionHandler.started(player, InteractionHand.MAIN_HAND) == -1
                     && InjectionHandler.started(player, InteractionHand.OFF_HAND) == -1, "Completion adds no damage and clears both animations");
             GameplayTests.remove(player);
@@ -106,6 +115,9 @@ public final class InjectionHandsTests {
                     "Only the completed dose is consumed");
             helper.assertTrue(player.getData(Content.NEKO).phase() == NekoState.Phase.SHOCK
                     && player.getData(Content.NEKO).stageDuration() == 24000, "An interrupted partner cannot accelerate the remaining dose");
+            helper.assertTrue(player.getData(Content.NEKO).sicknessDuration() == 1200
+                    && player.getEffect(Content.SHOCK).getDuration() <= 1200,
+                    "An interrupted second dose leaves the one-minute sickness unchanged");
             InjectionHandler.input(player, false, true);
             helper.assertTrue(InjectionHandler.started(player, InteractionHand.OFF_HAND) == -1,
                     "A later injection cannot stack onto an existing transformation");
@@ -137,6 +149,9 @@ public final class InjectionHandsTests {
                     && single.getData(Content.NEKO).stageDuration() == 24000, "An offhand injection works without consuming the main hand");
             helper.assertTrue(paired.getMainHandItem().is(Content.USED_SYRINGE) && paired.getOffhandItem().is(Content.USED_SYRINGE)
                     && paired.getData(Content.NEKO).stageDuration() == 6000, "Staggered completion preserves the paired dose until both finish");
+            helper.assertTrue(paired.getEffect(Content.SHOCK).getDuration() > 3550
+                    && paired.getEffect(net.minecraft.world.effect.MobEffects.CONFUSION).getDuration() > 3550,
+                    "Staggered doses extend both sickness effects as soon as the second injection completes");
             GameplayTests.remove(single);
             GameplayTests.remove(paired);
             helper.succeed();

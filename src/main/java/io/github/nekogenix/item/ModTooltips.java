@@ -20,6 +20,7 @@ final class ModTooltips {
         line(tooltip, "injection_use", ChatFormatting.GRAY);
         line(tooltip, "dual_injection", ChatFormatting.GRAY);
         line(tooltip, "dual_stages", ChatFormatting.GRAY);
+        line(tooltip, "dual_sickness", ChatFormatting.GRAY);
         line(tooltip, "stages", ChatFormatting.GRAY);
         line(tooltip, "stage_ability", ChatFormatting.GRAY);
         line(tooltip, "cat_stage", ChatFormatting.GRAY);

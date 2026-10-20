@@ -47,6 +47,9 @@ public final class SweetAmethystTests {
     @GameTest(template = "empty", timeoutTicks = 1250)
     public static void crystallizationRampsDamagesAndExpiresWithoutResidualSlowdown(GameTestHelper helper) {
         var player = GameplayTests.player(helper);
+        player.getAttribute(Attributes.MAX_HEALTH).setBaseValue(200);
+        player.setHealth(200);
+        float[] damagedHealth = {200};
         player.getFoodData().setFoodLevel(7); player.getFoodData().setSaturation(0);
         double original = player.getAttributeValue(Attributes.MOVEMENT_SPEED);
         player.addEffect(new MobEffectInstance(Content.CRYSTALLIZATION, CrystallizationEffect.DURATION, 0, false, false, true));
@@ -54,20 +57,24 @@ public final class SweetAmethystTests {
         helper.runAfterDelay(30, () -> {
             double speed = player.getAttributeValue(Attributes.MOVEMENT_SPEED);
             helper.assertTrue(speed > original * .2 && speed < original * .9, "Movement gradually slows during crystal growth");
-            helper.assertTrue(player.getHealth() == 20, "Early crystal growth does not damage the player");
+            helper.assertTrue(player.getHealth() == 200, "Early crystal growth does not damage the player");
         });
-        helper.runAfterDelay(120, () -> {
+        helper.runAfterDelay(125, () -> {
             helper.assertTrue(Math.abs(player.getAttributeValue(Attributes.MOVEMENT_SPEED) - original * .05) < .0001,
                     "Full crystallization leaves five percent movement speed");
-            helper.assertTrue(player.getHealth() < 20 && player.getTicksFrozen() == 0, "Crystal damage is real and does not alter powder snow freezing state");
+            helper.assertTrue(player.getHealth() <= 194 && player.getTicksFrozen() == 0, "Crystal damage is real and does not alter powder snow freezing state");
+            damagedHealth[0] = player.getHealth();
             helper.assertFalse(player.hasEffect(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN), "The penalty belongs to Crystallization without an extra Slowness effect");
         });
+        helper.runAfterDelay(145, () -> helper.assertTrue(player.getHealth() == damagedHealth[0] - 2,
+                "Full crystallization deals one heart of damage every second: " + damagedHealth[0] + " -> " + player.getHealth()
+                        + " at player tick " + player.tickCount));
         helper.runAfterDelay(1170, () -> helper.assertTrue(player.getAttributeValue(Attributes.MOVEMENT_SPEED) > original * .2,
                 "Movement recovers gradually before the effect ends"));
         helper.runAfterDelay(1210, () -> {
             helper.assertFalse(player.hasEffect(Content.CRYSTALLIZATION), "Crystallization lasts exactly one minute");
             helper.assertTrue(Math.abs(player.getAttributeValue(Attributes.MOVEMENT_SPEED) - original) < .0001 && player.isAlive(),
-                    "Expiry removes the modifier and the full course is survivable from full health");
+                    "Expiry removes the modifier after the full course on a high-health test player");
             GameplayTests.remove(player); helper.succeed();
         });
     }
