@@ -49,8 +49,12 @@ public final class CrystallizationOverlay {
                 RenderSystem.enableBlend();
                 RenderSystem.defaultBlendFunc();
                 graphics.setColor(1, 1, 1, alpha);
-                graphics.blit(Content.id("textures/misc/crystallization_outline.png"), 0, 0, -90, 0F, 0F,
-                        graphics.guiWidth(), graphics.guiHeight(), graphics.guiWidth(), graphics.guiHeight());
+                float scale = Math.min(graphics.guiWidth(), graphics.guiHeight()) / 256F;
+                graphics.pose().pushPose();
+                graphics.pose().scale(scale, scale, 1);
+                graphics.blitSprite(Content.id("crystallization_outline"), 0, 0, -90,
+                        Mth.ceil(graphics.guiWidth() / scale), Mth.ceil(graphics.guiHeight() / scale));
+                graphics.pose().popPose();
                 graphics.setColor(1, 1, 1, 1);
                 RenderSystem.disableBlend();
                 RenderSystem.depthMask(true);
