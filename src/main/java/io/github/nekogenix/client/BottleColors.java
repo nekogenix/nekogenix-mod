@@ -12,7 +12,7 @@ import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 public final class BottleColors {
     @SubscribeEvent public static void colors(RegisterColorHandlersEvent.Item event) {
         event.register((stack, index) -> index == 0 ? 0xFF000000 | BottledEffects.color(stack) : -1,
-                Content.LINGERING_SALIVA.get(), Content.SPLASH_SWEET_AMETHYST.get(), Content.LINGERING_SWEET_AMETHYST.get());
+                Content.SPLASH_SWEET_AMETHYST.get(), Content.LINGERING_SWEET_AMETHYST.get());
     }
 
     private BottleColors() {}
