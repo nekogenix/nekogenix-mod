@@ -34,3 +34,17 @@ type="optional"
 versionRange="[19.19.0,20)"
 ordering="AFTER"
 side="CLIENT"
+
+[[dependencies.nekogenix]]
+modId="emi"
+type="optional"
+versionRange="[1.1.24,2)"
+ordering="AFTER"
+side="CLIENT"
+
+[[dependencies.nekogenix]]
+modId="roughlyenoughitems"
+type="optional"
+versionRange="[16.0.799,17)"
+ordering="AFTER"
+side="CLIENT"

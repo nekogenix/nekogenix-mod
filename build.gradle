@@ -13,10 +13,25 @@ repositories {
         url = 'https://maven.blamejared.com/'
         content { includeGroup 'mezz.jei' }
     }
+    maven {
+        url = 'https://maven.terraformersmc.com/releases/'
+        content { includeGroup 'dev.emi' }
+    }
+    maven {
+        url = 'https://maven.shedaniel.me/'
+        content { includeGroupByRegex 'me\\.shedaniel.*' }
+    }
+    maven {
+        url = 'https://maven.architectury.dev/'
+        content { includeGroup 'dev.architectury' }
+    }
 }
 
 dependencies {
     compileOnly 'mezz.jei:jei-1.21.1-neoforge-api:19.69.0.456'
+    compileOnly 'dev.emi:emi-neoforge:1.1.24+1.21.1:api'
+    compileOnly 'me.shedaniel:RoughlyEnoughItems-api-neoforge:16.0.799'
+    compileOnly('me.shedaniel:RoughlyEnoughItems-default-plugin-neoforge:16.0.799') { transitive = false }
 }
 
 sourceSets {

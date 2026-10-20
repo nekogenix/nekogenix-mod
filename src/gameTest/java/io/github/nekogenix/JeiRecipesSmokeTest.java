@@ -1,6 +1,7 @@
 package io.github.nekogenix;
 
 import io.github.nekogenix.integration.jei.NekogenixJei;
+import io.github.nekogenix.client.recipe.ProcessingDisplay;
 import io.github.nekogenix.recipe.ProcessingRecipes;
 import java.util.List;
 import mezz.jei.api.IModPlugin;
@@ -26,6 +27,7 @@ public final class JeiRecipesSmokeTest implements IModPlugin {
             if (!Boolean.getBoolean("nekogenix.jeiSmokeTest")) return;
             var mc = net.minecraft.client.Minecraft.getInstance();
             mc.options.pauseOnLostFocus = false;
+            mc.getToasts().clear();
             mc.getTutorial().setStep(net.minecraft.client.tutorial.TutorialSteps.NONE);
             if (mc.player == null || mc.level == null) return;
             if (!net.neoforged.fml.ModList.get().isLoaded("jei")) {
@@ -66,8 +68,11 @@ public final class JeiRecipesSmokeTest implements IModPlugin {
             age++;
             if (age == 25) capture("jei-centrifuge.png");
             if (age == 35 || age == 85) {
+                var result = age == 35 ? Content.INJECTION : Content.STABILIZING_INJECTION;
                 var recipes = manager.createRecipeLookup(NekogenixJei.PNEUMATIC_FILLING).get()
-                        .filter(recipe -> recipe.syringes() == 2 && recipe.recipe().result().is(age == 35 ? Content.INJECTION : Content.STABILIZING_INJECTION)).toList();
+                        .filter(recipe -> recipe.syringes() == 2)
+                        .filter(recipe -> recipe.slots().stream().filter(slot -> slot.role() == ProcessingDisplay.Role.OUTPUT)
+                                .flatMap(slot -> slot.items().stream()).anyMatch(item -> item.is(result))).toList();
                 runtime.getRecipesGui().showRecipes(manager.getRecipeCategory(NekogenixJei.PNEUMATIC_FILLING), recipes, List.of());
             }
             if (age == 60) capture("jei-pneumatic-neko.png");

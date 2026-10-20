@@ -1,6 +1,7 @@
 package io.github.nekogenix.client;
 
 import io.github.nekogenix.Content;
+import io.github.nekogenix.client.recipe.ProcessingPage;
 import io.github.nekogenix.centrifuge.CentrifugeMenu;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -34,17 +35,8 @@ public final class CentrifugeScreen extends AbstractContainerScreen<CentrifugeMe
             if (!slot.hasItem()) sprite(graphics, index < 6 ? SAMPLE_HINT : index == 6 ? CARD_HINT : FUEL_HINT,
                     leftPos + slot.x, topPos + slot.y);
         }
-        float fraction = menu.fraction();
-        for (int row = 0; row < 14; row++) {
-            double phase = row * .65 + (menu.running() ? minecraft.level.getGameTime() * .08 : 0);
-            int x = 88 + (int) (Math.sin(phase) * 9);
-            int opposite = 176 - x;
-            int color = row >= 14 * (1 - fraction) ? 0xffd4a6cf : 0xff526775;
-            graphics.fill(leftPos + Math.min(x, opposite), topPos + 62 + row * 2,
-                    leftPos + Math.max(x, opposite) + 2, topPos + 63 + row * 2, 0xff667985);
-            graphics.fill(leftPos + x, topPos + 62 + row * 2, leftPos + x + 2, topPos + 64 + row * 2, color);
-            graphics.fill(leftPos + opposite, topPos + 62 + row * 2, leftPos + opposite + 2, topPos + 64 + row * 2, color);
-        }
+        ProcessingPage.centrifugeDetails(graphics, leftPos, topPos,
+                menu.fraction(), menu.running() ? minecraft.level.getGameTime() : 0);
     }
 
     @Override
