@@ -8,6 +8,17 @@ version = mod_version
 base.archivesName = 'nekogenix-neoforge'
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
+repositories {
+    maven {
+        url = 'https://maven.blamejared.com/'
+        content { includeGroup 'mezz.jei' }
+    }
+}
+
+dependencies {
+    compileOnly 'mezz.jei:jei-1.21.1-neoforge-api:19.69.0.456'
+}
+
 sourceSets {
     gameTest {
         compileClasspath += sourceSets.main.output
@@ -17,6 +28,7 @@ sourceSets {
 configurations {
     gameTestImplementation.extendsFrom implementation
     gameTestRuntimeOnly.extendsFrom runtimeOnly
+    gameTestCompileOnly.extendsFrom compileOnly
 }
 
 neoForge {

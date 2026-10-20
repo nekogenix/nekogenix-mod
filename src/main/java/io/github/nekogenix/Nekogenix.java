@@ -18,6 +18,7 @@ public final class Nekogenix {
 
     public Nekogenix(IEventBus bus, ModContainer container) {
         Content.register(bus);
+        io.github.nekogenix.recipe.ProcessingRecipes.register(bus);
         VoiceSounds.register(bus);
         InjectionSounds.register(bus);
         container.registerConfig(ModConfig.Type.CLIENT, ClientConfig.SPEC);

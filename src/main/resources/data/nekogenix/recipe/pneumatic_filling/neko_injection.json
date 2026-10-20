@@ -1,0 +1,6 @@
+{
+  "type": "nekogenix:pneumatic_filling",
+  "source": { "item": "nekogenix:cat_nucleocard" },
+  "result": { "id": "nekogenix:neko_injection" },
+  "remainder": { "id": "nekogenix:blank_nucleocard" }
+}

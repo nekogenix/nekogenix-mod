@@ -1,0 +1,6 @@
+{
+  "type": "nekogenix:pneumatic_filling",
+  "source": { "item": "nekogenix:neko_stabilizer" },
+  "result": { "id": "nekogenix:stabilizing_injection" },
+  "remainder": { "id": "minecraft:glass_bottle" }
+}

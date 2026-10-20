@@ -109,5 +109,9 @@
   "tooltip.nekogenix.dual_injection": "Hold both mouse buttons with a dose in each hand",
   "tooltip.nekogenix.dual_stages": "Two doses: stages and Cat Transformation last 5 min",
   "tooltip.nekogenix.dual_sickness": "Two doses: Neko Sickness lasts 3 minutes",
-  "death.attack.nekogenix.injection": "%1$s died during an injection"
+  "death.attack.nekogenix.injection": "%1$s died during an injection",
+  "jei.nekogenix.duration": "%s s",
+  "jei.nekogenix.returned": "Returned after processing",
+  "jei.nekogenix.collecting": "Use a Cotton Swab on your own tamed cat to collect a saliva sample. Brew the sample in a Brewing Stand to obtain a Bottle of Cat Saliva.",
+  "jei.nekogenix.cleaning": "Drop a Used Syringe into a full water cauldron heated from below. After 10 seconds, the water evaporates and the syringe is clean. Heat sources include fire, soul fire, lava, magma blocks, and lit campfires."
 }
