@@ -16,7 +16,7 @@
   "effect.nekogenix.feline_agility": "Котяча спритність",
   "effect.nekogenix.feline_vision": "Котячий зір",
   "effect.nekogenix.soft_paw_pads": "М’які подушечки лап",
-  "tooltip.nekogenix.injection_use": "Утримуйте ЛКМ для введення",
+  "tooltip.nekogenix.injection_use": "Утримуйте ПКМ для введення",
   "tooltip.nekogenix.stages": "Три стадії по 20 хвилин",
   "tooltip.nekogenix.agility": "+100% до швидкості бігу та пересування навприсядки",
   "tooltip.nekogenix.double_jump": "Другий стрибок: Стрибучість II",
@@ -106,5 +106,8 @@
   "item.nekogenix.lingering_bottle_of_cat_saliva": "Осідаюча пляшечка котячої слини",
   "item.nekogenix.splash_potion_of_sweet_amethyst": "Вибухове зілля солодкого аметисту",
   "item.nekogenix.lingering_potion_of_sweet_amethyst": "Осідаюче зілля солодкого аметисту",
-  "effect.nekogenix.cat_saliva_exposure": "Вплив котячої слини"
+  "effect.nekogenix.cat_saliva_exposure": "Вплив котячої слини",
+  "tooltip.nekogenix.dual_injection": "Затисніть обидві кнопки миші з ін’єкцією в кожній руці",
+  "tooltip.nekogenix.dual_stages": "Дві дози: стадії та котяча трансформація по 5 хвилин",
+  "death.attack.nekogenix.injection": "%1$s не пережив ін’єкцію"
 }

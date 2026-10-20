@@ -34,30 +34,38 @@ import net.neoforged.neoforge.network.PacketDistributor;
 @EventBusSubscriber(modid = Nekogenix.ID, value = Dist.CLIENT)
 public final class ClientEvents {
     private static boolean held;
+    private static boolean offHeld;
+    private static boolean useWasDown;
+    private static boolean primaryOff;
+    private static boolean secondaryInjection;
     private static int ticks;
     private static boolean loggedJoin;
     private static boolean shockWasActive;
 
-    private static float elapsed(LivingEntity entity, float partial) {
-        if (entity == null || !entity.hasData(Content.INJECTION_STARTED)) return -1;
-        var returning = entity.getData(Content.INJECTION_RETURN);
+    private static float elapsed(LivingEntity entity, InteractionHand hand, float partial) {
+        if (entity == null) return -1;
+        var returning = InjectionHandler.returning(entity, hand);
         if (returning.started() >= 0) {
             float remaining = returning.remaining(entity.level().getGameTime(), partial);
             return remaining > 0 ? returning.progress() * remaining : -1;
         }
-        long start = entity.getData(Content.INJECTION_STARTED);
+        long start = InjectionHandler.started(entity, hand);
         return start < 0 ? -1 : entity.level().getGameTime() - start + partial;
     }
 
-    private static boolean injecting(LivingEntity entity) {
-        float age = elapsed(entity, 0);
+    private static boolean injecting(LivingEntity entity, InteractionHand hand) {
+        float age = elapsed(entity, hand, 0);
         return age >= 0 && age < InjectionHandler.TOTAL_TICKS;
     }
 
     @SubscribeEvent
     public static void input(InputEvent.InteractionKeyMappingTriggered event) {
         var player = Minecraft.getInstance().player;
-        if (event.isAttack() && player != null && InjectionHandler.isInjection(player.getMainHandItem())) {
+        if (player != null && (event.isUseItem() && (InjectionHandler.isInjection(player.getMainHandItem())
+                || InjectionHandler.isInjection(player.getOffhandItem()))
+                || event.isAttack() && (Minecraft.getInstance().options.keyUse.isDown()
+                && (InjectionHandler.isInjection(player.getMainHandItem()) || InjectionHandler.isInjection(player.getOffhandItem()))
+                || injecting(player, InteractionHand.MAIN_HAND) || injecting(player, InteractionHand.OFF_HAND)))) {
             event.setCanceled(true);
             event.setSwingHand(false);
         }
@@ -66,13 +74,25 @@ public final class ClientEvents {
     @SubscribeEvent
     public static void tick(ClientTickEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.level == null) { held = false; return; }
+        if (mc.player == null || mc.level == null) {
+            held = offHeld = useWasDown = primaryOff = secondaryInjection = false;
+            return;
+        }
         sicknessDistortion(mc);
-        boolean down = mc.screen == null && mc.player.isAlive() && !mc.player.isSpectator()
-                && InjectionHandler.isInjection(mc.player.getMainHandItem()) && mc.options.keyAttack.isDown();
-        if (down != held || down && ++ticks % 20 == 0) {
-            PacketDistributor.sendToServer(new InjectionInput(down));
+        boolean enabled = mc.screen == null && mc.player.isAlive() && !mc.player.isSpectator();
+        boolean use = enabled && mc.options.keyUse.isDown();
+        boolean attack = enabled && mc.options.keyAttack.isDown();
+        if (use && !useWasDown) primaryOff = !InjectionHandler.isInjection(mc.player.getMainHandItem());
+        useWasDown = use;
+        if (!attack || !enabled) secondaryInjection = false;
+        else if (!primaryOff && use && InjectionHandler.canDual(mc.player)) secondaryInjection = true;
+        boolean down = !primaryOff && use && InjectionHandler.isInjection(mc.player.getMainHandItem());
+        boolean offDown = (primaryOff && use || secondaryInjection && attack)
+                && InjectionHandler.isInjection(mc.player.getOffhandItem());
+        if (down != held || offDown != offHeld || (down || offDown) && ++ticks % 20 == 0) {
+            PacketDistributor.sendToServer(new InjectionInput(down, offDown));
             held = down;
+            offHeld = offDown;
         }
         if (!loggedJoin && mc.player.tickCount > 20) {
             CreativeModeTabs.tryRebuildTabContents(mc.level.enabledFeatures(), mc.player.canUseGameMasterBlocks(), mc.level.registryAccess());
@@ -112,8 +132,17 @@ public final class ClientEvents {
 
     @SubscribeEvent
     public static void logout(ClientPlayerNetworkEvent.LoggingOut event) {
-        held = loggedJoin = shockWasActive = false;
+        held = offHeld = useWasDown = primaryOff = secondaryInjection = loggedJoin = shockWasActive = false;
         ticks = 0;
+    }
+
+    @SubscribeEvent(priority = net.neoforged.bus.api.EventPriority.HIGHEST)
+    public static void hand(net.neoforged.neoforge.client.event.RenderHandEvent event) {
+        var player = Minecraft.getInstance().player;
+        if (player == null) return;
+        boolean main = injecting(player, InteractionHand.MAIN_HAND);
+        boolean off = injecting(player, InteractionHand.OFF_HAND);
+        if ((main || off) && !(event.getHand() == InteractionHand.MAIN_HAND ? main : off)) event.setCanceled(true);
     }
 
     @SubscribeEvent
@@ -136,8 +165,12 @@ public final class ClientEvents {
             event.enqueueWork(() -> {
                 for (var item : new net.minecraft.world.item.Item[] {Content.INJECTION.get(), Content.STABILIZING_INJECTION.get()}) ItemProperties.register(item, Content.id("injection_stage"),
                     (stack, level, entity, seed) -> {
-                        float age = elapsed(entity, 0);
-                        if (age < 0 || age >= InjectionHandler.TOTAL_TICKS || entity.getMainHandItem() != stack) return 0;
+                        if (entity == null) return 0;
+                        InteractionHand hand = entity.getMainHandItem() == stack ? InteractionHand.MAIN_HAND
+                                : entity.getOffhandItem() == stack ? InteractionHand.OFF_HAND : null;
+                        if (hand == null) return 0;
+                        float age = elapsed(entity, hand, 0);
+                        if (age < 0 || age >= InjectionHandler.TOTAL_TICKS) return 0;
                         if (age >= InjectionHandler.FORWARD_TICKS) return 4 + Math.min(3, ((int)age - InjectionHandler.FORWARD_TICKS) / 3);
                         int frame = Math.min(3, (int)(Mth.clamp((age - InjectionHandler.NEEDLE_ENTRY_TICKS)
                                 / (InjectionHandler.FORWARD_TICKS - InjectionHandler.NEEDLE_ENTRY_TICKS), 0, 1) * 4));
@@ -157,13 +190,15 @@ public final class ClientEvents {
             event.registerItem(new IClientItemExtensions() {
                 @Override
                 public HumanoidModel.ArmPose getArmPose(LivingEntity entity, InteractionHand hand, ItemStack stack) {
-                    return hand == InteractionHand.MAIN_HAND && injecting(entity) ? HumanoidModel.ArmPose.CROSSBOW_HOLD : null;
+                    return injecting(entity, hand) ? HumanoidModel.ArmPose.CROSSBOW_HOLD : null;
                 }
 
                 @Override
                 public boolean applyForgeHandTransform(PoseStack pose, LocalPlayer player, HumanoidArm arm,
                         ItemStack stack, float partial, float equip, float swing) {
-                    float age = elapsed(player, partial);
+                    InteractionHand hand = arm == player.getMainArm() ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
+                    if (player.getItemInHand(hand) != stack) return false;
+                    float age = elapsed(player, hand, partial);
                     if (age < 0 || age >= InjectionHandler.TOTAL_TICKS) return false;
                     float side = arm == HumanoidArm.RIGHT ? 1 : -1;
                     float approachAge = age;
@@ -171,7 +206,7 @@ public final class ClientEvents {
                             : 1 - (age - InjectionHandler.FORWARD_TICKS) / InjectionHandler.RETURN_TICKS;
                     float pressure = Mth.sin(age * .48F) * .001F;
                     float tremor = Mth.cos(age * .48F) * .1F;
-                    var returning = player.getData(Content.INJECTION_RETURN);
+                    var returning = InjectionHandler.returning(player, hand);
                     if (returning.started() >= 0) {
                         retreat = returning.remaining(player.level().getGameTime(), partial);
                         approachAge = returning.progress();

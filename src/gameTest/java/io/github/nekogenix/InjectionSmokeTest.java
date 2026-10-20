@@ -43,7 +43,7 @@ public final class InjectionSmokeTest {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.level == null) return;
         int age = mc.player.tickCount;
-        mc.options.keyAttack.setDown(age >= 40 && age < 55 || age >= 90 && age < 135
+        mc.options.keyUse.setDown(age >= 40 && age < 55 || age >= 90 && age < 135
                 || age >= 170 && age < 245 || age >= 280 && age < 385);
         var returning = mc.player.getData(Content.INJECTION_RETURN);
         if (returning.started() >= 0) {

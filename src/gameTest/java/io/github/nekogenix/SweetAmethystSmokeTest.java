@@ -71,8 +71,7 @@ public final class SweetAmethystSmokeTest {
             if (mc.player == null) return;
             int age = mc.player.tickCount;
             mc.getToasts().clear();
-            mc.options.keyUse.setDown(age >= 70 && age < 105);
-            mc.options.keyAttack.setDown(age >= 590 && age < 700);
+            mc.options.keyUse.setDown(age >= 70 && age < 105 || age >= 590 && age < 700);
             if (age == 130) check(mc.player.hasEffect(Content.SWEETNESS) && mc.player.getFoodData().getFoodLevel() < 5, "The client sees nourishment without a full food prediction");
             if (age == 535) check(mc.player.getFoodData().getFoodLevel() == 20, "The client receives full hunger after gradual refill");
             float alpha = io.github.nekogenix.client.CrystallizationOverlay.strength(1);

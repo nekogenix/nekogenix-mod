@@ -104,7 +104,7 @@ public final class SicknessOverlaySmokeTest {
                 mc.options.fov().set(70);
                 mc.options.screenEffectScale().set(0.0);
             }
-            mc.options.keyAttack.setDown(age >= 80 && age < 180);
+            mc.options.keyUse.setDown(age >= 80 && age < 180);
             if (age == 500) mc.options.screenEffectScale().set(.5);
             if (age == 600 || age == 750) mc.options.screenEffectScale().set(0.0);
             if (age == 700) mc.options.screenEffectScale().set(1.0);

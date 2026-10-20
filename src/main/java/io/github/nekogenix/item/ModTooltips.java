@@ -18,6 +18,8 @@ final class ModTooltips {
                 new MobEffectInstance(Content.TRANSFORMING, 3 * NekoState.DAY),
                 new MobEffectInstance(Content.CAT_TRANSFORMING, NekoState.DAY)), tooltip::add, 1F, context.tickRate());
         line(tooltip, "injection_use", ChatFormatting.GRAY);
+        line(tooltip, "dual_injection", ChatFormatting.GRAY);
+        line(tooltip, "dual_stages", ChatFormatting.GRAY);
         line(tooltip, "stages", ChatFormatting.GRAY);
         line(tooltip, "stage_ability", ChatFormatting.GRAY);
         line(tooltip, "cat_stage", ChatFormatting.GRAY);

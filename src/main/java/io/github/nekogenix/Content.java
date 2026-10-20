@@ -106,6 +106,10 @@ public final class Content {
             () -> AttachmentType.builder(() -> -1L).sync(ByteBufCodecs.VAR_LONG).build());
     public static final DeferredHolder<AttachmentType<?>, AttachmentType<InjectionHandler.ReturnAnimation>> INJECTION_RETURN = ATTACHMENTS.register("injection_return",
             () -> AttachmentType.builder(() -> InjectionHandler.ReturnAnimation.NONE).sync(InjectionHandler.ReturnAnimation.STREAM_CODEC).build());
+    public static final DeferredHolder<AttachmentType<?>, AttachmentType<Long>> OFFHAND_INJECTION_STARTED = ATTACHMENTS.register("offhand_injection_started",
+            () -> AttachmentType.builder(() -> -1L).sync(ByteBufCodecs.VAR_LONG).build());
+    public static final DeferredHolder<AttachmentType<?>, AttachmentType<InjectionHandler.ReturnAnimation>> OFFHAND_INJECTION_RETURN = ATTACHMENTS.register("offhand_injection_return",
+            () -> AttachmentType.builder(() -> InjectionHandler.ReturnAnimation.NONE).sync(InjectionHandler.ReturnAnimation.STREAM_CODEC).build());
     public static final DeferredHolder<AttachmentType<?>, AttachmentType<Boolean>> FELINE_VOICE = ATTACHMENTS.register("feline_voice",
             () -> AttachmentType.builder(() -> false).sync(ByteBufCodecs.BOOL).build());
     public static final DeferredHolder<AttachmentType<?>, AttachmentType<Boolean>> CAT_FORM = ATTACHMENTS.register("cat_form",

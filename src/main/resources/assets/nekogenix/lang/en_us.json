@@ -15,7 +15,7 @@
   "effect.nekogenix.feline_agility": "Feline Agility",
   "effect.nekogenix.feline_vision": "Feline Vision",
   "effect.nekogenix.soft_paw_pads": "Soft Paw Pads",
-  "tooltip.nekogenix.injection_use": "Hold Left Click to inject",
+  "tooltip.nekogenix.injection_use": "Hold Right Click to inject",
   "tooltip.nekogenix.stages": "Three stages of 20 minutes each",
   "tooltip.nekogenix.agility": "+100% Sprinting and Sneaking Speed",
   "tooltip.nekogenix.double_jump": "Second jump: Jump Boost II",
@@ -105,5 +105,8 @@
   "item.nekogenix.lingering_bottle_of_cat_saliva": "Lingering Bottle of Cat Saliva",
   "item.nekogenix.splash_potion_of_sweet_amethyst": "Splash Potion of Sweet Amethyst",
   "item.nekogenix.lingering_potion_of_sweet_amethyst": "Lingering Potion of Sweet Amethyst",
-  "effect.nekogenix.cat_saliva_exposure": "Cat Saliva Exposure"
+  "effect.nekogenix.cat_saliva_exposure": "Cat Saliva Exposure",
+  "tooltip.nekogenix.dual_injection": "Hold both mouse buttons with a dose in each hand",
+  "tooltip.nekogenix.dual_stages": "Two doses: stages and Cat Transformation last 5 min",
+  "death.attack.nekogenix.injection": "%1$s died during an injection"
 }

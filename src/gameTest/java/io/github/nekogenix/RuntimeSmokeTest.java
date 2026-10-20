@@ -80,12 +80,12 @@ public final class RuntimeSmokeTest {
                     || Boolean.getBoolean("nekogenix.cauldronSmokeTest") || Boolean.getBoolean("nekogenix.refinementsSmokeTest")
                     || Boolean.getBoolean("nekogenix.overlaySmokeTest")) return;
             int age = mc.player.tickCount;
-            mc.options.keyAttack.setDown(age >= 40 && age < 140);
+            mc.options.keyUse.setDown(age >= 40 && age < 140);
             if (age == 90) net.minecraft.client.Screenshot.grab(mc.gameDirectory, "injection-smoke.png", mc.getMainRenderTarget(), message -> {});
             if (!checked && age >= 160) {
                 checked = true;
                 if (mc.player.getMainHandItem().is(Content.USED_SYRINGE) && mc.player.hasEffect(Content.SHOCK)) {
-                    Nekogenix.LOGGER.info("Nekogenix runtime smoke passed: left mouse injection completed, used syringe received, shock active");
+                    Nekogenix.LOGGER.info("Nekogenix runtime smoke passed: right mouse injection completed, used syringe received, shock active");
                     net.minecraft.client.Screenshot.grab(mc.gameDirectory, "shock-smoke.png", mc.getMainRenderTarget(), message -> {});
                 } else {
                     Nekogenix.LOGGER.error("Nekogenix runtime smoke failed: held={}, shock={}", mc.player.getMainHandItem(), mc.player.hasEffect(Content.SHOCK));

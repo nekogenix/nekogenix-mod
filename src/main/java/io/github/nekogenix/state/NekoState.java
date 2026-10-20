@@ -18,6 +18,7 @@ public final class NekoState implements INBTSerializable<CompoundTag> {
     private int elapsed;
     private int abilities;
     private int lives;
+    private boolean accelerated;
     public boolean visionOwned;
     public transient boolean applyingVision;
 
@@ -34,8 +35,15 @@ public final class NekoState implements INBTSerializable<CompoundTag> {
         return true;
     }
     public boolean has(int ability) { return (abilities & ability) != 0; }
-    public int stage() { return phase == Phase.TRANSFORMING ? Math.min(2, elapsed / DAY) : 0; }
-    public int stageRemaining() { return DAY - elapsed % DAY; }
+    public int stageDuration() { return accelerated ? DAY / 4 : DAY; }
+    public int stage() { return phase == Phase.TRANSFORMING ? Math.min(2, elapsed / stageDuration()) : 0; }
+    public int stageRemaining() { return stageDuration() - elapsed % stageDuration(); }
+
+    public boolean accelerate() {
+        if (phase != Phase.SHOCK || accelerated) return false;
+        accelerated = true;
+        return true;
+    }
 
     public boolean begin() {
         if (phase != Phase.HUMAN) return false;
@@ -43,6 +51,7 @@ public final class NekoState implements INBTSerializable<CompoundTag> {
         elapsed = 0;
         abilities = 0;
         lives = 0;
+        accelerated = false;
         return true;
     }
 
@@ -54,12 +63,12 @@ public final class NekoState implements INBTSerializable<CompoundTag> {
             elapsed = 0;
             return true;
         }
-        if (phase == Phase.CAT_TRANSFORMING && elapsed >= DAY) {
+        if (phase == Phase.CAT_TRANSFORMING && elapsed >= stageDuration()) {
             phase = Phase.CAT;
             elapsed = 0;
             return true;
         }
-        if (phase == Phase.TRANSFORMING && elapsed % DAY == 0) {
+        if (phase == Phase.TRANSFORMING && elapsed % stageDuration() == 0) {
             int remaining = 7 & ~abilities;
             int choice = random.nextInt(Integer.bitCount(remaining));
             for (int bit = 1; bit <= PAWS; bit <<= 1) {
@@ -68,7 +77,7 @@ public final class NekoState implements INBTSerializable<CompoundTag> {
                     break;
                 }
             }
-            if (elapsed >= 3 * DAY) {
+            if (elapsed >= 3 * stageDuration()) {
                 phase = Phase.CAT_TRANSFORMING;
                 elapsed = 0;
                 lives = 9;
@@ -91,6 +100,7 @@ public final class NekoState implements INBTSerializable<CompoundTag> {
     private void reset() {
         phase = Phase.HUMAN;
         elapsed = abilities = lives = 0;
+        accelerated = false;
     }
 
     @Override
@@ -100,6 +110,7 @@ public final class NekoState implements INBTSerializable<CompoundTag> {
         tag.putInt("elapsed", elapsed);
         tag.putInt("abilities", abilities);
         tag.putInt("lives", lives);
+        tag.putBoolean("accelerated", accelerated);
         tag.putBoolean("vision_owned", visionOwned);
         return tag;
     }
@@ -107,7 +118,8 @@ public final class NekoState implements INBTSerializable<CompoundTag> {
     @Override
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag tag) {
         phase = Phase.values()[Mth.clamp(tag.getInt("phase"), 0, Phase.values().length - 1)];
-        elapsed = Mth.clamp(tag.getInt("elapsed"), 0, 3 * DAY);
+        accelerated = phase != Phase.HUMAN && tag.getBoolean("accelerated");
+        elapsed = Mth.clamp(tag.getInt("elapsed"), 0, 3 * stageDuration());
         abilities = tag.getInt("abilities") & 7;
         lives = isNeko() ? Mth.clamp(tag.getInt("lives"), 0, 9) : 0;
         visionOwned = tag.getBoolean("vision_owned");
