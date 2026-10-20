@@ -100,6 +100,7 @@ public final class InjectionHandsSmokeTest {
             offReturn |= InjectionHandler.returning(mc.player, InteractionHand.OFF_HAND).started() >= 0;
             if (age == 70) capture = "injection-main-hand.png";
             if (age == 200) capture = "injection-off-hand.png";
+            if (age == 310) capture = "injection-mirror-idle.png";
             if (age == 370) {
                 capture = "injection-both-hands.png";
                 var mainPose = new com.mojang.blaze3d.vertex.PoseStack();
@@ -118,17 +119,22 @@ public final class InjectionHandsSmokeTest {
                 var offModel = mc.getItemRenderer().getModel(off, mc.level, mc.player, 0);
                 mainModel.getTransforms().getTransform(net.minecraft.world.item.ItemDisplayContext.FIRST_PERSON_RIGHT_HAND).apply(false, mainPose);
                 offModel.getTransforms().getTransform(net.minecraft.world.item.ItemDisplayContext.FIRST_PERSON_LEFT_HAND).apply(true, offPose);
-                for (float[] point : new float[][] {{.2F, .3F, .1F}, {-.4F, .1F, -.2F}}) {
+                check(mainPose.last().pose().determinant() > 0 && offPose.last().pose().determinant() > 0,
+                        "Both syringe models retain outward-facing geometry for transparent rendering");
+                for (float[] point : new float[][] {{.2F, .3F, 0}, {-.4F, .1F, 0}}) {
                     var rightPoint = mainPose.last().pose().transformPosition(new org.joml.Vector3f(point));
                     var leftPoint = offPose.last().pose().transformPosition(new org.joml.Vector3f(point));
                     check(Math.abs(rightPoint.x + leftPoint.x) < .0001 && Math.abs(rightPoint.y - leftPoint.y) < .0001
-                            && Math.abs(rightPoint.z - leftPoint.z) < .0001, "The actual item geometry mirrors with the hand animation");
+                            && Math.abs(rightPoint.z - leftPoint.z) < .0001, "The syringe silhouette mirrors without inverting its faces");
                 }
                 var property = net.minecraft.client.renderer.item.ItemProperties.getProperty(main, Content.id("injection_stage"));
                 check(property.call(main, mc.level, mc.player, 0) > 0 && property.call(off, mc.level, mc.player, 0) > 0,
                         "Both syringes animate their own liquid");
             }
+            if (age == 406) capture = "injection-mirror-return.png";
+            if (age == 520) capture = "crystallizing-mirror-idle.png";
             if (age == 575) capture = "injection-crystallizing-left.png";
+            if (age == 616) capture = "crystallizing-mirror-return.png";
             if (age == 730) capture = "crystallization-approved-overlay.png";
             if (age == 780) {
                 check(mainReturn && offReturn && mainShown && offShown && mainHidden && offHidden && dualMain && dualOff,
