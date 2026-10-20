@@ -3,7 +3,9 @@ package io.github.nekogenix.gameplay;
 import io.github.nekogenix.Content;
 import io.github.nekogenix.Nekogenix;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -21,6 +23,11 @@ public final class CatForm {
 
     public static boolean active(Player player) {
         return player.level().isClientSide ? player.getData(Content.CAT_FORM) : player.getData(Content.NEKO).isCat();
+    }
+
+    public static EntityDimensions dimensions(Pose pose) {
+        return EntityType.CAT.getDimensions().withEyeHeight(pose == Pose.CROUCHING
+                ? CROUCHING_EYE_HEIGHT : STANDING_EYE_HEIGHT);
     }
 
     public static void sync(ServerPlayer player) {
@@ -43,8 +50,7 @@ public final class CatForm {
     @SubscribeEvent
     public static void size(EntityEvent.Size event) {
         if (event.getEntity() instanceof Player player && player.isAddedToLevel() && active(player)) {
-            event.setNewSize(EntityType.CAT.getDimensions().withEyeHeight(event.getPose() == net.minecraft.world.entity.Pose.CROUCHING
-                    ? CROUCHING_EYE_HEIGHT : STANDING_EYE_HEIGHT).scale(player.getScale()));
+            event.setNewSize(dimensions(event.getPose()).scale(player.getScale()));
         }
     }
 

@@ -13,7 +13,8 @@ import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsE
 
 final class EffectDisplay implements IClientMobEffectExtensions {
     static void register(RegisterClientExtensionsEvent event) {
-        event.registerMobEffect(new EffectDisplay(), Content.SHOCK, Content.TRANSFORMING, Content.CAT_TRANSFORMING);
+        event.registerMobEffect(new EffectDisplay(), Content.SHOCK, Content.TRANSFORMING, Content.CAT_TRANSFORMING,
+                Content.SWEETNESS, Content.CRYSTALLIZATION);
         event.registerMobEffect(new IClientMobEffectExtensions() {
             @Override
             public boolean isVisibleInInventory(MobEffectInstance instance) { return false; }

@@ -13,7 +13,9 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 @EventBusSubscriber(modid = Nekogenix.ID)
 public final class SyringeHands {
     public static boolean blocked(Player player, InteractionHand hand) {
-        return hand == InteractionHand.OFF_HAND && InjectionHandler.isSyringe(player.getMainHandItem());
+        return injecting(player)
+                || hand == InteractionHand.OFF_HAND && InjectionHandler.isSyringe(player.getMainHandItem())
+                && !InjectionHandler.isInjection(player.getOffhandItem());
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -36,9 +38,23 @@ public final class SyringeHands {
     public static void use(LivingEntityUseItemEvent.Start event) {
         if (event.getEntity() instanceof Player player && blocked(player, event.getHand())) event.setCanceled(true);
     }
+
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void attack(net.neoforged.neoforge.event.entity.player.AttackEntityEvent event) {
+        if (injecting(event.getEntity())) event.setCanceled(true);
+    }
+
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void mine(PlayerInteractEvent.LeftClickBlock event) {
+        if (injecting(event.getEntity())) event.setCanceled(true);
+    }
     @SubscribeEvent public static void tick(PlayerTickEvent.Pre event) {
         var player = event.getEntity();
         if (player.isUsingItem() && blocked(player, player.getUsedItemHand())) player.stopUsingItem();
+    }
+
+    private static boolean injecting(Player player) {
+        return InjectionHandler.active(player, InteractionHand.MAIN_HAND) || InjectionHandler.active(player, InteractionHand.OFF_HAND);
     }
 
     private SyringeHands() {}

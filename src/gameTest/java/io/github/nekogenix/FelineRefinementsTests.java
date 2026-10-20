@@ -97,14 +97,19 @@ public final class FelineRefinementsTests {
         player.jumpFromGround();
         helper.assertTrue(Math.abs(player.getDeltaMovement().y - .42) < .001, "First jump keeps vanilla strength");
         player.setOnGround(false);
+        player.setDeltaMovement(.73, -.2, -.41);
+        player.hurtMarked = false;
         helper.assertTrue(FelineJump.jump(player), "A grounded jump unlocks one air jump");
         helper.assertTrue(Math.abs(player.getDeltaMovement().y - .62) < .001, "Second jump has Jump Boost II strength");
+        helper.assertTrue(player.getDeltaMovement().x == .73 && player.getDeltaMovement().z == -.41, "Double jumping preserves both horizontal velocity components");
+        helper.assertFalse(player.hurtMarked, "A predicted jump does not overwrite the client's momentum with a server motion packet");
+        helper.assertTrue(FelineJump.canStartFlight(player), "Flight becomes available after the second jump");
         helper.assertFalse(FelineJump.jump(player), "Repeated requests cannot create a third jump");
         player.setOnGround(true);
         player.jumpFromGround();
         player.setOnGround(false);
         player.setItemSlot(net.minecraft.world.entity.EquipmentSlot.CHEST, Items.ELYTRA.getDefaultInstance());
-        helper.assertFalse(FelineJump.jump(player), "The jump key remains available for vanilla elytra flight");
+        helper.assertTrue(FelineJump.jump(player), "Wearing elytra does not prevent the second jump");
         player.setItemSlot(net.minecraft.world.entity.EquipmentSlot.CHEST, net.minecraft.world.item.ItemStack.EMPTY);
         player.setOnGround(true);
         FelineJump.tick(new PlayerTickEvent.Post(player));
@@ -116,6 +121,56 @@ public final class FelineRefinementsTests {
         player.setOnGround(false);
         player.getData(Content.NEKO).deserializeNBT(player.registryAccess(), new CompoundTag());
         helper.assertFalse(FelineJump.jump(player), "Losing agility rejects pending air jumps");
+        GameplayTests.remove(player);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void airJumpRequiresEnoughFoodUnlessCreative(GameTestHelper helper) {
+        var player = GameplayTests.player(helper);
+        TransformationTests.setState(player, 4);
+        for (int food : new int[] {0, 6, 7}) {
+            player.getFoodData().setFoodLevel(food);
+            player.setOnGround(true);
+            player.jumpFromGround();
+            player.setOnGround(false);
+            helper.assertTrue(FelineJump.jump(player) == (food > 6), "Air jump uses the sprint hunger threshold at " + food);
+        }
+        player.getFoodData().setFoodLevel(20);
+        player.setOnGround(true); player.jumpFromGround(); player.setOnGround(false);
+        player.getFoodData().setFoodLevel(6);
+        helper.assertFalse(FelineJump.jump(player), "Becoming hungry after takeoff blocks the second jump");
+        player.setGameMode(net.minecraft.world.level.GameType.CREATIVE);
+        player.getFoodData().setFoodLevel(0);
+        player.setOnGround(true); player.jumpFromGround(); player.setOnGround(false);
+        helper.assertTrue(FelineJump.jump(player), "Creative air jumps do not require food");
+        helper.assertTrue(FelineJump.canStartFlight(player), "Creative flight remains available after a hungry air jump");
+        GameplayTests.remove(player);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void creativeJumpAndFlightStateAreSeparate(GameTestHelper helper) {
+        var player = GameplayTests.player(helper);
+        TransformationTests.setState(player, 4);
+        player.setGameMode(net.minecraft.world.level.GameType.CREATIVE);
+        player.getAbilities().flying = false;
+        player.setOnGround(true);
+        FelineJump.tick(new PlayerTickEvent.Post(player));
+        helper.assertFalse(FelineJump.canStartFlight(player), "Landing clears the previous flight handoff");
+        player.jumpFromGround();
+        player.setOnGround(false);
+        helper.assertFalse(FelineJump.canStartFlight(player), "A ground jump alone does not hand off to flight");
+        helper.assertTrue(FelineJump.jump(player), "Creative players still get a second jump");
+        helper.assertTrue(FelineJump.canStartFlight(player), "Creative flight can follow a completed double jump");
+        player.getAbilities().flying = true;
+        helper.assertFalse(FelineJump.jump(player), "Jumping while already flying remains flight input");
+        FelineJump.tick(new PlayerTickEvent.Post(player));
+        player.getAbilities().flying = false;
+        helper.assertFalse(FelineJump.canStartFlight(player), "Leaving flight cannot reuse the earlier jump");
+        player.setOnGround(true); player.jumpFromGround(); player.setOnGround(false);
+        player.startFallFlying();
+        helper.assertFalse(FelineJump.jump(player), "An active elytra glide cannot gain an extra jump");
         GameplayTests.remove(player);
         helper.succeed();
     }

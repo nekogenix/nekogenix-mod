@@ -182,7 +182,7 @@ public final class CatFormSmokeTest {
             mc.options.hideGui = false;
             mc.options.fov().set(70);
             mc.options.screenEffectScale().set(0D);
-            mc.options.keyAttack.setDown(age >= 60 && age < 100 || age >= 160 && age < 270 || age >= 400 && age < 510);
+            mc.options.keyUse.setDown(age >= 60 && age < 100 || age >= 160 && age < 270 || age >= 400 && age < 510);
             if (age == 85 || age == 205 || age == 445) needle(mc);
             if (age == 68 || age == 75 || age == 85 || age == 105 || age == 205 || age == 445) capture(mc, "cat-injection-" + age + ".png");
             if (age == 300) check(mc.player.getMainHandItem().is(Content.USED_SYRINGE) && mc.player.hasEffect(Content.SHOCK), "Neko injection still completes");

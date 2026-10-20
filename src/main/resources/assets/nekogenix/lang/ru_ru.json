@@ -15,7 +15,7 @@
   "effect.nekogenix.feline_agility": "Кошачья ловкость",
   "effect.nekogenix.feline_vision": "Кошачье зрение",
   "effect.nekogenix.soft_paw_pads": "Мягкие подушечки лап",
-  "tooltip.nekogenix.injection_use": "Удерживайте ЛКМ для введения",
+  "tooltip.nekogenix.injection_use": "Удерживайте ПКМ для введения",
   "tooltip.nekogenix.stages": "Три стадии по 20 минут",
   "tooltip.nekogenix.agility": "+100% к скорости бега и передвижения крадучись",
   "tooltip.nekogenix.double_jump": "Второй прыжок: Прыгучесть II",
@@ -98,5 +98,16 @@
   "ability.nekogenix.feline_scent": "Кошачий нюх",
   "options.nekogenix.camera_height": "Высота камеры",
   "options.nekogenix.camera_height.cat": "Кот",
-  "options.nekogenix.camera_height.human": "Человек"
+  "options.nekogenix.camera_height.human": "Человек",
+  "effect.nekogenix.sweetness": "Кристалльная сладость",
+  "effect.nekogenix.crystallization": "Кристаллизация",
+  "tooltip.nekogenix.sweetness": "Плавно восполняет голод и насыщение до максимума",
+  "item.nekogenix.lingering_bottle_of_cat_saliva": "Туманная бутылочка кошачьей слюны",
+  "item.nekogenix.splash_potion_of_sweet_amethyst": "Взрывное зелье сладкого аметиста",
+  "item.nekogenix.lingering_potion_of_sweet_amethyst": "Туманное зелье сладкого аметиста",
+  "effect.nekogenix.cat_saliva_exposure": "Воздействие кошачьей слюны",
+  "tooltip.nekogenix.dual_injection": "Зажмите обе кнопки мыши с инъекцией в каждой руке",
+  "tooltip.nekogenix.dual_stages": "Две дозы: стадии и кото-трансформация по 5 минут",
+  "tooltip.nekogenix.dual_sickness": "Две дозы: Неко болезнь длится 3 минуты",
+  "death.attack.nekogenix.injection": "%1$s не пережил инъекцию"
 }

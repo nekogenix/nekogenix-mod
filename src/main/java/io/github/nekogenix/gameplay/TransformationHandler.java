@@ -68,10 +68,12 @@ public final class TransformationHandler {
         CatForm.sync(player);
         if (player.getData(Content.FELINE_DIET) != state.isNeko()) player.setData(Content.FELINE_DIET, state.isNeko());
         marker(player, Content.SHOCK, state.phase() == NekoState.Phase.SHOCK,
-                NekoState.SHOCK_DURATION - state.elapsed());
-        if (state.phase() == NekoState.Phase.SHOCK && !player.hasEffect(MobEffects.CONFUSION)) {
+                state.sicknessDuration() - state.elapsed());
+        var nausea = player.getEffect(MobEffects.CONFUSION);
+        if (state.phase() == NekoState.Phase.SHOCK && (nausea == null
+                || !nausea.isInfiniteDuration() && nausea.getDuration() < state.sicknessDuration() - state.elapsed() - 20)) {
             player.addEffect(new MobEffectInstance(MobEffects.CONFUSION,
-                    NekoState.SHOCK_DURATION - state.elapsed(), 0, false, false, false));
+                    state.sicknessDuration() - state.elapsed(), 0, false, false, false));
         }
         marker(player, Content.TRANSFORMING, state.phase() == NekoState.Phase.TRANSFORMING,
                 state.stageRemaining(), state.stage());
@@ -88,7 +90,8 @@ public final class TransformationHandler {
     private static void marker(ServerPlayer player, Holder<MobEffect> effect, boolean enabled, int duration, int amplifier) {
         MobEffectInstance current = player.getEffect(effect);
         if (enabled && (current == null || current.getAmplifier() != amplifier
-                || (effect.is(Content.TRANSFORMING) || effect.is(Content.CAT_TRANSFORMING)) && Math.abs(current.getDuration() - duration) > 20)) {
+                || (effect.is(Content.SHOCK) || effect.is(Content.TRANSFORMING) || effect.is(Content.CAT_TRANSFORMING))
+                && Math.abs(current.getDuration() - duration) > 20)) {
             if (current != null) player.removeEffect(effect);
             player.addEffect(new MobEffectInstance(effect, Math.max(-1, duration), amplifier, false, false, true));
         }
@@ -110,13 +113,23 @@ public final class TransformationHandler {
             state.visionOwned = false;
         }
         if (!dark) {
-            if (state.visionOwned) player.removeEffect(MobEffects.NIGHT_VISION);
-            state.visionOwned = false;
+            if (state.visionOwned && current != null && !current.endsWithin(20)) {
+                player.removeEffect(MobEffects.NIGHT_VISION);
+                applyVision(player, state, 20);
+            }
+            if (current == null) state.visionOwned = false;
         } else if (current == null || state.visionOwned && current.getDuration() < 260) {
-            state.applyingVision = true;
-            player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 320, 0, true, false, false));
-            state.applyingVision = false;
+            applyVision(player, state, 320);
+        }
+    }
+
+    private static void applyVision(ServerPlayer player, NekoState state, int duration) {
+        state.applyingVision = true;
+        try {
+            player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, duration, 0, true, false, false));
             state.visionOwned = true;
+        } finally {
+            state.applyingVision = false;
         }
     }
 

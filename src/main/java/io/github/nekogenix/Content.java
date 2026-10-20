@@ -60,7 +60,10 @@ public final class Content {
     public static final DeferredItem<SalivaBottleItem> SPLASH_SALIVA = ITEMS.register("splash_bottle_of_cat_saliva",
             () -> new SalivaBottleItem(true));
     public static final DeferredItem<NekoInjectionItem> INJECTION = ITEMS.register("neko_injection", () -> new NekoInjectionItem());
-    public static final DeferredItem<Item> NEKO_STABILIZER = ITEMS.registerSimpleItem("neko_stabilizer", new Item.Properties().stacksTo(1));
+    public static final DeferredItem<Item> NEKO_STABILIZER = ITEMS.register("neko_stabilizer", io.github.nekogenix.item.SweetAmethystItem::new);
+    public static final DeferredItem<io.github.nekogenix.item.ThrownBottleItem> LINGERING_SALIVA = ITEMS.register("lingering_bottle_of_cat_saliva", () -> new io.github.nekogenix.item.ThrownBottleItem(false, true));
+    public static final DeferredItem<io.github.nekogenix.item.ThrownBottleItem> SPLASH_SWEET_AMETHYST = ITEMS.register("splash_potion_of_sweet_amethyst", () -> new io.github.nekogenix.item.ThrownBottleItem(true, false));
+    public static final DeferredItem<io.github.nekogenix.item.ThrownBottleItem> LINGERING_SWEET_AMETHYST = ITEMS.register("lingering_potion_of_sweet_amethyst", () -> new io.github.nekogenix.item.ThrownBottleItem(true, true));
     public static final DeferredItem<NekoInjectionItem> STABILIZING_INJECTION = ITEMS.register("stabilizing_injection", () -> new NekoInjectionItem(true));
     public static final DeferredItem<NucleocardItem> BLANK_NUCLEOCARD = ITEMS.register("blank_nucleocard", () -> new NucleocardItem(false));
     public static final DeferredItem<NucleocardItem> CAT_NUCLEOCARD = ITEMS.register("cat_nucleocard", () -> new NucleocardItem(true));
@@ -85,6 +88,9 @@ public final class Content {
     public static final DeferredHolder<MobEffect, MobEffect> AGILITY = effect("feline_agility", MobEffectCategory.BENEFICIAL, 0xA9D6D1);
     public static final DeferredHolder<MobEffect, MobEffect> VISION = effect("feline_vision", MobEffectCategory.BENEFICIAL, 0xBED487);
     public static final DeferredHolder<MobEffect, MobEffect> PAWS = effect("soft_paw_pads", MobEffectCategory.BENEFICIAL, 0xE9B6C9);
+    public static final DeferredHolder<MobEffect, MobEffect> SWEETNESS = EFFECTS.register("sweetness", io.github.nekogenix.gameplay.SweetnessEffect::new);
+    public static final DeferredHolder<MobEffect, MobEffect> CRYSTALLIZATION = EFFECTS.register("crystallization", io.github.nekogenix.gameplay.CrystallizationEffect::new);
+    public static final DeferredHolder<MobEffect, MobEffect> SALIVA_CLOUD = EFFECTS.register("cat_saliva_exposure", io.github.nekogenix.gameplay.SalivaCloudEffect::new);
 
     public static final DeferredHolder<EntityType<?>, EntityType<SalivaProjectile>> SALIVA_PROJECTILE = ENTITIES.register("saliva_bottle",
             () -> EntityType.Builder.<SalivaProjectile>of(SalivaProjectile::new, MobCategory.MISC)
@@ -99,6 +105,10 @@ public final class Content {
     public static final DeferredHolder<AttachmentType<?>, AttachmentType<Long>> INJECTION_STARTED = ATTACHMENTS.register("injection_started",
             () -> AttachmentType.builder(() -> -1L).sync(ByteBufCodecs.VAR_LONG).build());
     public static final DeferredHolder<AttachmentType<?>, AttachmentType<InjectionHandler.ReturnAnimation>> INJECTION_RETURN = ATTACHMENTS.register("injection_return",
+            () -> AttachmentType.builder(() -> InjectionHandler.ReturnAnimation.NONE).sync(InjectionHandler.ReturnAnimation.STREAM_CODEC).build());
+    public static final DeferredHolder<AttachmentType<?>, AttachmentType<Long>> OFFHAND_INJECTION_STARTED = ATTACHMENTS.register("offhand_injection_started",
+            () -> AttachmentType.builder(() -> -1L).sync(ByteBufCodecs.VAR_LONG).build());
+    public static final DeferredHolder<AttachmentType<?>, AttachmentType<InjectionHandler.ReturnAnimation>> OFFHAND_INJECTION_RETURN = ATTACHMENTS.register("offhand_injection_return",
             () -> AttachmentType.builder(() -> InjectionHandler.ReturnAnimation.NONE).sync(InjectionHandler.ReturnAnimation.STREAM_CODEC).build());
     public static final DeferredHolder<AttachmentType<?>, AttachmentType<Boolean>> FELINE_VOICE = ATTACHMENTS.register("feline_voice",
             () -> AttachmentType.builder(() -> false).sync(ByteBufCodecs.BOOL).build());
@@ -121,7 +131,25 @@ public final class Content {
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> TAB = TABS.register("nekogenix",
             () -> CreativeModeTab.builder().title(Component.translatable("itemGroup.nekogenix"))
                     .icon(() -> INJECTION.toStack()).displayItems((parameters, output) -> {
-                        ITEMS.getEntries().forEach(item -> output.accept(item.get()));
+                        output.accept(CENTRIFUGE_ITEM);
+                        output.accept(PNEUMATIC_ITEM);
+                        output.accept(COTTON_SWAB);
+                        output.accept(SALIVA_SWAB);
+                        output.accept(SALIVA_BOTTLE);
+                        output.accept(SPLASH_SALIVA);
+                        output.accept(LINGERING_SALIVA);
+                        output.accept(BLANK_NUCLEOCARD);
+                        output.accept(CAT_NUCLEOCARD);
+                        output.accept(NEEDLE);
+                        output.accept(BARREL);
+                        output.accept(PLUNGER);
+                        output.accept(SYRINGE);
+                        output.accept(USED_SYRINGE);
+                        output.accept(INJECTION);
+                        output.accept(STABILIZING_INJECTION);
+                        output.accept(NEKO_STABILIZER);
+                        output.accept(SPLASH_SWEET_AMETHYST);
+                        output.accept(LINGERING_SWEET_AMETHYST);
                     }).build());
 
     private static DeferredHolder<MobEffect, MobEffect> effect(String name, MobEffectCategory category, int color) {

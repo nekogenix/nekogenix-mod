@@ -2,16 +2,23 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "#": {
-      "tag": "minecraft:stone_crafting_materials"
+    "A": {
+      "item": "minecraft:iron_ingot"
     },
     "B": {
+      "item": "minecraft:redstone"
+    },
+    "C": {
       "item": "minecraft:breeze_rod"
+    },
+    "D": {
+      "item": "minecraft:smooth_stone"
     }
   },
   "pattern": [
-    " B ",
-    "###"
+    "AAA",
+    "BCB",
+    "DDD"
   ],
   "result": {
     "id": "nekogenix:pneumatic_stand",

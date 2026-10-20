@@ -41,10 +41,10 @@ public final class Nekogenix {
                 (payload, context) -> io.github.nekogenix.gameplay.CameraProjectiles.receive(context.player(), payload.height()));
         event.registrar("1").playToServer(AirJumpInput.TYPE, AirJumpInput.STREAM_CODEC,
                 (payload, context) -> io.github.nekogenix.gameplay.FelineJump.jump(context.player()));
-        event.registrar("1").playToServer(InjectionInput.TYPE, InjectionInput.STREAM_CODEC,
+        event.registrar("2").playToServer(InjectionInput.TYPE, InjectionInput.STREAM_CODEC,
                 (payload, context) -> {
                     if (context.player() instanceof net.minecraft.server.level.ServerPlayer player) {
-                        io.github.nekogenix.gameplay.InjectionHandler.input(player, payload.held());
+                        io.github.nekogenix.gameplay.InjectionHandler.input(player, payload.held(), payload.offHeld());
                     }
                 });
     }

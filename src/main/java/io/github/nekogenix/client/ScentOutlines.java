@@ -52,7 +52,9 @@ public final class ScentOutlines {
         }
         if (mc.isPaused()) return;
         boolean eligible = observer != null && observer.isAlive() && !observer.isSpectator() && CatForm.active(observer);
-        if (FOCUS.tick(eligible, eligible && observer.isCrouching())) observer.playSound(SoundEvents.FOX_SNIFF, .6F, 1.1F);
+        boolean focusing = eligible && observer.isShiftKeyDown() && !observer.getAbilities().flying
+                && !observer.isSwimming() && !observer.isPassenger();
+        if (FOCUS.tick(eligible, focusing)) observer.playSound(SoundEvents.FOX_SNIFF, .6F, 1.1F);
         if (!FOCUS.visible() || level == null) { targets = List.of(); scan = 0; return; }
         if (scan-- <= 0) {
             scan = 4;

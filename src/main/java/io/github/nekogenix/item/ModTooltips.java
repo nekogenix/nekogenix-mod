@@ -18,6 +18,9 @@ final class ModTooltips {
                 new MobEffectInstance(Content.TRANSFORMING, 3 * NekoState.DAY),
                 new MobEffectInstance(Content.CAT_TRANSFORMING, NekoState.DAY)), tooltip::add, 1F, context.tickRate());
         line(tooltip, "injection_use", ChatFormatting.GRAY);
+        line(tooltip, "dual_injection", ChatFormatting.GRAY);
+        line(tooltip, "dual_stages", ChatFormatting.GRAY);
+        line(tooltip, "dual_sickness", ChatFormatting.GRAY);
         line(tooltip, "stages", ChatFormatting.GRAY);
         line(tooltip, "stage_ability", ChatFormatting.GRAY);
         line(tooltip, "cat_stage", ChatFormatting.GRAY);
@@ -29,10 +32,22 @@ final class ModTooltips {
         line(tooltip, "paws", ChatFormatting.BLUE);
     }
 
-    static void stabilizer(List<Component> tooltip) {
+    static void stabilizer(Item.TooltipContext context, List<Component> tooltip) {
+        PotionContents.addPotionTooltip(List.of(new MobEffectInstance(Content.CRYSTALLIZATION,
+                io.github.nekogenix.gameplay.CrystallizationEffect.DURATION)), tooltip::add, 1F, context.tickRate());
         line(tooltip, "injection_use", ChatFormatting.GRAY);
         line(tooltip, "stabilizing_injection", ChatFormatting.BLUE);
         line(tooltip, "stabilizing_permanent", ChatFormatting.GRAY);
+    }
+
+    static void sweetAmethyst(Item.TooltipContext context, List<Component> tooltip) {
+        sweetAmethyst(context, tooltip, 1F);
+    }
+
+    static void sweetAmethyst(Item.TooltipContext context, List<Component> tooltip, float durationScale) {
+        PotionContents.addPotionTooltip(List.of(new MobEffectInstance(Content.SWEETNESS,
+                io.github.nekogenix.gameplay.SweetnessEffect.DURATION)), tooltip::add, durationScale, context.tickRate());
+        line(tooltip, "sweetness", ChatFormatting.BLUE);
     }
 
     static void saliva(Item.TooltipContext context, List<Component> tooltip) {

@@ -78,12 +78,14 @@ public final class CameraHeight {
             return vanillaY;
         }
         double requested = CameraGeometry.requested(player, ClientConfig.cameraHeight());
+        double crouch = CatForm.active(player) ? CameraGeometry.crouchOffset(player, ClientConfig.cameraHeight()) : 0;
         double x = Mth.lerp(partial, player.xo, player.getX());
         double z = Mth.lerp(partial, player.zo, player.getZ());
         var base = new Vec3(x, feet, z);
         double margin = CatForm.active(player) ? .24 : .08;
-        double clearance = CameraGeometry.ceiling(player, base, Math.max(requested, owner == player ? height : vanillaEye), margin);
-        double target = Math.min(requested, clearance);
+        double clearance = CameraGeometry.ceiling(player, base, Math.max(requested + crouch, owner == player ? height : vanillaEye), margin);
+        double limited = Math.min(requested, Math.max(.08, clearance - crouch));
+        double target = limited;
         var velocity = player.getDeltaMovement().multiply(1, 0, 1).scale(8);
         double length = velocity.length();
         if (length > 4) velocity = velocity.scale(4 / length);
@@ -94,11 +96,11 @@ public final class CameraHeight {
             for (int step = 1; step <= steps; step++) {
                 var offset = velocity.scale(step / (double)steps);
                 if (!player.level().noCollision(player, body.move(offset))) break;
-                double ahead = CameraGeometry.ceiling(player, base.add(offset), requested, margin);
-                target = Math.min(target, ahead);
+                double ahead = CameraGeometry.ceiling(player, base.add(offset), requested + crouch, margin);
+                target = Math.min(target, Math.max(.08, ahead - crouch));
             }
         }
-        if (target < Math.min(requested, clearance) - .001) {
+        if (target < limited - .001) {
             predictedHeight = target;
             predictionUntil = now + 200_000_000;
         }

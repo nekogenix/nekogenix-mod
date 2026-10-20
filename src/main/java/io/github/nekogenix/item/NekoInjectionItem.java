@@ -18,7 +18,7 @@ public final class NekoInjectionItem extends Item {
 
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
-        if (stabilizing) ModTooltips.stabilizer(tooltip);
+        if (stabilizing) ModTooltips.stabilizer(context, tooltip);
         else ModTooltips.injection(context, tooltip);
     }
 }
