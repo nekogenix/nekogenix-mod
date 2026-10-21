@@ -2,6 +2,7 @@ package io.github.nekogenix.integration.rei;
 
 import io.github.nekogenix.Content;
 import io.github.nekogenix.client.CentrifugeScreen;
+import io.github.nekogenix.client.InventoryAbilities;
 import io.github.nekogenix.client.PneumaticStandScreen;
 import io.github.nekogenix.client.recipe.ProcessingDisplay;
 import me.shedaniel.math.Rectangle;
@@ -15,6 +16,7 @@ import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.forge.REIPluginClient;
 import me.shedaniel.rei.plugin.common.displays.DefaultInformationDisplay;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 
 @REIPluginClient
@@ -40,6 +42,8 @@ public final class NekogenixRei implements REIClientPlugin {
     }
     @Override public void registerScreens(ScreenRegistry registry) {
         if (!ProcessingDisplay.active(ProcessingDisplay.Viewer.REI)) return;
+        registry.exclusionZones().register(AbstractContainerScreen.class, screen -> InventoryAbilities.bounds(screen).stream()
+                .map(area -> new Rectangle(area.left(), area.top(), area.width(), area.height())).toList());
         registry.registerContainerClickArea(new Rectangle(78, 63, 22, 22), CentrifugeScreen.class, CategoryIdentifier.of(ProcessingDisplay.Machine.CENTRIFUGE.id()));
         registry.registerContainerClickArea(new Rectangle(78, 36, 24, 10), PneumaticStandScreen.class, CategoryIdentifier.of(ProcessingDisplay.Machine.PNEUMATIC.id()));
     }

@@ -57,10 +57,13 @@ public final class TransformationHandler {
             }
         }
         boolean agility = state.has(NekoState.AGILITY);
+        if (agility && player.isShiftKeyDown() && !player.isSwimming()
+                && !player.getAbilities().flying && !player.isFallFlying()) player.setSprinting(false);
         modifier(player.getAttribute(Attributes.MOVEMENT_SPEED), "feline_sprint", agility && player.isSprinting());
         modifier(player.getAttribute(Attributes.SNEAKING_SPEED), "feline_sneak", agility);
         if (player.tickCount % 20 == 0) refreshEffects(player);
-        if (player.tickCount % 10 == 0) vision(player, state);
+        boolean visionChanged = FelineVisionControl.changed(player);
+        if (visionChanged || player.tickCount % 10 == 0) vision(player, state);
     }
 
     public static void refreshEffects(ServerPlayer player) {
@@ -107,12 +110,12 @@ public final class TransformationHandler {
     }
 
     private static void vision(ServerPlayer player, NekoState state) {
-        boolean dark = state.has(NekoState.VISION) && inDarkness(player);
+        boolean active = state.has(NekoState.VISION) && FelineVisionControl.active(player);
         MobEffectInstance current = player.getEffect(MobEffects.NIGHT_VISION);
         if (state.visionOwned && current != null && (!current.isAmbient() || current.isVisible() || current.showIcon())) {
             state.visionOwned = false;
         }
-        if (!dark) {
+        if (!active) {
             if (state.visionOwned && current != null && !current.endsWithin(20)) {
                 player.removeEffect(MobEffects.NIGHT_VISION);
                 applyVision(player, state, 20);

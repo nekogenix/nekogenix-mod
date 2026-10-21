@@ -37,11 +37,20 @@ public final class Nekogenix {
 
     private static void network(RegisterPayloadHandlersEvent event) {
         io.github.nekogenix.skin.SkinPackets.register(event);
-        event.registrar("1").playToServer(io.github.nekogenix.network.CameraViewInput.TYPE,
+        event.registrar("1").playToServer(io.github.nekogenix.network.FelineVisionInput.TYPE,
+                io.github.nekogenix.network.FelineVisionInput.STREAM_CODEC,
+                (payload, context) -> io.github.nekogenix.gameplay.FelineVisionControl.receive(context.player(), payload.automatic(), payload.enabled()));
+        event.registrar("2").playToServer(io.github.nekogenix.network.CameraViewInput.TYPE,
                 io.github.nekogenix.network.CameraViewInput.STREAM_CODEC,
-                (payload, context) -> io.github.nekogenix.gameplay.CameraProjectiles.receive(context.player(), payload.height()));
+                (payload, context) -> io.github.nekogenix.gameplay.CameraProjectiles.receive(context.player(), payload.height(), payload.preference()));
         event.registrar("1").playToServer(AirJumpInput.TYPE, AirJumpInput.STREAM_CODEC,
                 (payload, context) -> io.github.nekogenix.gameplay.FelineJump.jump(context.player()));
+        event.registrar("1").playToServer(io.github.nekogenix.network.PassageInput.TYPE, io.github.nekogenix.network.PassageInput.STREAM_CODEC,
+                (payload, context) -> {
+                    if (payload.entering()) io.github.nekogenix.gameplay.CameraPosture.enterPassage(context.player());
+                    else io.github.nekogenix.gameplay.CameraPosture.preparePassageJump(context.player(),
+                            new net.minecraft.world.phys.Vec3(payload.x(), 0, payload.z()));
+                });
         event.registrar("2").playToServer(InjectionInput.TYPE, InjectionInput.STREAM_CODEC,
                 (payload, context) -> {
                     if (context.player() instanceof net.minecraft.server.level.ServerPlayer player) {

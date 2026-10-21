@@ -1,6 +1,7 @@
 package io.github.nekogenix.client;
 
 import io.github.nekogenix.Nekogenix;
+import io.github.nekogenix.config.ClientConfig;
 import io.github.nekogenix.gameplay.FelineJump;
 import io.github.nekogenix.network.AirJumpInput;
 import net.minecraft.client.Minecraft;
@@ -24,6 +25,12 @@ public final class FelineJumpInput {
         if (event.getEntity() != mc.player) return;
         boolean down = mc.screen == null && event.getInput().jumping;
         var player = mc.player;
+        if (!ClientConfig.NEKO_DOUBLE_JUMP.get()) {
+            held = down;
+            restoreJump = null;
+            return;
+        }
+        if (down) FelineJump.groundInput(player);
         if (down && !held) {
             boolean consumed = FelineJump.jump(player);
             if (consumed) {

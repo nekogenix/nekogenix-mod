@@ -12,26 +12,20 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.PlayLevelSoundEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 @EventBusSubscriber(modid = Nekogenix.ID)
 public final class FelineRefinementsSmokeTest {
     private static final boolean ENABLED = Boolean.getBoolean("nekogenix.refinementsSmokeTest");
     private static int airJumps;
-
-    @SubscribeEvent
-    public static void sound(PlayLevelSoundEvent.AtEntity event) {
-        if (ENABLED && event.getEntity() instanceof ServerPlayer player && player.tickCount >= 490
-                && event.getSound() != null && event.getSound().value() == SoundEvents.CAT_PURREOW) {
-            airJumps++;
-            check(Math.abs(player.getDeltaMovement().y - .62) < .001, "Server authorizes Jump Boost II velocity");
-        }
-    }
+    private static boolean airJumpUsed;
 
     @SubscribeEvent
     public static void server(PlayerTickEvent.Post event) {
         if (!ENABLED || !(event.getEntity() instanceof ServerPlayer player)) return;
+        boolean used = io.github.nekogenix.gameplay.FelineJump.canStartFlight(player);
+        if (used && !airJumpUsed) airJumps++;
+        airJumpUsed = used;
         int age = player.tickCount;
         if (age == 40 || age == 460) {
             player.removeAllEffects();

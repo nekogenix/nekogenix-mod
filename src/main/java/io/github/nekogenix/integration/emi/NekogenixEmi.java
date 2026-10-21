@@ -7,6 +7,7 @@ import dev.emi.emi.api.recipe.EmiInfoRecipe;
 import dev.emi.emi.api.recipe.EmiRecipeCategory;
 import dev.emi.emi.api.stack.EmiStack;
 import io.github.nekogenix.Content;
+import io.github.nekogenix.client.InventoryAbilities;
 import io.github.nekogenix.client.recipe.ProcessingDisplay;
 import java.util.List;
 import net.minecraft.client.Minecraft;
@@ -16,6 +17,12 @@ import net.minecraft.network.chat.Component;
 public final class NekogenixEmi implements EmiPlugin {
     @Override public void register(EmiRegistry registry) {
         if (!ProcessingDisplay.active(ProcessingDisplay.Viewer.EMI)) return;
+        registry.addGenericExclusionArea((screen, consumer) -> {
+            if (screen instanceof net.minecraft.client.gui.screens.inventory.AbstractContainerScreen<?> container) {
+                InventoryAbilities.bounds(container).forEach(area -> consumer.accept(
+                        new dev.emi.emi.api.widget.Bounds(area.left(), area.top(), area.width(), area.height())));
+            }
+        });
         var level = Minecraft.getInstance().level;
         if (level == null) return;
         for (var machine : ProcessingDisplay.Machine.values()) {

@@ -33,6 +33,7 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 public final class FelineRefinementsTests {
     private static final Map<ServerPlayer, Integer> MEAL_FOOD = new WeakHashMap<>();
     private static final Map<ServerPlayer, List<Integer>> HISSES = new WeakHashMap<>();
+    private static final Map<ServerPlayer, Integer> JUMP_SOUNDS = new WeakHashMap<>();
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void mealSound(PlayLevelSoundEvent.AtPosition event) {
@@ -46,6 +47,9 @@ public final class FelineRefinementsTests {
 
     @SubscribeEvent
     public static void hissSound(PlayLevelSoundEvent.AtEntity event) {
+        if (event.getEntity() instanceof ServerPlayer player && JUMP_SOUNDS.containsKey(player)) {
+            JUMP_SOUNDS.merge(player, 1, Integer::sum);
+        }
         if (event.getEntity() instanceof ServerPlayer player && HISSES.containsKey(player)
                 && event.getSound() != null && event.getSound().value() == SoundEvents.CAT_HISS) {
             HISSES.get(player).add(player.tickCount);
@@ -121,6 +125,115 @@ public final class FelineRefinementsTests {
         player.setOnGround(false);
         player.getData(Content.NEKO).deserializeNBT(player.registryAccess(), new CompoundTag());
         helper.assertFalse(FelineJump.jump(player), "Losing agility rejects pending air jumps");
+        GameplayTests.remove(player);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void airJumpDoesNotPlayAnySound(GameTestHelper helper) {
+        for (boolean cat : new boolean[] {false, true}) {
+            var player = GameplayTests.player(helper);
+            if (cat) CatTransformationTests.cat(player);
+            else TransformationTests.setState(player, 4);
+            player.setOnGround(true);
+            player.jumpFromGround();
+            player.setOnGround(false);
+            JUMP_SOUNDS.put(player, 0);
+            helper.assertTrue(FelineJump.jump(player), "Both feline forms can perform the silent air jump");
+            helper.assertTrue(JUMP_SOUNDS.remove(player) == 0, "An accepted air jump does not emit a sound");
+            GameplayTests.remove(player);
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void airJumpExpiresAfterTwentyAirborneTicks(GameTestHelper helper) {
+        for (boolean cat : new boolean[] {false, true}) {
+            for (int elapsed : new int[] {19, 20, 21, 30, 100}) {
+                var player = GameplayTests.player(helper);
+                if (cat) CatTransformationTests.cat(player);
+                else TransformationTests.setState(player, 4);
+                player.setOnGround(true);
+                player.verticalCollisionBelow = true;
+                player.jumpFromGround();
+                player.setOnGround(false);
+                player.verticalCollisionBelow = false;
+                player.tickCount += elapsed;
+                var velocity = new net.minecraft.world.phys.Vec3(.4, -.8, -.3);
+                player.setDeltaMovement(velocity);
+                boolean accepted = FelineJump.jump(player);
+                helper.assertTrue(accepted == (elapsed <= 20), "Both feline forms have exactly twenty ticks to air jump at " + elapsed);
+                if (!accepted) helper.assertTrue(player.getDeltaMovement().equals(velocity), "Expired requests cannot alter velocity");
+                player.setOnGround(true);
+                player.verticalCollisionBelow = true;
+                player.jumpFromGround();
+                player.setOnGround(false);
+                player.verticalCollisionBelow = false;
+                player.tickCount++;
+                helper.assertTrue(FelineJump.jump(player), "Landing and jumping again starts a fresh window even before another player tick");
+                GameplayTests.remove(player);
+            }
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void jumpConfirmationCannotExtendTheAirborneDeadline(GameTestHelper helper) {
+        var player = GameplayTests.player(helper);
+        CatTransformationTests.cat(player);
+        player.setOnGround(true);
+        player.verticalCollisionBelow = true;
+        FelineJump.tick(new PlayerTickEvent.Post(player));
+        player.jumpFromGround();
+        player.setOnGround(false);
+        player.verticalCollisionBelow = false;
+        player.tickCount += 3;
+        player.awardStat(net.minecraft.stats.Stats.JUMP);
+        player.tickCount += 18;
+        helper.assertFalse(FelineJump.jump(player), "Delayed movement compatibility confirmation does not restart the timer");
+        player.setOnGround(true);
+        player.verticalCollisionBelow = true;
+        FelineJump.tick(new PlayerTickEvent.Post(player));
+        player.jumpFromGround();
+        player.setOnGround(false);
+        player.verticalCollisionBelow = false;
+        player.tickCount++;
+        helper.assertTrue(FelineJump.jump(player), "A fresh jump is available after landing");
+        player.tickCount += 100;
+        FelineJump.tick(new PlayerTickEvent.Post(player));
+        helper.assertTrue(FelineJump.canStartFlight(player), "The deadline does not remove the flight handoff after a completed air jump");
+        GameplayTests.remove(player);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void jumpStatConfirmsCustomGroundJumps(GameTestHelper helper) {
+        var player = GameplayTests.player(helper);
+        TransformationTests.setState(player, 4);
+        helper.assertFalse(player.hasData(Content.FELINE_JUMP), "A newly transformed player has no previous jump session");
+        player.setOnGround(true);
+        FelineJump.tick(new PlayerTickEvent.Post(player));
+        helper.assertTrue(player.hasData(Content.FELINE_JUMP), "Ground contact is tracked before the first custom jump");
+        FelineJump.dimension(new net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerChangedDimensionEvent(
+                player, net.minecraft.world.level.Level.OVERWORLD, net.minecraft.world.level.Level.NETHER));
+        player.setOnGround(false);
+        player.awardStat(net.minecraft.stats.Stats.JUMP);
+        helper.assertFalse(FelineJump.jump(player), "An airborne statistic cannot arm another jump");
+        player.setOnGround(true);
+        player.awardStat(net.minecraft.stats.Stats.WALK_ONE_CM);
+        player.setOnGround(false);
+        helper.assertFalse(FelineJump.jump(player), "Movement statistics cannot arm a jump");
+        player.setOnGround(true);
+        FelineJump.tick(new PlayerTickEvent.Post(player));
+        player.setOnGround(false);
+        player.awardStat(net.minecraft.stats.Stats.JUMP);
+        helper.assertTrue(FelineJump.jump(player), "The server confirms a custom takeoff even when the movement mod clears onGround before awarding the jump");
+        helper.assertFalse(FelineJump.jump(player), "Custom ground jumps still permit only one air jump");
+        player.awardStat(net.minecraft.stats.Stats.JUMP);
+        helper.assertFalse(FelineJump.jump(player), "A repeated airborne jump statistic cannot rearm a used jump");
+        FelineJump.dimension(new net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerChangedDimensionEvent(
+                player, net.minecraft.world.level.Level.OVERWORLD, net.minecraft.world.level.Level.NETHER));
+        helper.assertFalse(FelineJump.canStartFlight(player), "Changing dimensions clears the flight handoff");
         GameplayTests.remove(player);
         helper.succeed();
     }

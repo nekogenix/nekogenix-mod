@@ -26,6 +26,7 @@ public final class NewCatSkinScreen extends Screen {
     private int panel, controls, controlWidth, request;
     private float rotation = 145, zoom = 1;
     private boolean reading, saving, picker;
+    private CatSkinPreview.Pose previewPose = CatSkinPreview.Pose.FOUR_PAWS;
 
     public NewCatSkinScreen(CatSkinScreen parent) { super(text("import")); this.parent = parent; }
 
@@ -36,6 +37,9 @@ public final class NewCatSkinScreen extends Screen {
             catch (java.io.IOException e) { status = text("storage_failed"); }
         }
         panel = Math.max(104, width / 2 - 16); controls = panel + 24; controlWidth = width - controls - 12;
+        addRenderableWidget(Button.builder(previewPose.label(), button -> {
+            previewPose = previewPose.next(); button.setMessage(previewPose.label());
+        }).bounds(14, height - 75, panel - 12, 20).build());
         String previous = name == null ? "" : name.getValue();
         name = addRenderableWidget(new EditBox(font, controls, 46, controlWidth, 20, text("name")));
         name.setMaxLength(32); name.setValue(previous); name.setHint(text("name_hint"));
@@ -68,10 +72,10 @@ public final class NewCatSkinScreen extends Screen {
         graphics.drawCenteredString(font, title, width / 2, 12, 0xffffff);
         graphics.drawString(font, text("name"), controls, 34, 0xffffff, false);
         graphics.drawWordWrap(font, text("requirements"), controls, 76, controlWidth, 0xa7b4bc);
-        graphics.enableScissor(9, 31, panel + 7, height - 54);
-        float scale = Math.min(panel * .85F, (height - 96) * .9F) * zoom;
+        graphics.enableScissor(9, 31, panel + 7, height - 78);
+        float scale = Math.min(panel * .85F, (height - 120) * .9F) * zoom;
         CatSkin skin = draft != null ? draft : placeholder;
-        if (skin != null) preview.render(graphics, skin, panel / 2 + 8, (height - 24) / 2 + (int)(scale * .3F), scale, rotation);
+        if (skin != null) preview.renderInArea(graphics, skin, panel / 2 + 8, 31, height - 78, scale, rotation, previewPose);
         graphics.disableScissor();
         graphics.drawCenteredString(font, text("drag"), panel / 2 + 8, height - 51, 0x89989f);
         graphics.drawString(font, font.plainSubstrByWidth(filename.isEmpty() ? text("no_file").getString() : filename, controlWidth), controls, 166, 0xffffff, false);
@@ -137,7 +141,7 @@ public final class NewCatSkinScreen extends Screen {
     }
 
     @Override public boolean mouseDragged(double x, double y, int button, double dx, double dy) {
-        if (button == 0 && x < panel + 8 && y >= 30 && y < height - 38) { rotation += (float)dx * 1.5F; return true; }
+        if (button == 0 && x < panel + 8 && y >= 30 && y < height - 78) { rotation += (float)dx * 1.5F; return true; }
         return super.mouseDragged(x, y, button, dx, dy);
     }
     @Override public boolean mouseScrolled(double x, double y, double horizontal, double vertical) {

@@ -109,7 +109,7 @@ public final class GameplayTests {
         helper.runAfterDelay(197, () -> {
             helper.assertTrue(player.getMainHandItem().is(Content.USED_SYRINGE), "Completed injection becomes used syringe");
             helper.assertTrue(player.getData(Content.NEKO).phase() == NekoState.Phase.SHOCK, "Injection starts shock");
-            helper.assertTrue(player.getHealth() == 18F, "Each needle entry hurts once and completion adds no extra damage");
+            helper.assertTrue(player.getHealth() == 17F, "Two needle entries and the first sickness poison tick each deal one damage");
             remove(player);
             helper.succeed();
         });

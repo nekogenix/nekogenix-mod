@@ -16,10 +16,15 @@ import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Phantom;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.Pose;
 
 public final class FelineScent {
     public static final int HOSTILE = 0xff5555, NEUTRAL = 0xffff55, PASSIVE = 0x55ff55, PLAYER = 0xffffff;
     public static final int HORIZONTAL_RANGE = 30, VERTICAL_RANGE = 15;
+
+    public static boolean crouching(Player player) {
+        return player.hasPose(Pose.CROUCHING) && !player.getAbilities().flying && !player.isSwimming() && !player.isPassenger();
+    }
 
     public static boolean inRange(LivingEntity observer, LivingEntity target) {
         double dx = target.getX() - observer.getX(), dz = target.getZ() - observer.getZ();
@@ -42,7 +47,7 @@ public final class FelineScent {
     }
 
     public static final class Focus {
-        private static final int DELAY = 100, FADE = 20;
+        private static final int DELAY = 60, FADE = 20;
         private int held, previous, strength;
 
         public boolean tick(boolean eligible, boolean crouching) {

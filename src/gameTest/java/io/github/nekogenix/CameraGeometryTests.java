@@ -92,7 +92,8 @@ public final class CameraGeometryTests {
         helper.getLevel().setBlockAndUpdate(pos.above(), Blocks.STONE.defaultBlockState());
         CameraProjectiles.receive(player, 1000);
         var trident = new ThrownTrident(helper.getLevel(), player, Items.TRIDENT.getDefaultInstance()); helper.getLevel().addFreshEntity(trident);
-        helper.assertTrue(Math.abs(trident.getY() - player.getY() - .82) < .001, "The server caps exaggerated input at a real ceiling"); trident.discard();
+        helper.assertTrue(Math.abs(trident.getY() - player.getEyeY() + .1) < .001 && player.getBbHeight() <= 1.001,
+                "The server caps exaggerated input at a ceiling and keeps the shot inside the real body"); trident.discard();
         helper.getLevel().setBlockAndUpdate(pos.above(), Blocks.AIR.defaultBlockState());
         int age = player.tickCount; player.tickCount += 41;
         arrow = new Arrow(helper.getLevel(), player, Items.ARROW.getDefaultInstance(), null); double original = arrow.getY(); helper.getLevel().addFreshEntity(arrow);

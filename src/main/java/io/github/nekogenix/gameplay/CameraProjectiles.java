@@ -16,15 +16,30 @@ import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 @EventBusSubscriber(modid = Nekogenix.ID)
 public final class CameraProjectiles {
     public static final class View {
-        private float height;
-        private int tick = Integer.MIN_VALUE;
+        public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, View> STREAM_CODEC =
+                net.minecraft.network.codec.StreamCodec.composite(net.minecraft.network.codec.ByteBufCodecs.FLOAT, view -> view.bodyEye,
+                        net.minecraft.network.codec.ByteBufCodecs.BOOL, view -> view.upright,
+                        net.minecraft.network.codec.ByteBufCodecs.BOOL, view -> view.prone, View::new);
+        float height, bodyEye = -1;
+        boolean upright, prone;
+        int tick = Integer.MIN_VALUE, preference = 100;
+        public View() {}
+        private View(float eye, boolean upright, boolean prone) { bodyEye = eye; this.upright = upright; this.prone = prone; }
     }
 
     public static void receive(Player player, float height) {
+        int preference = Math.round((height / player.getScale() - CatForm.STANDING_EYE_HEIGHT)
+                / (Player.STANDING_DIMENSIONS.eyeHeight() - CatForm.STANDING_EYE_HEIGHT) * 100);
+        receive(player, height, Mth.clamp(preference, 0, 100));
+    }
+
+    public static void receive(Player player, float height, int preference) {
         if (!(player instanceof ServerPlayer) || !Float.isFinite(height) || !player.isAlive() || player.isSpectator()) return;
         var view = player.getData(Content.CAMERA_VIEW);
         view.height = Mth.clamp(height, .08F, (float)(1.62 * player.getScale()));
+        view.preference = Mth.clamp(preference, 0, 100);
         view.tick = player.tickCount;
+        CameraPosture.accept(player, view.height, view.preference);
     }
 
     public static Vec3 interactionEye(Player player) {
@@ -33,7 +48,7 @@ public final class CameraProjectiles {
         var view = player.getData(Content.CAMERA_VIEW);
         long age = (long)player.tickCount - view.tick;
         if (age < 0 || age > 40) return player.getEyePosition();
-        double height = Math.min(view.height, CameraGeometry.ceiling(player, player.position(), view.height));
+        double height = Math.min(view.bodyEye, CameraGeometry.ceiling(player, player.position(), view.bodyEye));
         return player.position().add(0, height, 0);
     }
 
@@ -45,7 +60,7 @@ public final class CameraProjectiles {
         var view = player.getData(Content.CAMERA_VIEW);
         long age = (long)player.tickCount - view.tick;
         if (age < 0 || age > 40 || projectile.position().distanceToSqr(player.getEyePosition()) > 2.25) return;
-        double desired = Math.min(view.height, CameraGeometry.ceiling(player, player.position(), view.height));
+        double desired = Math.min(view.bodyEye, CameraGeometry.ceiling(player, player.position(), view.bodyEye));
         double offset = desired - player.getEyeHeight();
         if (Math.abs(offset) < .002) return;
         var origin = projectile.position();

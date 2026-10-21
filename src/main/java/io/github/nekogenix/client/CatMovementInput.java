@@ -1,5 +1,6 @@
 package io.github.nekogenix.client;
 
+import io.github.nekogenix.Content;
 import io.github.nekogenix.Nekogenix;
 import io.github.nekogenix.gameplay.CatForm;
 import net.minecraft.client.player.LocalPlayer;
@@ -13,8 +14,20 @@ import net.neoforged.neoforge.client.event.MovementInputUpdateEvent;
 @EventBusSubscriber(modid = Nekogenix.ID, value = Dist.CLIENT)
 public final class CatMovementInput {
     @SubscribeEvent public static void movement(MovementInputUpdateEvent event) {
-        if (!(event.getEntity() instanceof LocalPlayer player) || !CatForm.active(player)) return;
+        if (!(event.getEntity() instanceof LocalPlayer player)) return;
         var input = event.getInput();
+        if (input.shiftKeyDown && player.hasEffect(Content.AGILITY) && !player.isSwimming()
+                && !player.getAbilities().flying && !player.isFallFlying()) {
+            player.setSprinting(false);
+            var speed = player.getAttribute(Attributes.MOVEMENT_SPEED);
+            if (speed != null) speed.removeModifier(Content.id("feline_sprint"));
+            if (!player.isMovingSlowly()) {
+                float sneak = (float)player.getAttributeValue(Attributes.SNEAKING_SPEED);
+                input.forwardImpulse *= sneak;
+                input.leftImpulse *= sneak;
+            }
+        }
+        if (!CatForm.active(player) && !io.github.nekogenix.gameplay.CameraPosture.freeProne(player)) return;
         if (input.shiftKeyDown || !player.isMovingSlowly() || player.isSwimming()) return;
         float factor = (float)player.getAttributeValue(Attributes.SNEAKING_SPEED);
         if (factor > 0) {

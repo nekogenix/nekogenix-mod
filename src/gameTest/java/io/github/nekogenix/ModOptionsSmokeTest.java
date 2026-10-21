@@ -38,6 +38,11 @@ public final class ModOptionsSmokeTest {
         if (ticks == 10) open(new net.minecraft.client.gui.screens.TitleScreen());
         if (ticks == 14) {
             check(mc.level == null && mc.screen instanceof ModOptionsScreen, "Config opens from Mods without a world");
+            check(ClientConfig.NEKO_DOUBLE_JUMP.get(), "Double jump defaults to enabled");
+            check(ClientConfig.AUTOMATIC_FELINE_VISION.get(), "Feline Vision defaults to automatic");
+            visionMode().onPress();
+            doubleJump().onPress();
+            check(!ClientConfig.NEKO_DOUBLE_JUMP.get(), "Config disables double jump immediately");
             slide("options.nekogenix.neko_voice", 0);
             slide("options.nekogenix.camera_height", 0);
             capture = "mod-config-title.png";
@@ -56,6 +61,8 @@ public final class ModOptionsSmokeTest {
             check(mc.screen instanceof ModListScreen, "Done returns to Mods");
             String file = java.nio.file.Files.readString(mc.gameDirectory.toPath().resolve("config/nekogenix-client.toml"));
             check(file.contains("cameraHeight = 0") && file.contains("nekoVoiceVolume = 0.0"), "Changes persist in the existing client config");
+            check(file.contains("nekoDoubleJump = false"), "The double jump preference persists alongside the original settings");
+            check(file.contains("automaticFelineVision = false"), "Manual vision mode persists in the same config");
         }
         if (ticks == 40) {
             String address = "127.0.0.1:" + Integer.getInteger("nekogenix.smokePort");
@@ -68,6 +75,9 @@ public final class ModOptionsSmokeTest {
         if (age == 40) open(new net.minecraft.client.gui.screens.PauseScreen(true));
         if (age == 45) {
             check(mc.screen instanceof ModOptionsScreen, "Config opens from Mods in game");
+            check(Boolean.FALSE.equals(doubleJump().getValue()), "Config retains the disabled preference in game");
+            check(Boolean.FALSE.equals(visionMode().getValue()), "Config retains manual vision mode in game");
+            doubleJump().onPress();
             slide("options.nekogenix.neko_voice", .5);
             slide("options.nekogenix.camera_height", 1);
             button("skins.nekogenix.title").onPress();
@@ -83,6 +93,23 @@ public final class ModOptionsSmokeTest {
         if (age == 65) check(widgets().stream().anyMatch(w -> w.getMessage().getString().equals("Camera Height: Human")), "Vanilla Options reflects the config camera setting");
         if (age == 70) mc.setScreen(new net.minecraft.client.gui.screens.options.SoundOptionsScreen(null, mc.options));
         if (age == 75) check(widgets().stream().anyMatch(w -> w.getMessage().getString().equals("Neko Voice: 50%")), "Vanilla sounds reflect the config voice setting");
+        if (age == 76) mc.setScreen(new net.minecraft.client.gui.screens.options.controls.ControlsScreen(null, mc.options));
+        if (age == 77) {
+            check(Boolean.FALSE.equals(visionMode().getValue()) && visionMode().getMessage().getString().equals("Feline Vision: Manual"),
+                    "Controls reflects the manual vision mode selected in Config");
+            visionMode().onPress();
+            check(Boolean.TRUE.equals(doubleJump().getValue()) && doubleJump().getMessage().getString().equals("Neko Double Jump: ON"),
+                    "Controls reflects the preference changed in Config using the vanilla ON label");
+            doubleJump().onPress();
+            check(!ClientConfig.NEKO_DOUBLE_JUMP.get(), "Controls changes the same config value");
+            capture = "neko-double-jump-controls.png";
+        }
+        if (age == 78) {
+            open(new net.minecraft.client.gui.screens.PauseScreen(true));
+            check(Boolean.TRUE.equals(visionMode().getValue()), "Config reflects automatic vision selected in Controls");
+            check(Boolean.FALSE.equals(doubleJump().getValue()), "Config reflects the preference changed in Controls");
+            doubleJump().onPress();
+        }
         if (age == 80) {
             open(new net.minecraft.client.gui.screens.PauseScreen(true));
             mc.options.guiScale().set(4);
@@ -131,6 +158,21 @@ public final class ModOptionsSmokeTest {
         String name = Component.translatable(key).getString();
         return widgets().stream().filter(Button.class::isInstance).map(Button.class::cast)
                 .filter(button -> button.getMessage().getString().equals(name)).findFirst().orElseThrow();
+    }
+
+    private static net.minecraft.client.gui.components.CycleButton<?> doubleJump() {
+        return cycle("options.nekogenix.double_jump");
+    }
+
+    private static net.minecraft.client.gui.components.CycleButton<?> visionMode() {
+        return cycle("options.nekogenix.feline_vision");
+    }
+
+    private static net.minecraft.client.gui.components.CycleButton<?> cycle(String key) {
+        String name = Component.translatable(key).getString();
+        return widgets().stream().filter(net.minecraft.client.gui.components.CycleButton.class::isInstance)
+                .map(widget -> (net.minecraft.client.gui.components.CycleButton<?>)widget)
+                .filter(widget -> widget.getMessage().getString().startsWith(name + ":")).findFirst().orElseThrow();
     }
 
     private static void slide(String key, double value) {

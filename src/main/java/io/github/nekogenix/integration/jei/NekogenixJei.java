@@ -2,17 +2,23 @@ package io.github.nekogenix.integration.jei;
 
 import io.github.nekogenix.Content;
 import io.github.nekogenix.client.CentrifugeScreen;
+import io.github.nekogenix.client.InventoryAbilities;
 import io.github.nekogenix.client.PneumaticStandScreen;
 import io.github.nekogenix.client.recipe.ProcessingDisplay;
 import java.util.List;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
+import mezz.jei.api.gui.handlers.IGuiContainerHandler;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.registration.IGuiHandlerRegistration;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
@@ -50,6 +56,14 @@ public final class NekogenixJei implements IModPlugin {
 
     @Override public void registerGuiHandlers(IGuiHandlerRegistration registration) {
         if (!ProcessingDisplay.active(ProcessingDisplay.Viewer.JEI)) return;
+        var abilities = new IGuiContainerHandler<AbstractContainerScreen<?>>() {
+            @Override public List<Rect2i> getGuiExtraAreas(AbstractContainerScreen<?> screen) {
+                return InventoryAbilities.bounds(screen).stream()
+                        .map(area -> new Rect2i(area.left(), area.top(), area.width(), area.height())).toList();
+            }
+        };
+        registration.addGuiContainerHandler(InventoryScreen.class, abilities);
+        registration.addGuiContainerHandler(CreativeModeInventoryScreen.class, abilities);
         registration.addRecipeClickArea(CentrifugeScreen.class, 78, 63, 22, 22, CENTRIFUGING);
         registration.addRecipeClickArea(PneumaticStandScreen.class, 78, 36, 24, 10, PNEUMATIC_FILLING);
     }

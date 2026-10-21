@@ -84,7 +84,8 @@ public final class CameraInteractionsSmokeTest {
             if (age == 220) ClientConfig.CAMERA_HEIGHT.set(0);
             if (age == 250) {
                 check(!mc.player.getData(Content.CAT_FORM) && block().equals(LOW), "A low human camera selects at full block range");
-                check(Math.abs(mc.player.getBbHeight() - 1.8F) < .001, "The low camera does not shrink the human body");
+                check(mc.player.isVisuallyCrawling() && Math.abs(mc.player.getBbHeight() - .6F) < .01,
+                        "The low human camera uses the actual prone pose and crawl hitbox");
             }
             if (age == 325) check(block().equals(CLOSE), "A low human camera selects the adjacent low block");
             if (age == 160 || age == 260 || age == 330 || age == 520) mc.options.keyUse.setDown(true);
@@ -95,7 +96,7 @@ public final class CameraInteractionsSmokeTest {
             if (age == 460) check(mc.hitResult.getType() == net.minecraft.world.phys.HitResult.Type.MISS, "Targets beyond native reach remain out of range");
             if (age == 510) check(mc.hitResult instanceof net.minecraft.world.phys.EntityHitResult, "Entity selection also follows the low viewpoint");
             if (age == 560) {
-                Nekogenix.LOGGER.info("Nekogenix camera interactions client smoke passed: grass close and far targets normal body dimensions wall occlusion reach boundary entities and agility FOV scaling");
+                Nekogenix.LOGGER.info("Nekogenix camera interactions client smoke passed: grass close and far targets prone hitbox wall occlusion reach boundary entities and agility FOV scaling");
                 mc.stop();
             }
         }

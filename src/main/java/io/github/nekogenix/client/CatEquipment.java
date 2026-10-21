@@ -99,7 +99,8 @@ final class CatEquipment implements RenderLayerParent<AbstractClientPlayer, Play
 
     private static void fit(ModelPart part, ModelPart bone, float x, float y, float z, float sx, float sy, float sz) {
         part.copyFrom(bone);
-        Vector3f offset = new Vector3f(x, y, z).rotate(new Quaternionf().rotationZYX(bone.zRot, bone.yRot, bone.xRot));
+        Vector3f offset = new Vector3f(x * bone.xScale, y * bone.yScale, z * bone.zScale)
+                .rotate(new Quaternionf().rotationZYX(bone.zRot, bone.yRot, bone.xRot));
         part.x += offset.x; part.y += offset.y; part.z += offset.z;
         part.xScale *= sx; part.yScale *= sy; part.zScale *= sz;
     }

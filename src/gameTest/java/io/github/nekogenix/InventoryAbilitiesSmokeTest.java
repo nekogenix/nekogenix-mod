@@ -36,6 +36,18 @@ public final class InventoryAbilitiesSmokeTest {
     @EventBusSubscriber(modid = Nekogenix.ID, value = net.neoforged.api.distmarker.Dist.CLIENT)
     public static final class Client {
         private static String capture;
+        private static net.minecraft.client.gui.components.Button done;
+
+        @SubscribeEvent
+        public static void init(net.neoforged.neoforge.client.event.ScreenEvent.Init.Post event) {
+            if (!ENABLED || !(event.getScreen() instanceof net.minecraft.client.gui.screens.inventory.InventoryScreen
+                    || event.getScreen() instanceof net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen)) return;
+            var screen = (net.minecraft.client.gui.screens.inventory.AbstractContainerScreen<?>)event.getScreen();
+            int tabs = screen instanceof net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen ? 28 : 0;
+            done = net.minecraft.client.gui.components.Button.builder(net.minecraft.network.chat.CommonComponents.GUI_DONE, button -> {})
+                    .bounds(screen.width / 2 - 100, Math.min(screen.height - 24, screen.getGuiTop() + screen.getYSize() + tabs + 2), 200, 20).build();
+            event.addListener(done);
+        }
 
         @SubscribeEvent
         public static void tick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
@@ -45,6 +57,7 @@ public final class InventoryAbilitiesSmokeTest {
             mc.getToasts().clear();
             int age = mc.player.tickCount;
             if (age == 60) {
+                io.github.nekogenix.client.InventoryAbilityLayoutChecks.verify();
                 for (var effect : java.util.List.of(Content.AGILITY, Content.VISION, Content.PAWS)) {
                     var instance = mc.player.getEffect(effect);
                     var extension = net.neoforged.neoforge.client.extensions.common.IClientMobEffectExtensions.of(effect.value());
@@ -58,6 +71,9 @@ public final class InventoryAbilitiesSmokeTest {
                 }
                 check(mc.player.getData(Content.CAT_FORM), "Cat form is synchronized from the dedicated server");
                 check(net.minecraft.network.chat.Component.translatable("ability.nekogenix.feline_scent").getString().equals("Feline Scent"), "Scent name is translated");
+                mc.player.addEffect(new MobEffectInstance(Content.SHOCK, 150));
+                mc.player.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 150, 0, false, false, false));
+                mc.player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 150, 0, true, false, false));
             }
             if (age == 70 || age == 105 || age == 140) {
                 mc.options.guiScale().set(age == 70 ? 2 : age == 105 ? 3 : 4);
@@ -66,6 +82,11 @@ public final class InventoryAbilitiesSmokeTest {
             }
             if (age == 80) capture = "abilities-scale2";
             if (age == 115) capture = "abilities-scale3";
+            if (age == 125 && done != null) done.setY(done.getY() + 8);
+            if (age == 130 && mc.screen instanceof net.minecraft.client.gui.screens.inventory.AbstractContainerScreen<?> screen) {
+                io.github.nekogenix.client.InventoryAbilityLayoutChecks.verify(screen);
+            }
+            if (age == 135 && done != null) done.visible = false;
             if (age == 150) capture = "abilities-scale4";
             if (age == 185) {
                 mc.setScreen(new net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen(mc.player,
@@ -83,10 +104,13 @@ public final class InventoryAbilitiesSmokeTest {
 
         @SubscribeEvent
         public static void tooltip(net.neoforged.neoforge.client.event.ScreenEvent.Render.Post event) {
-            if (!ENABLED || !"abilities-scale2".equals(capture)) return;
-            var screen = (net.minecraft.client.gui.screens.inventory.AbstractContainerScreen<?>)event.getScreen();
+            if (!ENABLED || capture == null || !capture.startsWith("abilities-")
+                    || !(event.getScreen() instanceof net.minecraft.client.gui.screens.inventory.AbstractContainerScreen<?> screen)) return;
+            io.github.nekogenix.client.InventoryAbilityLayoutChecks.verify(screen);
+            if (!"abilities-scale2".equals(capture)) return;
+            var cell = InventoryAbilities.bounds(screen).getLast();
             InventoryAbilities.render(new net.neoforged.neoforge.client.event.ScreenEvent.Render.Post(screen, event.getGuiGraphics(),
-                    screen.getGuiLeft() + screen.getXSize() / 2 + 54, screen.getGuiTop() + screen.getYSize() + 18, event.getPartialTick()));
+                    cell.left() + cell.width() / 2, cell.top() + cell.height() / 2, event.getPartialTick()));
         }
 
         @SubscribeEvent

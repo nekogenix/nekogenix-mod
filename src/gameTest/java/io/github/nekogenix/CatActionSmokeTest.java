@@ -81,7 +81,7 @@ public final class CatActionSmokeTest {
             }
         }
 
-        @SubscribeEvent public static void hand(net.neoforged.neoforge.client.event.RenderHandEvent event) {
+        @SubscribeEvent(receiveCanceled = true) public static void hand(net.neoforged.neoforge.client.event.RenderHandEvent event) {
             if (ENABLED && Minecraft.getInstance().screen == null && event.getSwingProgress() > .1F) swings.add(event.getHand());
         }
 

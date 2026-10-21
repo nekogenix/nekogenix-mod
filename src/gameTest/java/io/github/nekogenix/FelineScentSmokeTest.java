@@ -51,7 +51,7 @@ public final class FelineScentSmokeTest {
         @SubscribeEvent public static void sound(net.neoforged.neoforge.client.event.sound.PlaySoundEvent event) {
             if (!TIGHT || event.getSound() == null || !event.getSound().getLocation().equals(net.minecraft.sounds.SoundEvents.FOX_SNIFF.getLocation())) return;
             int age = net.minecraft.client.Minecraft.getInstance().player.tickCount;
-            check(Math.abs(age - (sniffs == 0 ? 140 : 360)) <= 3, "Scent still requires five seconds of sneaking in a low passage");
+            check(Math.abs(age - new int[] {100, 320, 470, 590}[sniffs]) <= 3, "Scent requires three seconds of actual crouching in a low passage");
             sniffs++;
         }
         @SubscribeEvent public static void tick(net.neoforged.neoforge.client.event.ClientTickEvent.Pre event) {
@@ -71,12 +71,12 @@ public final class FelineScentSmokeTest {
                     check(mc.player.isShiftKeyDown() && mc.player.isCrouching(), "A cat can crouch even under a low ceiling");
                     check(mc.gameRenderer.getMainCamera().getPosition().y - mc.player.getY() < .8, "The selected Human camera is lowered by the roof");
                 }
-                if (TIGHT && age == 125) check(sniffs == 0, "The ability cannot activate before its delay");
+                if (TIGHT && age == 95) check(sniffs == 0, "The ability cannot activate before its delay");
                 if (TIGHT && age == 190) check(sniffs == 1, "Scent activates while the cat crouches under a low ceiling");
                 if (TIGHT && age == 228) check(sniffs == 1, "Resuming during fade does not repeat the activation delay or sound");
                 if (TIGHT && age == 365) check(sniffs == 2, "After fading out the next activation requires a fresh delay");
-                if (age == 125) capture = "scent-before-delay.png";
-                if (age == 145) capture = "scent-fading-in.png";
+                if (age == 95) capture = "scent-before-delay.png";
+                if (age == 105) capture = "scent-fading-in.png";
                 if (age == 190) capture = "scent-full.png";
                 if (age == 205 || age == 240 || age == 380) mc.options.keyShift.setDown(false);
                 if (age == 213) capture = "scent-fading-out.png";
@@ -87,10 +87,17 @@ public final class FelineScentSmokeTest {
                     capture = "scent-resized.png";
                 }
                 if (age == 370) mc.reloadResourcePacks().thenRun(() -> reloaded = true);
-                if (age >= 410 && reloaded) {
+                if (TIGHT && age == 410) { mc.options.toggleCrouch().set(true); mc.options.keyShift.setDown(true); }
+                if (TIGHT && age == 411) mc.options.keyShift.setDown(false);
+                if (TIGHT && age == 475) check(sniffs == 3 && mc.player.isCrouching(), "Toggle crouching activates scent without holding the physical key");
+                if (TIGHT && age == 490) mc.options.keyShift.setDown(true);
+                if (TIGHT && age == 491) { mc.options.keyShift.setDown(false); mc.options.toggleCrouch().set(false); }
+                if (TIGHT && age == 530) mc.player.setForcedPose(net.minecraft.world.entity.Pose.CROUCHING);
+                if (TIGHT && age == 600) check(sniffs == 4 && !mc.player.isShiftKeyDown(), "A forced crouching pose activates scent without any sneak input");
+                if (age >= (TIGHT ? 610 : 410) && reloaded) {
                     check(mc.player.getData(Content.CAT_FORM), "The local observer remains a full cat");
                     Nekogenix.LOGGER.info("Nekogenix scent client smoke passed: timed crouching fades recovery resize and resource reload"); mc.stop();
-                    if (TIGHT) Nekogenix.LOGGER.info("Nekogenix tight scent smoke passed: native crouching pose lowered Human camera five second activation fade and recovery");
+                    if (TIGHT) Nekogenix.LOGGER.info("Nekogenix tight scent smoke passed: three second delay actual pose toggle crouching forced crouching fade and recovery");
                 }
             }
             if (age > 30) for (var entity : mc.level.entitiesForRendering()) {

@@ -9,10 +9,16 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 public final class CameraGeometry {
+    public static double selected(int percent) {
+        return Mth.lerp(Mth.clamp(percent, 0, 100) / 100.0, CatForm.STANDING_EYE_HEIGHT, Player.STANDING_DIMENSIONS.eyeHeight());
+    }
+
     public static double requested(Player player, int percent) {
-        double height = Mth.lerp(Mth.clamp(percent, 0, 100) / 100.0,
-                CatForm.STANDING_EYE_HEIGHT, Player.STANDING_DIMENSIONS.eyeHeight()) * player.getScale() - crouchOffset(player, percent);
-        if (!CatForm.active(player) && player.getPose() != Pose.STANDING && player.getPose() != Pose.CROUCHING) {
+        double height = selected(percent) * player.getScale() - crouchOffset(player, percent);
+        if (CameraPosture.passage(player) || CameraPosture.passageJumpPending(player)) height = Math.min(height, (CatForm.active(player) ? CatForm.STANDING_EYE_HEIGHT : .4F) * player.getScale());
+        if (CatForm.active(player) && CameraPosture.seated(player)) return .595 * player.getScale();
+        if (CatForm.active(player) && !CameraPosture.ordinaryPose(player)) height = Math.min(height, CatForm.STANDING_EYE_HEIGHT * player.getScale());
+        if (!CatForm.active(player) && !CameraPosture.cameraProne(player) && player.getPose() != Pose.STANDING && player.getPose() != Pose.CROUCHING) {
             height = Math.min(height, player.getEyeHeight());
         }
         return height;
@@ -42,7 +48,9 @@ public final class CameraGeometry {
     }
 
     public static Vec3 reachableMovement(Player player, Vec3 feet, Vec3 movement) {
-        var body = player.getBoundingBox().move(feet.subtract(player.position()));
+        var body = CatForm.active(player) ? CatForm.dimensions(Pose.STANDING).scale(player.getScale()).makeBoundingBox(feet)
+                : CameraPosture.cameraProne(player) ? net.minecraft.world.entity.EntityDimensions.scalable(.6F, .6F).scale(player.getScale()).makeBoundingBox(feet)
+                : player.getBoundingBox().move(feet.subtract(player.position()));
         return Entity.collideBoundingBox(player, movement, body, player.level(), List.of());
     }
 

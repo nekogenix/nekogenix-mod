@@ -52,8 +52,7 @@ public final class ScentOutlines {
         }
         if (mc.isPaused()) return;
         boolean eligible = observer != null && observer.isAlive() && !observer.isSpectator() && CatForm.active(observer);
-        boolean focusing = eligible && observer.isShiftKeyDown() && !observer.getAbilities().flying
-                && !observer.isSwimming() && !observer.isPassenger();
+        boolean focusing = eligible && FelineScent.crouching(observer);
         if (FOCUS.tick(eligible, focusing)) observer.playSound(SoundEvents.FOX_SNIFF, .6F, 1.1F);
         if (!FOCUS.visible() || level == null) { targets = List.of(); scan = 0; return; }
         if (scan-- <= 0) {
