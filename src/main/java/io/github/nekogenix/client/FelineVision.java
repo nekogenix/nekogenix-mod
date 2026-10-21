@@ -46,5 +46,7 @@ public final class FelineVision {
         return value * value * (3 - 2 * value);
     }
 
+    public static boolean changing() { return previous != strength; }
+
     private FelineVision() {}
 }

@@ -36,6 +36,7 @@ public final class CatSkinScreen extends Screen {
     private int scroll, previewWidth, gridX, columns, tileWidth, tileHeight, bottom;
     private float rotation = 145, zoom = 1;
     private boolean waitingForLibrary = !CatSkins.loaded();
+    private CatSkinPreview.Pose previewPose = CatSkinPreview.Pose.FOUR_PAWS;
 
     public CatSkinScreen(Screen parent) { super(text("title")); this.parent = parent; }
 
@@ -45,6 +46,9 @@ public final class CatSkinScreen extends Screen {
         columns = Math.max(1, Math.min(4, (width - gridX - 12) / 90));
         tileWidth = (width - gridX - 12) / columns;
         tileHeight = Math.max(80, Math.min(106, (height - 86) / 2)); bottom = height - 58;
+        addRenderableWidget(Button.builder(previewPose.label(), button -> {
+            previewPose = previewPose.next(); button.setMessage(previewPose.label());
+        }).bounds(14, bottom - 37, previewWidth - 12, 20).build());
         name = addRenderableWidget(new EditBox(font, 20, 43, previewWidth - 38, 16, text("rename")));
         name.setMaxLength(32); name.setBordered(false); name.setTextColor(0xe4f1ee);
         verify = addRenderableWidget(new VerifyButton(width - 28, 7));
@@ -108,9 +112,9 @@ public final class CatSkinScreen extends Screen {
             icon(graphics, 2, previewWidth - 16, 39, 0xffa6cbbd);
             if (mouseX >= 14 && mouseX < previewWidth + 2 && mouseY >= 36 && mouseY < 61) hoverTip = text("rename");
         } else graphics.drawCenteredString(font, font.plainSubstrByWidth(chosenName().getString(), previewWidth - 12), previewWidth / 2 + 8, 44, 0xffffff);
-        graphics.enableScissor(9, 65, previewWidth + 7, bottom - 15);
-        float scale = Math.min(previewWidth * .85F, (bottom - 78) * .9F) * zoom;
-        preview.render(graphics, choice, previewWidth / 2 + 8, (65 + bottom - 15) / 2 + (int)(scale * .3F), scale, rotation);
+        graphics.enableScissor(9, 65, previewWidth + 7, bottom - 40);
+        float scale = Math.min(previewWidth * .85F, (bottom - 103) * .9F) * zoom;
+        preview.renderInArea(graphics, choice, previewWidth / 2 + 8, 65, bottom - 40, scale, rotation, previewPose);
         graphics.disableScissor();
         graphics.drawCenteredString(font, text("drag"), previewWidth / 2 + 8, bottom - 13, 0x89989f);
         graphics.enableScissor(gridX - 3, 31, width - 9, bottom - 1);
@@ -148,7 +152,7 @@ public final class CatSkinScreen extends Screen {
         return super.keyPressed(key, scan, modifiers);
     }
     @Override public boolean mouseDragged(double x, double y, int button, double dx, double dy) {
-        if (button == 0 && x < previewWidth + 8 && y >= 65 && y < bottom) { rotation += (float)dx * 1.5F; return true; }
+        if (button == 0 && x < previewWidth + 8 && y >= 65 && y < bottom - 40) { rotation += (float)dx * 1.5F; return true; }
         return super.mouseDragged(x, y, button, dx, dy);
     }
     @Override public boolean mouseScrolled(double x, double y, double horizontal, double vertical) {
@@ -212,14 +216,14 @@ public final class CatSkinScreen extends Screen {
             boolean hovered = isHoveredOrFocused();
             graphics.fill(x, y, x + w, y + h, picked ? 0xff719b91 : hovered ? 0xff728790 : 0xff34424b);
             graphics.fill(x + 1, y + 1, x + w - 1, y + h - 1, picked ? 0xff253b39 : 0xff19232a);
-            int labelWidth = w - (used ? 26 : 10);
-            graphics.drawCenteredString(font, font.plainSubstrByWidth(getMessage().getString(), labelWidth), x + w / 2 - (used ? 6 : 0), y + 8, 0xffffff);
+            int labelWidth = w - 40;
+            graphics.drawCenteredString(font, font.plainSubstrByWidth(getMessage().getString(), labelWidth), x + w / 2, y + 8, 0xffffff);
             if (entry == null) {
                 graphics.fill(x + w / 2 - 1, y + h / 2 - 10, x + w / 2 + 2, y + h / 2 + 11, hovered ? 0xffd5e8e0 : 0xff8fa9a2);
                 graphics.fill(x + w / 2 - 10, y + h / 2 - 1, x + w / 2 + 11, y + h / 2 + 2, hovered ? 0xffd5e8e0 : 0xff8fa9a2);
                 return;
             }
-            float scale = Math.min((w - 4) * .72F, (h - 24) * 1.05F);
+            float scale = Math.min((w - 12) * .5F, (h - 30) * .85F);
             preview.render(graphics, entry.skin(), x + w / 2, y + h / 2 + (int)(scale * .4F), scale, 145);
             if (used) icon(graphics, 0, x + w - 20, y + 3, 0xffa6d6a4);
             if (hovered) {

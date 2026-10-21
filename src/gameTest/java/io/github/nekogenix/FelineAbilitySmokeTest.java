@@ -15,14 +15,13 @@ import net.neoforged.fml.common.EventBusSubscriber;
 public final class FelineAbilitySmokeTest {
     private static final boolean ENABLED = Boolean.getBoolean("nekogenix.felineAbilitySmokeTest");
     private static int jumps;
-
-    @SubscribeEvent public static void sound(net.neoforged.neoforge.event.PlayLevelSoundEvent.AtEntity event) {
-        if (ENABLED && event.getEntity() instanceof ServerPlayer && event.getSound() != null
-                && event.getSound().value() == net.minecraft.sounds.SoundEvents.CAT_PURREOW) jumps++;
-    }
+    private static boolean airJumpUsed;
 
     @SubscribeEvent public static void server(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
         if (!ENABLED || !(event.getEntity() instanceof ServerPlayer player)) return;
+        boolean used = io.github.nekogenix.gameplay.FelineJump.canStartFlight(player);
+        if (used && !airJumpUsed) jumps++;
+        airJumpUsed = used;
         int age = player.tickCount;
         var level = player.serverLevel();
         if (age == 20) {
@@ -71,6 +70,7 @@ public final class FelineAbilitySmokeTest {
         private static float prior;
         private static boolean fadeIn, fadeOut, recovery;
         private static String capture;
+        private static final java.util.Set<Integer> lightIn = new java.util.HashSet<>(), lightOut = new java.util.HashSet<>();
 
         @SubscribeEvent public static void tick(net.neoforged.neoforge.client.event.ClientTickEvent.Pre event) {
             if (!ENABLED) return;
@@ -104,6 +104,10 @@ public final class FelineAbilitySmokeTest {
             if (age == 540 || age == 600) check(player.getDeltaMovement().y > 0, "A fed or creative player can double jump");
             if (age == 650) {
                 check(fadeIn && fadeOut && recovery, "Vision fades in out and reverses a partial fade");
+                check(lightIn.size() >= 8 && java.util.Collections.max(lightIn) - java.util.Collections.min(lightIn) > 70,
+                        "The actual lightmap renders intermediate brightness throughout fade in");
+                check(lightOut.size() >= 8 && java.util.Collections.max(lightOut) - java.util.Collections.min(lightOut) > 70,
+                        "The actual lightmap renders intermediate brightness throughout fade out");
                 check(!player.getData(Content.CAT_FORM) && player.getDimensions(Pose.CROUCHING).height() > 1.4F, "Returning to human restores human crouching dimensions");
                 Nekogenix.LOGGER.info("Nekogenix feline ability client smoke passed: crouching under a low ceiling smooth rendered vision fade recovery hungry jump rejection and creative jump");
                 mc.stop();
@@ -111,8 +115,20 @@ public final class FelineAbilitySmokeTest {
         }
 
         @SubscribeEvent public static void frame(net.neoforged.neoforge.client.event.RenderFrameEvent.Post event) throws java.io.IOException {
-            if (!ENABLED || capture == null) return;
+            if (!ENABLED) return;
             var mc = net.minecraft.client.Minecraft.getInstance();
+            if (mc.player != null) {
+                int age = mc.player.tickCount;
+                if (age >= 190 && age <= 215 || age >= 255 && age <= 280) {
+                    try {
+                        var field = net.minecraft.client.renderer.LightTexture.class.getDeclaredField("lightPixels");
+                        field.setAccessible(true);
+                        var pixels = (com.mojang.blaze3d.platform.NativeImage)field.get(mc.gameRenderer.lightTexture());
+                        (age < 240 ? lightIn : lightOut).add(pixels.getPixelRGBA(0, 0) & 255);
+                    } catch (ReflectiveOperationException exception) { throw new IllegalStateException(exception); }
+                }
+            }
+            if (capture == null) return;
             try (var image = net.minecraft.client.Screenshot.takeScreenshot(mc.getMainRenderTarget())) {
                 var directory = mc.gameDirectory.toPath().resolve("screenshots");
                 java.nio.file.Files.createDirectories(directory);

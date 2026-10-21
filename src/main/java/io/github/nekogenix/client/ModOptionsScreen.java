@@ -18,6 +18,8 @@ public final class ModOptionsScreen extends OptionsSubScreen {
     protected void addOptions() {
         list.addBig(ClientOptions.voiceVolume());
         list.addBig(ClientOptions.cameraHeight());
+        list.addBig(ClientOptions.doubleJump());
+        list.addBig(ClientOptions.felineVision());
         list.addSmall(List.of(Button.builder(Component.translatable("skins.nekogenix.title"),
                 button -> minecraft.setScreen(new CatSkinScreen(this))).width(310).build()));
     }

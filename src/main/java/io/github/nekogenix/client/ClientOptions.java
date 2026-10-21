@@ -9,6 +9,23 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundSource;
 
 final class ClientOptions {
+    static OptionInstance<Boolean> felineVision() {
+        return OptionInstance.createBoolean("options.nekogenix.feline_vision", OptionInstance.noTooltip(),
+                (caption, automatic) -> Component.translatable(
+                        "options.nekogenix.feline_vision." + (automatic ? "automatic" : "manual")),
+                ClientConfig.AUTOMATIC_FELINE_VISION.get(), value -> {
+                    ClientConfig.AUTOMATIC_FELINE_VISION.set(value);
+                    ClientConfig.SPEC.save();
+                });
+    }
+
+    static OptionInstance<Boolean> doubleJump() {
+        return OptionInstance.createBoolean("options.nekogenix.double_jump", ClientConfig.NEKO_DOUBLE_JUMP.get(), value -> {
+            ClientConfig.NEKO_DOUBLE_JUMP.set(value);
+            ClientConfig.SPEC.save();
+        });
+    }
+
     static OptionInstance<Double> voiceVolume() {
         return new OptionInstance<>("options.nekogenix.neko_voice", OptionInstance.noTooltip(),
                 (caption, value) -> value == 0 ? Options.genericValueLabel(caption, CommonComponents.OPTION_OFF)

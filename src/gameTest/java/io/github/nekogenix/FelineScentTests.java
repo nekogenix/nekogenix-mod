@@ -15,18 +15,18 @@ public final class FelineScentTests {
         var focus = new FelineScent.Focus();
         for (int i = 0; i < 150; i++) focus.tick(false, true);
         helper.assertFalse(focus.visible(), "Neko and human players cannot use feline scent");
-        for (int i = 0; i < 99; i++) helper.assertFalse(focus.tick(true, true) || focus.visible(), "Nothing appears before five continuous seconds");
+        for (int i = 0; i < 59; i++) helper.assertFalse(focus.tick(true, true) || focus.visible(), "Nothing appears before three continuous seconds");
         focus.tick(true, false);
-        for (int i = 0; i < 99; i++) focus.tick(true, true);
+        for (int i = 0; i < 59; i++) focus.tick(true, true);
         helper.assertFalse(focus.visible(), "Interrupting a pending hold restarts the delay");
-        helper.assertTrue(focus.tick(true, true), "The hundredth held tick activates scent exactly once");
+        helper.assertTrue(focus.tick(true, true), "The sixtieth crouching tick activates scent exactly once");
         for (int i = 0; i < 19; i++) helper.assertFalse(focus.tick(true, true), "Fading in never repeats the activation sound");
         helper.assertTrue(focus.opacity(1) == 1, "The outline reaches full brightness");
         for (int i = 0; i < 10; i++) focus.tick(true, false);
         helper.assertTrue(Math.abs(focus.opacity(1) - .5F) < .001, "Release fades out rather than clearing immediately");
         float halfway = focus.opacity(1);
         helper.assertFalse(focus.tick(true, true), "Releasing briefly does not replay the activation");
-        helper.assertTrue(focus.opacity(0) == halfway && focus.opacity(1) > halfway, "Reentry continues smoothly from current strength without five seconds");
+        helper.assertTrue(focus.opacity(0) == halfway && focus.opacity(1) > halfway, "Reentry continues smoothly from current strength without another delay");
         for (int i = 0; i < 20; i++) focus.tick(true, false);
         helper.assertTrue(focus.opacity(1) == 0, "The fade reaches exactly zero");
         focus.tick(true, true);
@@ -35,6 +35,24 @@ public final class FelineScentTests {
         focus.tick(false, true);
         helper.assertFalse(focus.visible(), "Death or loss of cat form clears all focus immediately");
         helper.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void scentUsesTheCrouchingPoseInsteadOfTheSneakKey(GameTestHelper helper) {
+        var player = GameplayTests.player(helper);
+        CatTransformationTests.cat(player);
+        player.setShiftKeyDown(true);
+        player.setPose(net.minecraft.world.entity.Pose.STANDING);
+        helper.assertFalse(FelineScent.crouching(player), "Holding sneak without crouching cannot activate scent");
+        player.setShiftKeyDown(false);
+        player.setPose(net.minecraft.world.entity.Pose.CROUCHING);
+        helper.assertTrue(FelineScent.crouching(player), "An actual crouch works without a held sneak key");
+        player.getAbilities().flying = true;
+        helper.assertFalse(FelineScent.crouching(player), "Creative descent cannot count as crouching");
+        player.getAbilities().flying = false;
+        player.setPose(net.minecraft.world.entity.Pose.SWIMMING);
+        helper.assertFalse(FelineScent.crouching(player), "Crawling is distinct from crouching");
+        GameplayTests.remove(player); helper.succeed();
     }
 
     @GameTest(template = "empty")

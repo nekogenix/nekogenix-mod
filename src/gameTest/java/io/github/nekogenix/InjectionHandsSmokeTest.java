@@ -34,7 +34,7 @@ public final class InjectionHandsSmokeTest {
             player.removeAllEffects();
             TransformationHandler.refreshEffects(player);
             player.setItemInHand(InteractionHand.MAIN_HAND, age == 150 ? Items.SHIELD.getDefaultInstance()
-                    : age == 500 ? net.minecraft.world.item.ItemStack.EMPTY : Content.INJECTION.toStack());
+                    : age == 500 ? Items.FILLED_MAP.getDefaultInstance() : Content.INJECTION.toStack());
             player.setItemInHand(InteractionHand.OFF_HAND, age == 20 ? Items.SHIELD.getDefaultInstance()
                     : age == 500 ? Content.STABILIZING_INJECTION.toStack() : Content.INJECTION.toStack());
             player.inventoryMenu.broadcastChanges();
@@ -49,11 +49,12 @@ public final class InjectionHandsSmokeTest {
         if (age == 255) check(player.getOffhandItem().is(Content.INJECTION) && player.getMainHandItem().is(Items.SHIELD)
                 && player.getData(Content.NEKO).phase() == NekoState.Phase.HUMAN && player.getHealth() == 19,
                 "Right-click offhand cancellation preserves the opposite item");
-        if (age == 455) check(player.getMainHandItem().is(Content.USED_SYRINGE) && player.getOffhandItem().is(Content.USED_SYRINGE)
-                && player.getData(Content.NEKO).stageDuration() == 6000 && player.getHealth() == 18
+        if (age == 480) check(player.getMainHandItem().is(Content.USED_SYRINGE) && player.getOffhandItem().is(Content.USED_SYRINGE)
+                && player.getData(Content.NEKO).stageDuration() == 6000 && player.getHealth() < 18
+                && !player.hasEffect(net.minecraft.world.effect.MobEffects.POISON)
                 && player.getEffect(Content.SHOCK).getDuration() > 3450,
                 "Both real input buttons complete a paired dose with accelerated stages and three-minute sickness");
-        if (age == 665) check(player.getMainHandItem().isEmpty() && player.getOffhandItem().is(Content.USED_SYRINGE)
+        if (age == 665) check(player.getMainHandItem().is(Items.FILLED_MAP) && player.getOffhandItem().is(Content.USED_SYRINGE)
                 && player.getData(Content.NEKO).phase() == NekoState.Phase.NEKO && player.hasEffect(Content.CRYSTALLIZATION),
                 "The left-hand crystallizing injection stabilizes and applies its own effect");
         if (age == 755) Nekogenix.LOGGER.info("Nekogenix injection hands server smoke passed: right click either hand independent cancellation paired dose and left hand stabilization");
@@ -61,7 +62,10 @@ public final class InjectionHandsSmokeTest {
 
     @EventBusSubscriber(modid = Nekogenix.ID, value = net.neoforged.api.distmarker.Dist.CLIENT)
     public static final class Client {
-        private static boolean mainReturn, offReturn, mainShown, offHidden, offShown, mainHidden, dualMain, dualOff;
+        private static boolean mainReturn, offReturn, mainShown, offHidden, offShown, mainHidden, dualMain, dualOff, readyOff;
+        private static boolean lowering, raising, restored, mapLowering, mapRaising;
+        private static com.mojang.blaze3d.vertex.PoseStack.Pose framePose;
+        private static org.joml.Matrix4f frameBase;
         private static String capture;
 
         @SubscribeEvent(priority = net.neoforged.bus.api.EventPriority.LOWEST, receiveCanceled = true)
@@ -70,6 +74,28 @@ public final class InjectionHandsSmokeTest {
             if (!ENABLED || player == null) return;
             int age = player.tickCount;
             boolean main = event.getHand() == InteractionHand.MAIN_HAND;
+            var current = event.getPoseStack().last();
+            if (main && age >= 50 && age <= 110) {
+                framePose = current;
+                frameBase = new org.joml.Matrix4f(current.pose());
+            } else if (!main && age >= 50 && age <= 110 && current == framePose && !event.isCanceled()) {
+                float distance = current.pose().getTranslation(new org.joml.Vector3f())
+                        .distance(frameBase.getTranslation(new org.joml.Vector3f()));
+                if (age < 65 && distance > .01F && distance < 1.99F) lowering = true;
+                if (age >= 85 && distance > .01F && distance < 1.99F) raising = true;
+                if (age >= 105 && distance < .0001F) restored = true;
+            }
+            if (main && !event.isCanceled() && event.getItemStack().is(Items.FILLED_MAP)) {
+                framePose = current;
+                frameBase = new org.joml.Matrix4f(current.pose());
+            } else if (!main && age >= 530 && age <= 640 && current == framePose && !event.isCanceled()) {
+                float distance = current.pose().getTranslation(new org.joml.Vector3f())
+                        .distance(frameBase.getTranslation(new org.joml.Vector3f()));
+                if (distance > .01F && distance < 1.99F) {
+                    if (age <= 540) mapLowering = true;
+                    if (age >= 610) mapRaising = true;
+                }
+            }
             if (age >= 65 && age <= 75) {
                 if (main && !event.isCanceled()) mainShown = true;
                 if (!main && event.isCanceled()) offHidden = true;
@@ -82,6 +108,12 @@ public final class InjectionHandsSmokeTest {
                 if (main) dualMain = true;
                 else dualOff = true;
             }
+            if (age >= 330 && age <= 338 && !main) {
+                check(InjectionHandler.active(player, InteractionHand.MAIN_HAND)
+                        && !InjectionHandler.active(player, InteractionHand.OFF_HAND) && !event.isCanceled(),
+                        "An idle second Neko Injection remains visible before its input is pressed");
+                readyOff = true;
+            }
         }
 
         @SubscribeEvent public static void tick(net.neoforged.neoforge.client.event.ClientTickEvent.Pre event) {
@@ -89,16 +121,28 @@ public final class InjectionHandsSmokeTest {
             var mc = net.minecraft.client.Minecraft.getInstance();
             if (mc.player == null || mc.level == null) return;
             int age = mc.player.tickCount;
+            if (age == 40) {
+                SyringeGeometryChecks.verify();
+                InjectionAnimationChecks.verify();
+            }
             mc.getToasts().clear();
             mc.options.fov().set(70);
             mc.options.screenEffectScale().set(0D);
             mc.player.setXRot(0);
             mc.player.xRotO = 0;
             mc.options.keyUse.setDown(age >= 50 && age < 85 || age >= 180 && age < 215
-                    || age >= 320 && age < 430 || age >= 530 && age < 640);
-            mc.options.keyAttack.setDown(age >= 320 && age < 430);
+                    || age >= 320 && age < 455 || age >= 530 && age < 640);
+            mc.options.keyAttack.setDown(age >= 340 && age < 455);
             mainReturn |= InjectionHandler.returning(mc.player, InteractionHand.MAIN_HAND).started() >= 0;
             offReturn |= InjectionHandler.returning(mc.player, InteractionHand.OFF_HAND).started() >= 0;
+            if (age == 54) capture = "injection-main-early.png";
+            if (age == 88) capture = "injection-opposite-hand-return.png";
+            if (age == 184) capture = "injection-off-early.png";
+            if (age == 324) capture = "injection-dual-early.png";
+            if (age == 335) capture = "injection-second-ready.png";
+            if (age == 344) capture = "injection-second-starting.png";
+            if (age == 534) capture = "injection-crystallizing-early.png";
+            if (age == 618) capture = "injection-map-return.png";
             if (age == 70) capture = "injection-main-hand.png";
             if (age == 200) capture = "injection-off-hand.png";
             if (age == 310) capture = "injection-mirror-idle.png";
@@ -132,14 +176,16 @@ public final class InjectionHandsSmokeTest {
                 check(property.call(main, mc.level, mc.player, 0) > 0 && property.call(off, mc.level, mc.player, 0) > 0,
                         "Both syringes animate their own liquid");
             }
-            if (age == 406) capture = "injection-mirror-return.png";
+            if (age == 428) capture = "injection-mirror-return.png";
             if (age == 520) capture = "crystallizing-mirror-idle.png";
             if (age == 575) capture = "injection-crystallizing-left.png";
             if (age == 616) capture = "crystallizing-mirror-return.png";
             if (age == 730) capture = "crystallization-approved-overlay.png";
             if (age == 780) {
-                check(mainReturn && offReturn && mainShown && offShown && mainHidden && offHidden && dualMain && dualOff,
-                        "Main and offhand returns render with the opposite hand hidden, while both paired hands remain visible");
+                check(mainReturn && offReturn && mainShown && offShown && mainHidden && offHidden && dualMain && dualOff && readyOff,
+                        "Single injections hide the other hand while a second Neko Injection stays available before and during dual injection");
+                check(lowering && raising && restored && mapLowering && mapRaising,
+                        "Opposite items lower and return through visible intermediate poses on cancellation and completion including maps");
                 check(mc.player.getOffhandItem().is(Content.USED_SYRINGE) && mc.player.hasEffect(Content.CRYSTALLIZATION),
                         "Offhand stabilization reaches the real client");
                 Nekogenix.LOGGER.info("Nekogenix injection hands client smoke passed: right click left hand mirrored transforms dual textures hand visibility independent returns approved overlay");

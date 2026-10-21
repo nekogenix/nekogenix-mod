@@ -5,6 +5,13 @@ license="PolyForm Noncommercial 1.0.0"
 [[mixins]]
 config="nekogenix.mixins.json"
 
+[[mixins]]
+config="nekogenix.emi.mixins.json"
+requiredMods=["emi"]
+
+["badoptimizations:cache_hooks"]
+lightmap="io.github.nekogenix.integration.badoptimizations.FelineLightmapHook"
+
 [[mods]]
 modId="nekogenix"
 version="${mod_version}"
@@ -48,3 +55,10 @@ type="optional"
 versionRange="[16.0.799,17)"
 ordering="AFTER"
 side="CLIENT"
+
+[[dependencies.nekogenix]]
+modId="sable"
+type="optional"
+versionRange="[2.0.5,)"
+ordering="AFTER"
+side="BOTH"

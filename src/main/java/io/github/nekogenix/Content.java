@@ -82,7 +82,7 @@ public final class Content {
     public static final DeferredHolder<MenuType<?>, MenuType<PneumaticStandMenu>> PNEUMATIC_MENU = MENUS.register("pneumatic_stand",
             () -> new MenuType<>(PneumaticStandMenu::new, FeatureFlags.VANILLA_SET));
 
-    public static final DeferredHolder<MobEffect, MobEffect> SHOCK = effect("injection_shock", MobEffectCategory.HARMFUL, 0xB769A2);
+    public static final DeferredHolder<MobEffect, MobEffect> SHOCK = EFFECTS.register("injection_shock", io.github.nekogenix.gameplay.NekoSicknessEffect::new);
     public static final DeferredHolder<MobEffect, MobEffect> TRANSFORMING = effect("neko_transformation", MobEffectCategory.NEUTRAL, 0xD4A6DE);
     public static final DeferredHolder<MobEffect, MobEffect> CAT_TRANSFORMING = effect("cat_transformation", MobEffectCategory.NEUTRAL, 0xA98AD4);
     public static final DeferredHolder<MobEffect, MobEffect> AGILITY = effect("feline_agility", MobEffectCategory.BENEFICIAL, 0xA9D6D1);
@@ -116,13 +116,16 @@ public final class Content {
             () -> AttachmentType.builder(() -> false).sync(ByteBufCodecs.BOOL).build());
 
     public static final DeferredHolder<AttachmentType<?>, AttachmentType<io.github.nekogenix.gameplay.CameraProjectiles.View>> CAMERA_VIEW = ATTACHMENTS.register("camera_view",
-            () -> AttachmentType.builder(io.github.nekogenix.gameplay.CameraProjectiles.View::new).build());
+            () -> AttachmentType.builder(io.github.nekogenix.gameplay.CameraProjectiles.View::new)
+                    .sync((holder, viewer) -> holder != viewer, io.github.nekogenix.gameplay.CameraProjectiles.View.STREAM_CODEC).build());
     public static final DeferredHolder<AttachmentType<?>, AttachmentType<io.github.nekogenix.gameplay.CatForm.Session>> CAT_SIZE = ATTACHMENTS.register("cat_size",
             () -> AttachmentType.builder(io.github.nekogenix.gameplay.CatForm.Session::new).build());
     public static final DeferredHolder<AttachmentType<?>, AttachmentType<Boolean>> FELINE_DIET = ATTACHMENTS.register("feline_diet",
             () -> AttachmentType.builder(() -> false).sync(ByteBufCodecs.BOOL).build());
     public static final DeferredHolder<AttachmentType<?>, AttachmentType<FelineJump.Session>> FELINE_JUMP = ATTACHMENTS.register("feline_jump",
             () -> AttachmentType.builder(FelineJump.Session::new).build());
+    public static final DeferredHolder<AttachmentType<?>, AttachmentType<io.github.nekogenix.gameplay.FelineVisionControl.Session>> VISION_CONTROL = ATTACHMENTS.register("feline_vision_control",
+            () -> AttachmentType.builder(io.github.nekogenix.gameplay.FelineVisionControl.Session::new).build());
     public static final DeferredHolder<AttachmentType<?>, AttachmentType<BreedingState>> BREEDING = ATTACHMENTS.register("neko_breeding",
             () -> AttachmentType.serializable(BreedingState::new).build());
     public static final DeferredHolder<AttachmentType<?>, AttachmentType<Integer>> FIRST_OCEAN_SOUND = ATTACHMENTS.register("first_ocean_sound",

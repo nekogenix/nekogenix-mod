@@ -85,8 +85,8 @@ public final class InjectionHandsTests {
             helper.assertTrue(player.getEffect(Content.SHOCK).getDuration() > 3550
                     && player.getEffect(net.minecraft.world.effect.MobEffects.CONFUSION).getDuration() > 3550,
                     "Both sickness and its hidden nausea extend to three minutes when the second dose completes");
-            helper.assertTrue(player.getHealth() == 18 && InjectionHandler.started(player, InteractionHand.MAIN_HAND) == -1
-                    && InjectionHandler.started(player, InteractionHand.OFF_HAND) == -1, "Completion adds no damage and clears both animations");
+            helper.assertTrue(player.getHealth() == 17 && InjectionHandler.started(player, InteractionHand.MAIN_HAND) == -1
+                    && InjectionHandler.started(player, InteractionHand.OFF_HAND) == -1, "Completion clears both animations and starts the built in sickness poison");
             GameplayTests.remove(player);
             helper.succeed();
         });

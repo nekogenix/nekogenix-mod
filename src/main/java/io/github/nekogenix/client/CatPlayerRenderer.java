@@ -106,8 +106,10 @@ public final class CatPlayerRenderer extends CatRenderer {
     protected void setupRotations(Cat cat, PoseStack pose, float age, float yaw, float partial, float scale) {
         PlayerCat proxy = (PlayerCat) cat;
         super.setupRotations(cat, pose, age, yaw + proxy.bodyYaw(partial), partial, scale);
+        if (cat.isInSittingPose()) return;
         pose.translate(0, .35, 0);
-        pose.mulPose(Axis.XP.rotationDegrees(-proxy.bodyPitch(partial)));
+        float horizontal = io.github.nekogenix.gameplay.CameraPosture.upright(proxy.player) ? proxy.horizontal(partial) * 90 : 0;
+        pose.mulPose(Axis.XP.rotationDegrees(-horizontal - proxy.bodyPitch(partial)));
         pose.mulPose(Axis.ZP.rotationDegrees(proxy.bodyRoll(partial)));
         pose.translate(0, -.35, 0);
     }
@@ -153,7 +155,7 @@ public final class CatPlayerRenderer extends CatRenderer {
         cat.attackAnim = player.attackAnim;
         cat.oAttackAnim = player.oAttackAnim;
         cat.setInvisible(player.isInvisible());
-        cat.setSprinting(player.isSprinting());
+        cat.setSprinting(player.isSprinting() && !cat.isInSittingPose());
         cat.setGlowingTag(player.isCurrentlyGlowing());
         cat.setItemSlot(EquipmentSlot.MAINHAND, player.getMainHandItem());
         cat.setItemSlot(EquipmentSlot.OFFHAND, player.getOffhandItem());
@@ -171,7 +173,7 @@ public final class CatPlayerRenderer extends CatRenderer {
                 event.getPoseStack(), event.getMultiBufferSource(), event.getPackedLight());
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = net.neoforged.bus.api.EventPriority.LOWEST)
     public static void hand(RenderHandEvent event) {
         var mc = Minecraft.getInstance();
         var player = mc.player;
@@ -179,26 +181,19 @@ public final class CatPlayerRenderer extends CatRenderer {
         ItemStack stack = event.getItemStack();
         if (stack.isEmpty() || stack.getItem() instanceof MapItem || player.isInvisible()) return;
         HumanoidArm arm = event.getHand() == InteractionHand.MAIN_HAND ? player.getMainArm() : player.getMainArm().getOpposite();
-        float side = arm == HumanoidArm.RIGHT ? 1 : -1;
         PlayerCat cat = proxy(player);
         PoseStack pose = event.getPoseStack();
         pose.pushPose();
-        float swing = Mth.sin(Mth.sqrt(event.getSwingProgress()) * Mth.PI);
-        pose.translate(side * (.56 - swing * .16), -.52 - event.getEquipProgress() * .6 + swing * .12, -.72);
-        if (player.isUsingItem() && player.getUsedItemHand() == event.getHand()) {
-            switch (stack.getUseAnimation()) {
-                case EAT, DRINK -> pose.translate(side * -.18, .16, .12);
-                case BLOCK -> pose.translate(side * -.12, .08, .05);
-                case BOW, CROSSBOW, SPEAR -> pose.translate(side * -.22, .08, .06);
-                default -> {}
-            }
-        }
-        pose.mulPose(Axis.ZP.rotationDegrees(-side * swing * 20));
+        CatHandPose.apply(event, player, arm);
         ModelPart paw = renderer.paw(arm);
         paw.setPos(0, -10, -.5F);
         paw.render(pose, event.getMultiBufferSource().getBuffer(RenderType.entityCutout(renderer.getTextureLocation(cat))),
                 event.getPackedLight(), OverlayTexture.NO_OVERLAY);
+        renderer.items.renderItem(player, stack,
+                arm == HumanoidArm.RIGHT ? ItemDisplayContext.FIRST_PERSON_RIGHT_HAND : ItemDisplayContext.FIRST_PERSON_LEFT_HAND,
+                arm == HumanoidArm.LEFT, pose, event.getMultiBufferSource(), event.getPackedLight());
         pose.popPose();
+        event.setCanceled(true);
     }
 
     @SubscribeEvent
@@ -232,7 +227,8 @@ public final class CatPlayerRenderer extends CatRenderer {
 
     private static final class PawModel extends CatModel<Cat> {
         private final ModelPart ears;
-        private PawModel(ModelPart root) { super(root); ears = head.getChild("ears"); }
+        private final CatBodyPose posture;
+        private PawModel(ModelPart root) { super(root); ears = head.getChild("ears"); posture = new CatBodyPose(root); }
         private ModelPart paw(HumanoidArm arm) { return arm == HumanoidArm.LEFT ? leftFrontLeg : rightFrontLeg; }
 
         private static ModelPart createRoot() {
@@ -248,6 +244,7 @@ public final class CatPlayerRenderer extends CatRenderer {
 
         @Override
         public void prepareMobModel(Cat cat, float walk, float speed, float partial) {
+            head.resetPose(); body.resetPose();
             leftFrontLeg.resetPose(); rightFrontLeg.resetPose();
             leftHindLeg.resetPose(); rightHindLeg.resetPose();
             tail1.resetPose(); tail2.resetPose();
@@ -264,6 +261,11 @@ public final class CatPlayerRenderer extends CatRenderer {
             ears.visible = player.getItemBySlot(EquipmentSlot.HEAD).isEmpty();
             head.yRot = Mth.clamp(Mth.wrapDegrees(yaw - proxy.bodyYaw(partial)), -70, 70) * Mth.DEG_TO_RAD;
             head.xRot = Mth.clamp(pitch - proxy.bodyPitch(partial), -60, 60) * Mth.DEG_TO_RAD;
+            if (cat.isInSittingPose()) {
+                hold(player, HumanoidArm.RIGHT, partial);
+                hold(player, HumanoidArm.LEFT, partial);
+                return;
+            }
             float air = proxy.air(partial);
             float stride = walking ? Math.min(1, player.walkAnimation.speed(partial)) * .85F : 0;
             float phase = player.walkAnimation.position(partial) * (player.isSprinting() ? 1.45F : .9F);
@@ -287,14 +289,21 @@ public final class CatPlayerRenderer extends CatRenderer {
             leftFrontLeg.xRot += swim * .12F + proxy.stroke(partial, -1) * .5F;
             rightHindLeg.xRot += swim * .18F + proxy.stroke(partial, -1) * .35F;
             leftHindLeg.xRot += swim * .18F + proxy.stroke(partial, 1) * .35F;
+            boolean upright = io.github.nekogenix.gameplay.CameraPosture.upright(player);
+            if (upright) {
+                posture.upright(player.isCrouching());
+                head.xRot -= Mth.HALF_PI * proxy.horizontal(partial);
+            }
             tail(proxy, partial);
             hold(player, HumanoidArm.RIGHT, partial);
             hold(player, HumanoidArm.LEFT, partial);
+            if (upright) posture.attachUpright();
         }
 
         private void tail(PlayerCat cat, float partial) {
             float motion = cat.motion(partial);
-            tail1.xRot = Mth.lerp(motion, tail1.xRot, 1.15F + cat.vertical(partial) * .25F - cat.forward(partial) * .1F);
+            float horizontal = io.github.nekogenix.gameplay.CameraPosture.upright(cat.player) ? cat.horizontal(partial) : 0;
+            tail1.xRot = Mth.lerp(motion, tail1.xRot, Mth.lerp(horizontal, 1.15F, .15F) + cat.vertical(partial) * .25F - cat.forward(partial) * .1F);
             tail1.yRot = cat.sideways(partial) * .3F;
             tail1.zRot = -cat.sideways(partial) * .08F;
             var endpoint = new org.joml.Vector3f(0, 8, 0)
@@ -302,9 +311,10 @@ public final class CatPlayerRenderer extends CatRenderer {
             tail2.x = Mth.lerp(motion, tail2.x, tail1.x + endpoint.x);
             tail2.y = Mth.lerp(motion, tail2.y, tail1.y + endpoint.y);
             tail2.z = Mth.lerp(motion, tail2.z, tail1.z + endpoint.z);
-            tail2.xRot = Mth.lerp(motion, tail2.xRot, 1.65F + cat.tipVertical(partial) * .18F);
+            tail2.xRot = Mth.lerp(motion, tail2.xRot, Mth.lerp(horizontal, 1.65F, .2F) + cat.tipVertical(partial) * .18F);
             tail2.yRot = cat.tipSideways(partial) * .35F;
             tail2.zRot = -cat.tipSideways(partial) * .1F;
+            if (io.github.nekogenix.gameplay.CameraPosture.upright(cat.player)) posture.attachUprightTail();
         }
 
         private void hold(Player player, HumanoidArm arm, float partial) {
@@ -316,8 +326,10 @@ public final class CatPlayerRenderer extends CatRenderer {
             ModelPart paw = paw(arm);
             float side = arm == HumanoidArm.RIGHT ? -1 : 1;
             if (holding) {
-                paw.x += side * 1.2F;
-                paw.z -= 1.5F;
+                if (!io.github.nekogenix.gameplay.CameraPosture.upright(player)) {
+                    paw.x += side * 1.2F;
+                    paw.z -= 1.5F;
+                }
                 paw.xRot = paw.xRot * .25F - .65F;
                 paw.zRot += -side * .12F;
             }
@@ -339,12 +351,15 @@ public final class CatPlayerRenderer extends CatRenderer {
         private final Player player;
         private int poseTick = -1;
         private float dimensionsScale = Float.NaN;
+        private float dimensionsEye = Float.NaN;
+        private boolean dimensionsUpright;
         private float oldCrouch, crouch, oldAir, air;
         private float oldForward, forward, oldSideways, sideways;
         private float oldVertical, vertical, oldMotion, motion, oldSwim, swim, oldSpeed, speed;
         private float oldTipVertical, tipVertical, oldTipSideways, tipSideways;
         private float oldBodyYaw, bodyYaw, oldBodyPitch, bodyPitch, oldBodyRoll, bodyRoll;
         private float oldStrokePhase, strokePhase;
+        private float oldHorizontal, horizontal;
         private int fallingTicks;
         private PlayerCat(Player player) {
             super(EntityType.CAT, player.level());
@@ -357,8 +372,12 @@ public final class CatPlayerRenderer extends CatRenderer {
             if (poseTick == player.tickCount) return;
             int ticks = poseTick < 0 ? 1 : Mth.clamp(player.tickCount - poseTick, 1, 4);
             poseTick = player.tickCount;
-            if (dimensionsScale != player.getScale()) {
+            float nextEye = io.github.nekogenix.gameplay.CameraPosture.catEye(player) / player.getScale();
+            boolean upright = io.github.nekogenix.gameplay.CameraPosture.upright(player);
+            if (dimensionsScale != player.getScale() || dimensionsEye != nextEye || dimensionsUpright != upright) {
                 dimensionsScale = player.getScale();
+                dimensionsEye = nextEye;
+                dimensionsUpright = upright;
                 refreshDimensions();
             }
             oldCrouch = crouch; oldAir = air;
@@ -367,6 +386,7 @@ public final class CatPlayerRenderer extends CatRenderer {
             oldTipVertical = tipVertical; oldTipSideways = tipSideways;
             oldBodyYaw = bodyYaw; oldBodyPitch = bodyPitch; oldBodyRoll = bodyRoll;
             oldStrokePhase = strokePhase;
+            oldHorizontal = horizontal;
             crouch = Mth.lerp(1 - (float)Math.pow(.6, ticks), crouch, player.isCrouching() ? 1 : 0);
             boolean airborne = !player.onGround() && !player.isInWaterOrBubble() && !player.onClimbable() && !player.isPassenger();
             boolean flying = player.getAbilities().flying;
@@ -392,6 +412,7 @@ public final class CatPlayerRenderer extends CatRenderer {
             tipVertical = Mth.lerp(tailBlend, tipVertical, vertical);
             tipSideways = Mth.lerp(tailBlend, tipSideways, sideways);
             boolean aligning = player.isFallFlying() || swimming;
+            this.horizontal = Mth.lerp(blend, this.horizontal, aligning ? 1 : 0);
             double horizontal = motion.horizontalDistance();
             float targetYaw = aligning && horizontal > .015
                     ? Mth.wrapDegrees((float)Math.atan2(-motion.x, motion.z) * Mth.RAD_TO_DEG - player.yBodyRot) : 0;
@@ -404,6 +425,10 @@ public final class CatPlayerRenderer extends CatRenderer {
             bodyRoll = Mth.lerp(bodyBlend, bodyRoll, aligning ? Mth.clamp(-turn * .35F, -18, 18) : 0);
         }
         private float crouch(float partial) { return Mth.lerp(partial, oldCrouch, crouch); }
+        private float horizontal(float partial) { return Mth.lerp(partial, oldHorizontal, horizontal); }
+        @Override public net.minecraft.world.entity.EntityDimensions getDefaultDimensions(net.minecraft.world.entity.Pose pose) {
+            return player == null ? super.getDefaultDimensions(pose) : io.github.nekogenix.gameplay.CameraPosture.catDimensions(player, pose);
+        }
         private float air(float partial) { return Mth.lerp(partial, oldAir, air); }
         private float forward(float partial) { return Mth.lerp(partial, oldForward, forward); }
         private float sideways(float partial) { return Mth.lerp(partial, oldSideways, sideways); }
@@ -416,14 +441,18 @@ public final class CatPlayerRenderer extends CatRenderer {
         }
         private float tipVertical(float partial) { return Mth.lerp(partial, oldTipVertical, tipVertical); }
         private float tipSideways(float partial) { return Mth.lerp(partial, oldTipSideways, tipSideways); }
-        private float bodyYaw(float partial) { return Mth.rotLerp(partial, oldBodyYaw, bodyYaw); }
-        private float bodyPitch(float partial) { return Mth.lerp(partial, oldBodyPitch, bodyPitch); }
+        private float bodyYaw(float partial) { return isInSittingPose() ? 0 : Mth.rotLerp(partial, oldBodyYaw, bodyYaw); }
+        private float bodyPitch(float partial) { return isInSittingPose() ? 0 : Mth.lerp(partial, oldBodyPitch, bodyPitch); }
         private float bodyRoll(float partial) { return Mth.lerp(partial, oldBodyRoll, bodyRoll); }
         @Override public Component getDisplayName() { return player.getDisplayName(); }
         @Override public Component getName() { return player.getName(); }
         @Override public net.minecraft.world.scores.PlayerTeam getTeam() { return player.getTeam(); }
         @Override public boolean isInvisibleTo(Player viewer) { return player.isInvisibleTo(viewer); }
-        @Override public boolean isCrouching() { return player != null && player.isCrouching(); }
+        @Override public boolean isInSittingPose() {
+            return player != null && io.github.nekogenix.gameplay.CameraPosture.seated(player);
+        }
+        @Override public net.minecraft.world.entity.Entity getVehicle() { return player == null ? null : player.getVehicle(); }
+        @Override public boolean isCrouching() { return player != null && !isInSittingPose() && player.isCrouching(); }
         @Override public boolean isDiscrete() { return player != null && player.isDiscrete(); }
         @Override public HumanoidArm getMainArm() { return player.getMainArm(); }
         @Override public float getScale() { return player == null ? 1 : player.getScale(); }

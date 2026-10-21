@@ -111,7 +111,7 @@ public final class CameraHeightSmokeTest {
                 check(camera.getMessage().getString().endsWith("Human"), "Human endpoint label");
                 camera.mouseClicked(camera.getX() + 4, camera.getY() + 10, 0);
                 camera.mouseReleased(camera.getX() + 4, camera.getY() + 10, 0);
-                check(io.github.nekogenix.config.ClientConfig.CAMERA_HEIGHT.get() == 0 && camera.getMessage().getString().endsWith("Cat"), "A human can select Cat");
+                check(io.github.nekogenix.config.ClientConfig.CAMERA_HEIGHT.get() == 0 && camera.getMessage().getString().endsWith("Quadrupeds"), "A human can select the Quadrupeds endpoint");
                 capture = "camera-height-options.png";
             }
             if (age == 60) {

@@ -10,6 +10,10 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
 repositories {
     maven {
+        url = 'https://api.modrinth.com/maven/'
+        content { includeModule 'maven.modrinth', 'sable' }
+    }
+    maven {
         url = 'https://maven.blamejared.com/'
         content { includeGroup 'mezz.jei' }
     }
@@ -28,6 +32,7 @@ repositories {
 }
 
 dependencies {
+    compileOnly('maven.modrinth:sable:U678xqle') { transitive = false }
     compileOnly 'mezz.jei:jei-1.21.1-neoforge-api:19.69.0.456'
     compileOnly 'dev.emi:emi-neoforge:1.1.24+1.21.1:api'
     compileOnly 'me.shedaniel:RoughlyEnoughItems-api-neoforge:16.0.799'

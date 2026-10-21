@@ -1,7 +1,6 @@
 package io.github.nekogenix.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
 import io.github.nekogenix.Content;
 import io.github.nekogenix.Nekogenix;
 import io.github.nekogenix.gameplay.InjectionHandler;
@@ -136,15 +135,6 @@ public final class ClientEvents {
         ticks = 0;
     }
 
-    @SubscribeEvent(priority = net.neoforged.bus.api.EventPriority.HIGHEST)
-    public static void hand(net.neoforged.neoforge.client.event.RenderHandEvent event) {
-        var player = Minecraft.getInstance().player;
-        if (player == null) return;
-        boolean main = injecting(player, InteractionHand.MAIN_HAND);
-        boolean off = injecting(player, InteractionHand.OFF_HAND);
-        if ((main || off) && !(event.getHand() == InteractionHand.MAIN_HAND ? main : off)) event.setCanceled(true);
-    }
-
     @SubscribeEvent
     public static void camera(ViewportEvent.ComputeCameraAngles event) {
         var player = Minecraft.getInstance().player;
@@ -158,6 +148,17 @@ public final class ClientEvents {
 
     @EventBusSubscriber(modid = Nekogenix.ID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
     public static final class Registration {
+        @SubscribeEvent
+        public static void geometry(net.neoforged.neoforge.client.event.ModelEvent.RegisterGeometryLoaders event) {
+            event.register(Content.id("syringe"), SyringeGeometry.LOADER);
+        }
+
+        @SubscribeEvent
+        public static void keys(net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent event) {
+            event.register(AbilityControls.DOUBLE_JUMP);
+            event.register(AbilityControls.FELINE_VISION);
+        }
+
         @SubscribeEvent
         public static void setup(net.neoforged.fml.event.lifecycle.FMLClientSetupEvent event) {
             ModList.get().getModContainerById(Nekogenix.ID).orElseThrow().registerExtensionPoint(IConfigScreenFactory.class,
@@ -198,33 +199,7 @@ public final class ClientEvents {
                         ItemStack stack, float partial, float equip, float swing) {
                     InteractionHand hand = arm == player.getMainArm() ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
                     if (player.getItemInHand(hand) != stack) return false;
-                    float age = elapsed(player, hand, partial);
-                    if (age < 0 || age >= InjectionHandler.TOTAL_TICKS) return false;
-                    float side = arm == HumanoidArm.RIGHT ? 1 : -1;
-                    float approachAge = age;
-                    float retreat = age < InjectionHandler.FORWARD_TICKS ? 1
-                            : 1 - (age - InjectionHandler.FORWARD_TICKS) / InjectionHandler.RETURN_TICKS;
-                    float pressure = Mth.sin(age * .48F) * .001F;
-                    float tremor = Mth.cos(age * .48F) * .1F;
-                    var returning = InjectionHandler.returning(player, hand);
-                    if (returning.started() >= 0) {
-                        retreat = returning.remaining(player.level().getGameTime(), partial);
-                        approachAge = returning.progress();
-                        pressure *= retreat;
-                        tremor *= retreat;
-                    }
-                    float approach = Mth.clamp(approachAge / InjectionHandler.APPROACH_TICKS, 0, 1);
-                    approach = approach * approach * (3 - 2 * approach);
-                    float jab = Mth.clamp((approachAge - InjectionHandler.APPROACH_TICKS)
-                            / (InjectionHandler.NEEDLE_ENTRY_TICKS - InjectionHandler.APPROACH_TICKS), 0, 1);
-                    pressure *= 1 - jab;
-                    tremor *= 1 - jab;
-                    pose.translate(side * (.56F - .45F * approach * retreat), -.52F + (.45072432F * approach - .09F * jab) * retreat + pressure,
-                            -.72F - .069F * approach * retreat);
-                    pose.mulPose(Axis.YP.rotationDegrees(side * (45F + 45F * approach * retreat)));
-                    pose.mulPose(Axis.ZP.rotationDegrees(side * (145F * approach * retreat)));
-                    pose.mulPose(Axis.XP.rotationDegrees(25F * approach * retreat + tremor));
-                    return true;
+                    return InjectionAnimation.apply(pose, player, hand, arm, partial, equip, swing);
                 }
             }, Content.INJECTION.get(), Content.STABILIZING_INJECTION.get());
         }

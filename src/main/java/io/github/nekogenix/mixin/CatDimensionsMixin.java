@@ -14,6 +14,6 @@ public abstract class CatDimensionsMixin {
     @Inject(method = "getDefaultDimensions", at = @At("HEAD"), cancellable = true)
     private void nekogenix$catDimensions(Pose pose, CallbackInfoReturnable<EntityDimensions> callback) {
         Player player = (Player)(Object)this;
-        if (player.isAddedToLevel() && CatForm.active(player)) callback.setReturnValue(CatForm.dimensions(pose));
+        if (player.isAddedToLevel() && CatForm.active(player)) callback.setReturnValue(io.github.nekogenix.gameplay.CameraPosture.catDimensions(player, pose));
     }
 }

@@ -18,7 +18,13 @@ public final class CatForm {
     public static final float CROUCHING_EYE_HEIGHT = .35F;
 
     public static final class Session {
-        private boolean cat;
+        boolean cat, prone, upright, passage;
+        int passageUntil;
+        int passageJumpUntil;
+        double passageLedge;
+        float passageEye;
+        net.minecraft.world.phys.Vec3 passageDirection;
+        float eye = -1;
     }
 
     public static boolean active(Player player) {
@@ -39,18 +45,15 @@ public final class CatForm {
     public static void tick(PlayerTickEvent.Post event) {
         Player player = event.getEntity();
         if (player instanceof ServerPlayer serverPlayer) sync(serverPlayer);
-        boolean cat = active(player);
-        Session session = player.getData(Content.CAT_SIZE);
-        if (session.cat != cat) {
-            session.cat = cat;
-            player.refreshDimensions();
-        }
+        CameraPosture.refresh(player);
     }
 
     @SubscribeEvent
     public static void size(EntityEvent.Size event) {
         if (event.getEntity() instanceof Player player && player.isAddedToLevel() && active(player)) {
-            event.setNewSize(dimensions(event.getPose()).scale(player.getScale()));
+            event.setNewSize(CameraPosture.catDimensions(player, event.getPose()).scale(player.getScale()));
+        } else if (event.getEntity() instanceof Player player && player.isAddedToLevel() && CameraPosture.cameraProne(player)) {
+            event.setNewSize(CameraPosture.proneDimensions(player, event.getNewSize()));
         }
     }
 

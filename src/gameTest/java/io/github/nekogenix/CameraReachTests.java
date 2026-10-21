@@ -29,6 +29,8 @@ public final class CameraReachTests {
         helper.assertTrue(player.canInteractWithEntity(entity, 0), "Entity reach uses the same low viewpoint");
         helper.assertFalse(player.canInteractWithEntity(entity.move(.02, 0, 0), 0), "Entity reach remains bounded");
         player.tickCount += 41;
+        io.github.nekogenix.gameplay.CameraPosture.tick(new net.neoforged.neoforge.event.tick.PlayerTickEvent.Pre(player));
+        player.setPose(net.minecraft.world.entity.Pose.STANDING);
         helper.assertFalse(player.canInteractWithBlock(block, 0), "An expired sample restores vanilla eye validation");
         GameplayTests.remove(player); helper.succeed();
     }
