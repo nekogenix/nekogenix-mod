@@ -17,13 +17,14 @@ public final class InventoryAbilityLayoutChecks {
                 {640, 360}, {854, 480}, {960, 540}, {1280, 720}}) {
             int width = viewport[0], height = viewport[1];
             var panel = new ScreenRectangle((width - 176) / 2, (height - 166) / 2, 176, 166);
-            for (int count = 1; count <= 4; count++) for (int scenario = 0; scenario < 5; scenario++) {
+            for (int count = 1; count <= 4; count++) for (int scenario = 0; scenario < 6; scenario++) {
                 var occupied = new ArrayList<ScreenRectangle>();
                 occupied.add(panel);
                 if (scenario > 0) occupied.add(new ScreenRectangle((width - 200) / 2, panel.bottom() + 2, 200, 20));
                 if (scenario > 1) occupied.add(new ScreenRectangle((width - 180) / 2, height - 22, 180, 18));
                 if (scenario > 2) occupied.add(new ScreenRectangle(4, panel.bottom() + 2, 22, 20));
                 if (scenario > 3) occupied.add(new ScreenRectangle(0, height - 22, width, 22));
+                if (scenario == 5) occupied.add(new ScreenRectangle(panel.left() - 16, panel.bottom(), panel.width() + 32, 26));
                 var cells = InventoryAbilityLayout.arrange(width, height, panel, count, occupied);
                 check(cells.size() == count, "All abilities fit around inventory controls at " + width + "x" + height);
                 check(cells.getFirst().top() >= panel.top() + panel.height() / 2,
@@ -46,6 +47,10 @@ public final class InventoryAbilityLayoutChecks {
         occupied.add(new ScreenRectangle(screen.getGuiLeft(), screen.getGuiTop() - tabs,
                 screen.getXSize(), screen.getYSize() + tabs * 2));
         collect(screen.children(), occupied);
+        if (net.neoforged.fml.ModList.get().isLoaded("inventoryprofilesnext")) {
+            occupied.add(new ScreenRectangle(screen.getGuiLeft() - 16, screen.getGuiTop() + screen.getYSize() + 3,
+                    screen.getXSize() + 32, 20));
+        }
         var cells = InventoryAbilities.bounds(screen);
         check(cells.size() == 4, "All four acquired abilities remain visible at the actual GUI scale");
         if (net.neoforged.fml.ModList.get().isLoaded("emi") || net.neoforged.fml.ModList.get().isLoaded("jei")

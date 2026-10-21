@@ -42,6 +42,7 @@ public final class InventoryAbilitiesSmokeTest {
         public static void init(net.neoforged.neoforge.client.event.ScreenEvent.Init.Post event) {
             if (!ENABLED || !(event.getScreen() instanceof net.minecraft.client.gui.screens.inventory.InventoryScreen
                     || event.getScreen() instanceof net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen)) return;
+            if (net.neoforged.fml.ModList.get().isLoaded("inventoryprofilesnext")) return;
             var screen = (net.minecraft.client.gui.screens.inventory.AbstractContainerScreen<?>)event.getScreen();
             int tabs = screen instanceof net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen ? 28 : 0;
             done = net.minecraft.client.gui.components.Button.builder(net.minecraft.network.chat.CommonComponents.GUI_DONE, button -> {})

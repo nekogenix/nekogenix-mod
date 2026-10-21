@@ -17,6 +17,7 @@ final class InventoryAbilityLayout {
     private static final int GAP = 6;
     private static final int SPACING = 4;
     private static final int VIEWER_FOOTER = 22;
+    private static final int PROFILE_CONTROLS_HEIGHT = 26;
     private static Request cached;
     private static List<ScreenRectangle> cells = List.of();
 
@@ -29,6 +30,10 @@ final class InventoryAbilityLayout {
         var occupied = new ArrayList<ScreenRectangle>();
         occupied.add(panel);
         collect(screen.children(), occupied);
+        if (ModList.get().isLoaded("inventoryprofilesnext")) {
+            occupied.add(new ScreenRectangle(screen.getGuiLeft() - 16, screen.getGuiTop() + screen.getYSize(),
+                    screen.getXSize() + 32, PROFILE_CONTROLS_HEIGHT));
+        }
         if (ModList.get().isLoaded("emi") || ModList.get().isLoaded("jei") || ModList.get().isLoaded("roughlyenoughitems")) {
             occupied.add(new ScreenRectangle(0, screen.height - VIEWER_FOOTER, screen.width, VIEWER_FOOTER));
         }
