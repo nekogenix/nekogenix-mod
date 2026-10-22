@@ -1,4 +1,4 @@
-## Assets License
+# Assets License
 
 All Rights Reserved
 
@@ -10,7 +10,7 @@ This license applies to any files under the following directories:
 
 ---
 
-## Code License
+# Code License
 
  PolyForm Noncommercial License 1.0.0
 
