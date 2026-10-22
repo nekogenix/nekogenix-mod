@@ -1,4 +1,18 @@
-# PolyForm Noncommercial License 1.0.0
+## Assets License
+
+All Rights Reserved
+
+Copyright (c) Rudator and Wechirok
+
+This license applies to any files under the following directories:
+
+- ./src/main/resources/assets/
+
+---
+
+## Code License
+
+ PolyForm Noncommercial License 1.0.0
 
 <https://polyformproject.org/licenses/noncommercial/1.0.0>
 
