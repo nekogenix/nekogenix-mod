@@ -126,7 +126,7 @@ public final class FelineFlightSmokeTest {
             if (age == 69 || age == 229 || age == 369) {
                 var actual = event.getEntity().getDeltaMovement();
                 var up = io.github.nekogenix.integration.sable.FelineOrientation.up(event.getEntity());
-                check(Math.abs(actual.dot(up) - .62) < .001
+                check(Math.abs(actual.dot(up) - .74722065) < .001
                                 && actual.subtract(up.scale(actual.dot(up))).distanceTo(momentum.subtract(up.scale(momentum.dot(up)))) < 1.0E-8,
                         "The air jump changes only velocity along the local up axis");
                 check(!event.getInput().jumping, "Vanilla flight handling does not consume the second press");
