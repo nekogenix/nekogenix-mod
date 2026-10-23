@@ -18,6 +18,7 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 @EventBusSubscriber(modid = Nekogenix.ID)
 public final class FelineJump {
     private static final int MAX_AIR_TICKS = 20;
+    private static final double EXTRA_JUMP_STRENGTH = .12722065;
 
     public static final class Session {
         private boolean ready, used;
@@ -71,7 +72,8 @@ public final class FelineJump {
         session.ready = false;
         session.used = true;
         var velocity = player.getDeltaMovement();
-        double power = player.getAttributeValue(Attributes.JUMP_STRENGTH) + Math.max(.2F, player.getJumpBoostPower());
+        double power = player.getAttributeValue(Attributes.JUMP_STRENGTH)
+                + Math.max(.2F, player.getJumpBoostPower()) + EXTRA_JUMP_STRENGTH;
         var up = FelineOrientation.up(player);
         player.setDeltaMovement(velocity.add(up.scale(power - velocity.dot(up))));
         player.fallDistance = 0;

@@ -18,7 +18,7 @@ public final class CatForm {
     public static final float CROUCHING_EYE_HEIGHT = .35F;
 
     public static final class Session {
-        boolean cat, prone, upright, passage;
+        boolean cat, prone, upright, passage, passageCompressed, passageRaised;
         int passageUntil;
         int passageJumpUntil;
         double passageLedge;

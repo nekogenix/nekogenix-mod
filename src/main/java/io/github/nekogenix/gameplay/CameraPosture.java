@@ -6,6 +6,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -71,7 +72,8 @@ public final class CameraPosture {
         if (session.passage && (!ordinaryPose(player) || player.getAbilities().flying
                 || player.tickCount >= session.passageUntil && standingRoom(player))) session.passage = false;
         if (session.prone && player.getForcedPose() != Pose.SWIMMING) session.prone = false;
-        boolean wanted = !CatForm.active(player) && ordinaryPose(player) && (CameraGeometry.selected(preference) < 1 || session.passage);
+        boolean wanted = !CatForm.active(player) && ordinaryPose(player) && (CameraGeometry.selected(preference) < 1
+                || session.passage || session.passageCompressed && passageJumpPending(player));
         if (wanted && player.getForcedPose() == null && player.level().noCollision(player,
                 EntityDimensions.scalable(.6F, .6F).scale(player.getScale()).makeBoundingBox(player.position()).deflate(1.0E-7))) {
             session.prone = true;
@@ -84,6 +86,9 @@ public final class CameraPosture {
                 player.setPose(player.isShiftKeyDown() ? Pose.CROUCHING : Pose.STANDING);
             }
         }
+        if (session.prone && player.getForcedPose() == Pose.SWIMMING && !player.hasPose(Pose.SWIMMING)) {
+            player.setPose(Pose.SWIMMING);
+        }
     }
 
     public static boolean passage(Player player) {
@@ -91,24 +96,32 @@ public final class CameraPosture {
     }
 
     public static boolean preparePassageJump(Player player, Vec3 direction) {
+        return preparePassageJump(player, direction, true);
+    }
+
+    public static boolean preparePassageJump(Player player, Vec3 direction, boolean jumping) {
         if (direction.equals(Vec3.ZERO)) { cancelPassageJump(player); return false; }
         if (!Double.isFinite(direction.x) || !Double.isFinite(direction.z) || direction.y != 0
                 || direction.lengthSqr() < .0001 || direction.lengthSqr() > 1.001
                 || !ordinaryPose(player) || player.getAbilities().flying || !player.onGround()
-                || player.getForcedPose() != null || player.getBbHeight() <= player.getScale() || passage(player)) return false;
+                || player.getForcedPose() != null && !(player.getData(Content.CAT_SIZE).prone && player.getForcedPose() == Pose.SWIMMING)
+                || player.getBbHeight() <= player.getScale() || passage(player)) return false;
         var offset = direction.normalize().scale(.18 * player.getScale());
         var facing = Vec3.directionFromRotation(0, player.getYRot());
         if (offset.dot(facing) <= .001) return false;
+        if (passageFits(player, player.position(), offset)) {
+            if (!player.isShiftKeyDown()) return false;
+            preparePassage(player, direction, player.getY());
+            return true;
+        }
+        if (!jumping) return false;
         var reach = player.getBoundingBox().expandTowards(offset).deflate(1.0E-7);
         for (var shape : player.level().getBlockCollisions(player, reach)) for (var box : shape.toAabbs()) {
             double rise = box.maxY - player.getY();
             if (!box.intersects(reach) || rise < .25 || rise > 1.25) continue;
             var feet = player.position().add(0, rise, 0);
             if (!passageFits(player, feet, offset)) continue;
-            var session = player.getData(Content.CAT_SIZE);
-            session.passageJumpUntil = player.tickCount + 12;
-            session.passageLedge = box.maxY;
-            session.passageDirection = direction.normalize();
+            preparePassage(player, direction, box.maxY);
             return true;
         }
         return false;
@@ -118,8 +131,42 @@ public final class CameraPosture {
         return player.getData(Content.CAT_SIZE).passageDirection != null;
     }
 
+    public static boolean passageNeedsJump(Player player) {
+        return passageJumpPending(player) && player.getData(Content.CAT_SIZE).passageRaised;
+    }
+
     public static void cancelPassageJump(Player player) {
-        player.getData(Content.CAT_SIZE).passageDirection = null;
+        var session = player.getData(Content.CAT_SIZE);
+        boolean compressed = session.passageCompressed;
+        session.passageDirection = null;
+        session.passageCompressed = false;
+        session.passageRaised = false;
+        if (compressed) {
+            var view = player.getData(Content.CAMERA_VIEW);
+            accept(player, view.bodyEye < 0 ? player.getEyeHeight() : view.bodyEye, view.preference);
+        }
+    }
+
+    private static void preparePassage(Player player, Vec3 direction, double ledge) {
+        var session = player.getData(Content.CAT_SIZE);
+        session.passageJumpUntil = player.tickCount + 12;
+        session.passageLedge = ledge;
+        session.passageDirection = direction.normalize();
+        session.passageRaised = ledge > player.getY() + .001;
+        double required = UPRIGHT_HEIGHT * player.getScale() + ledge - player.getY();
+        session.passageCompressed = clearance(player, player.position(), required) < required - .001;
+        if (session.passageCompressed) {
+            var view = player.getData(Content.CAMERA_VIEW);
+            accept(player, view.bodyEye < 0 ? player.getEyeHeight() : view.bodyEye, view.preference);
+        }
+    }
+
+    private static float passageJumpEye(Player player) {
+        if (CatForm.active(player)) return CatForm.STANDING_EYE_HEIGHT * player.getScale();
+        double rise = player.onGround() ? player.getAttributeValue(Attributes.JUMP_STRENGTH) + player.getJumpBoostPower()
+                : Math.max(0, player.getDeltaMovement().y);
+        return (float)Math.max(.08, clearance(player, player.position(), UPRIGHT_HEIGHT * player.getScale())
+                - rise - .2 * player.getScale());
     }
 
     private static boolean passageFits(Player player, Vec3 feet, Vec3 offset) {
@@ -134,16 +181,23 @@ public final class CameraPosture {
         var session = player.getData(Content.CAT_SIZE);
         if (session.passageDirection == null) return false;
         if (player.tickCount > session.passageJumpUntil || !ordinaryPose(player) || player.getAbilities().flying
-                || player.getForcedPose() != null || passage(player)) { cancelPassageJump(player); return false; }
-        if (player.getY() < session.passageLedge - .001 || player.onGround()
+                || player.getForcedPose() != null && !(session.prone && player.getForcedPose() == Pose.SWIMMING)
+                || passage(player)) { cancelPassageJump(player); return false; }
+        if (session.passageCompressed) {
+            var view = player.getData(Content.CAMERA_VIEW);
+            accept(player, view.bodyEye < 0 ? player.getEyeHeight() : view.bodyEye, view.preference);
+        }
+        if (player.getY() < session.passageLedge - .001
+                || !session.passageRaised && !player.isShiftKeyDown()
                 || !passageFits(player, player.position(), session.passageDirection.scale(.18 * player.getScale()))) return false;
-        session.passageEye = (float)Math.max(.08, clearance(player,
+        float eye = (float)Math.max(.08, clearance(player,
                 player.position().add(session.passageDirection.scale(.18 * player.getScale())), UPRIGHT_HEIGHT * player.getScale())
                 - (CatForm.active(player) ? .24F : .18F) * player.getScale());
-        cancelPassageJump(player);
+        var view = player.getData(Content.CAMERA_VIEW);
+        session.passageEye = eye;
         session.passage = true;
         session.passageUntil = player.tickCount + 10;
-        var view = player.getData(Content.CAMERA_VIEW);
+        cancelPassageJump(player);
         view.tick = player.tickCount;
         accept(player, view.bodyEye < 0 ? player.getEyeHeight() : view.bodyEye, view.preference);
         return true;
@@ -172,6 +226,8 @@ public final class CameraPosture {
 
     public static EntityDimensions proneDimensions(Player player, EntityDimensions vanilla) {
         float eye = player.getData(Content.CAMERA_VIEW).bodyEye;
+        if (passage(player)) eye = eye < 0 ? player.getData(Content.CAT_SIZE).passageEye
+                : Math.min(eye, player.getData(Content.CAT_SIZE).passageEye);
         if (eye < 0) return vanilla;
         return vanilla.scale(1, Math.max(vanilla.height(), eye + .18F * player.getScale()) / vanilla.height()).withEyeHeight(eye);
     }
@@ -181,6 +237,9 @@ public final class CameraPosture {
         var view = player.getData(Content.CAMERA_VIEW);
         boolean oldUpright = view.upright, oldProne = view.prone;
         float approved = height;
+        if (player.getData(Content.CAT_SIZE).passageCompressed && passageJumpPending(player)) {
+            approved = Math.min(approved, passageJumpEye(player));
+        }
         if (CatForm.active(player)) {
             if (seated(player)) approved = .595F * player.getScale();
             else if (!ordinaryPose(player)) approved = Math.min(approved, CatForm.STANDING_EYE_HEIGHT * player.getScale());

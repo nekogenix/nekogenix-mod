@@ -130,7 +130,8 @@ public final class CameraHeight {
             height = CameraGeometry.approach(height, target, seconds);
         }
         height = Math.min(height, clearance);
-        height = CameraPosture.accept(player, (float)height, ClientConfig.cameraHeight());
+        float bodyEye = CameraPosture.accept(player, (float)height, ClientConfig.cameraHeight());
+        if (!CameraPosture.passage(player) || CatForm.active(player)) height = bodyEye;
         return feet + height;
     }
 

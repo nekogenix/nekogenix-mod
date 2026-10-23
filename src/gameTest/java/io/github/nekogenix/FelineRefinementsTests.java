@@ -104,7 +104,7 @@ public final class FelineRefinementsTests {
         player.setDeltaMovement(.73, -.2, -.41);
         player.hurtMarked = false;
         helper.assertTrue(FelineJump.jump(player), "A grounded jump unlocks one air jump");
-        helper.assertTrue(Math.abs(player.getDeltaMovement().y - .62) < .001, "Second jump has Jump Boost II strength");
+        helper.assertTrue(Math.abs(player.getDeltaMovement().y - .74722065) < .001, "Second jump uses the increased launch strength");
         helper.assertTrue(player.getDeltaMovement().x == .73 && player.getDeltaMovement().z == -.41, "Double jumping preserves both horizontal velocity components");
         helper.assertFalse(player.hurtMarked, "A predicted jump does not overwrite the client's momentum with a server motion packet");
         helper.assertTrue(FelineJump.canStartFlight(player), "Flight becomes available after the second jump");
@@ -127,6 +127,41 @@ public final class FelineRefinementsTests {
         helper.assertFalse(FelineJump.jump(player), "Losing agility rejects pending air jumps");
         GameplayTests.remove(player);
         helper.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void airJumpAddsOneBlockOfHeight(GameTestHelper helper) {
+        for (boolean cat : new boolean[] {false, true}) {
+            var player = GameplayTests.player(helper);
+            if (cat) CatTransformationTests.cat(player);
+            else TransformationTests.setState(player, 4);
+            player.setNoGravity(false);
+            var start = helper.absolutePos(new BlockPos(2, 40, 2)).getCenter();
+            player.setPos(start);
+            player.setOnGround(false);
+            player.setDeltaMovement(0, .62, 0);
+            double previousHeight = jumpApex(player);
+            player.setPos(start);
+            player.setOnGround(true);
+            player.jumpFromGround();
+            player.setOnGround(false);
+            helper.assertTrue(FelineJump.jump(player), "An eligible player can activate the higher air jump");
+            double height = jumpApex(player);
+            helper.assertTrue(Math.abs(height - previousHeight - 1) < .001,
+                    "The air jump gains exactly one block with vanilla movement physics in both feline forms");
+            GameplayTests.remove(player);
+        }
+        helper.succeed();
+    }
+
+    private static double jumpApex(ServerPlayer player) {
+        double start = player.getY(), highest = start;
+        for (int tick = 0; tick < 40; tick++) {
+            player.travel(net.minecraft.world.phys.Vec3.ZERO);
+            highest = Math.max(highest, player.getY());
+            if (player.getDeltaMovement().y <= 0) return highest - start;
+        }
+        throw new IllegalStateException("Air jump did not reach its apex");
     }
 
     @GameTest(template = "empty")
