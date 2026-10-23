@@ -106,7 +106,7 @@ public final class CatPlayerRenderer extends CatRenderer {
     protected void setupRotations(Cat cat, PoseStack pose, float age, float yaw, float partial, float scale) {
         PlayerCat proxy = (PlayerCat) cat;
         super.setupRotations(cat, pose, age, yaw + proxy.bodyYaw(partial), partial, scale);
-        if (cat.isInSittingPose()) return;
+        if (proxy.player.isSleeping() || cat.isInSittingPose()) return;
         pose.translate(0, .35, 0);
         float horizontal = io.github.nekogenix.gameplay.CameraPosture.upright(proxy.player) ? proxy.horizontal(partial) * 90 : 0;
         pose.mulPose(Axis.XP.rotationDegrees(-horizontal - proxy.bodyPitch(partial)));
@@ -259,6 +259,7 @@ public final class CatPlayerRenderer extends CatRenderer {
             boolean walking = player.onGround() && !player.isInWaterOrBubble();
             super.setupAnim(cat, player.walkAnimation.position(partial), walking ? player.walkAnimation.speed(partial) : 0, age, yaw, pitch);
             ears.visible = player.getItemBySlot(EquipmentSlot.HEAD).isEmpty();
+            if (player.isSleeping()) return;
             head.yRot = Mth.clamp(Mth.wrapDegrees(yaw - proxy.bodyYaw(partial)), -70, 70) * Mth.DEG_TO_RAD;
             head.xRot = Mth.clamp(pitch - proxy.bodyPitch(partial), -60, 60) * Mth.DEG_TO_RAD;
             if (cat.isInSittingPose()) {
@@ -360,6 +361,7 @@ public final class CatPlayerRenderer extends CatRenderer {
         private float oldBodyYaw, bodyYaw, oldBodyPitch, bodyPitch, oldBodyRoll, bodyRoll;
         private float oldStrokePhase, strokePhase;
         private float oldHorizontal, horizontal;
+        private float oldLieDown, lieDown, oldLieDownTail, lieDownTail;
         private int fallingTicks;
         private PlayerCat(Player player) {
             super(EntityType.CAT, player.level());
@@ -387,6 +389,15 @@ public final class CatPlayerRenderer extends CatRenderer {
             oldBodyYaw = bodyYaw; oldBodyPitch = bodyPitch; oldBodyRoll = bodyRoll;
             oldStrokePhase = strokePhase;
             oldHorizontal = horizontal;
+            oldLieDown = lieDown;
+            oldLieDownTail = lieDownTail;
+            if (player.isSleeping()) {
+                lieDown = Math.min(1, lieDown + .15F * ticks);
+                lieDownTail = Math.min(1, lieDownTail + .08F * ticks);
+            } else {
+                lieDown = Math.max(0, lieDown - .22F * ticks);
+                lieDownTail = Math.max(0, lieDownTail - .13F * ticks);
+            }
             crouch = Mth.lerp(1 - (float)Math.pow(.6, ticks), crouch, player.isCrouching() ? 1 : 0);
             boolean airborne = !player.onGround() && !player.isInWaterOrBubble() && !player.onClimbable() && !player.isPassenger();
             boolean flying = player.getAbilities().flying;
@@ -441,6 +452,8 @@ public final class CatPlayerRenderer extends CatRenderer {
         }
         private float tipVertical(float partial) { return Mth.lerp(partial, oldTipVertical, tipVertical); }
         private float tipSideways(float partial) { return Mth.lerp(partial, oldTipSideways, tipSideways); }
+        @Override public float getLieDownAmount(float partial) { return Mth.lerp(partial, oldLieDown, lieDown); }
+        @Override public float getLieDownAmountTail(float partial) { return Mth.lerp(partial, oldLieDownTail, lieDownTail); }
         private float bodyYaw(float partial) { return isInSittingPose() ? 0 : Mth.rotLerp(partial, oldBodyYaw, bodyYaw); }
         private float bodyPitch(float partial) { return isInSittingPose() ? 0 : Mth.lerp(partial, oldBodyPitch, bodyPitch); }
         private float bodyRoll(float partial) { return Mth.lerp(partial, oldBodyRoll, bodyRoll); }

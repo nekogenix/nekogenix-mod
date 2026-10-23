@@ -128,5 +128,20 @@
   "recipe.nekogenix.duration": "%s s",
   "recipe.nekogenix.returned": "Returned after processing",
   "recipe.nekogenix.collecting": "Use a Cotton Swab on your own tamed cat to collect a saliva sample. Brew the sample in a Brewing Stand to obtain a Bottle of Cat Saliva.",
-  "recipe.nekogenix.cleaning": "Drop a Used Syringe into a full water cauldron heated from below. After 10 seconds, the water evaporates and the syringe is clean. Heat sources include fire, soul fire, lava, magma blocks, and lit campfires."
+  "recipe.nekogenix.cleaning": "Drop a Used Syringe into a full water cauldron heated from below. After 10 seconds, the water evaporates and the syringe is clean. Heat sources include fire, soul fire, lava, magma blocks, and lit campfires.",
+  "commands.nekogenix.help": "Nekogenix admin commands: status, phase, progress, ability, lives, accelerate, stabilize, reset, kit",
+  "commands.nekogenix.status": "Phase: %1$s; progress: %2$s ticks; abilities: %3$s; lives: %4$s; accelerated: %5$s",
+  "commands.nekogenix.invalid_phase": "Unknown Nekogenix phase: %s",
+  "commands.nekogenix.invalid_ability": "Unknown feline ability: %s",
+  "commands.nekogenix.no_changes": "No player state changed",
+  "commands.nekogenix.phase": "Set phase to %2$s for %1$s player(s)",
+  "commands.nekogenix.progress": "Set progress to %2$s ticks for %1$s player(s)",
+  "commands.nekogenix.next": "Advanced transformation progress for %1$s player(s)",
+  "commands.nekogenix.ability_granted": "Granted %2$s to %1$s player(s)",
+  "commands.nekogenix.ability_revoked": "Revoked %2$s from %1$s player(s)",
+  "commands.nekogenix.lives": "Set lives to %2$s for %1$s player(s)",
+  "commands.nekogenix.accelerated": "Set accelerated mode to %2$s for %1$s player(s)",
+  "commands.nekogenix.stabilized": "Stabilized %1$s player(s)",
+  "commands.nekogenix.reset": "Reset %1$s player(s) to human state",
+  "commands.nekogenix.kit": "Gave the Nekogenix test kit to %1$s player(s)"
 }
