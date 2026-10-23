@@ -24,6 +24,7 @@ public final class NekoState implements INBTSerializable<CompoundTag> {
 
     public Phase phase() { return phase; }
     public int elapsed() { return elapsed; }
+    public boolean accelerated() { return accelerated; }
     public boolean isNeko() { return phase == Phase.NEKO || phase == Phase.CAT_TRANSFORMING || phase == Phase.CAT; }
     public boolean isTransforming() { return phase == Phase.SHOCK || phase == Phase.TRANSFORMING || phase == Phase.CAT_TRANSFORMING; }
     public boolean isCat() { return phase == Phase.CAT; }
@@ -43,6 +44,74 @@ public final class NekoState implements INBTSerializable<CompoundTag> {
     public boolean accelerate() {
         if (phase != Phase.SHOCK || accelerated) return false;
         accelerated = true;
+        return true;
+    }
+
+    public void setPhase(Phase phase) {
+        this.phase = phase;
+        elapsed = 0;
+        accelerated = false;
+        abilities = switch (phase) {
+            case HUMAN, SHOCK, TRANSFORMING -> 0;
+            case NEKO, CAT_TRANSFORMING, CAT -> AGILITY | VISION | PAWS;
+        };
+        lives = isNeko() ? 9 : 0;
+    }
+
+    public boolean setElapsed(int ticks) {
+        int maximum = switch (phase) {
+            case SHOCK -> sicknessDuration() - 1;
+            case TRANSFORMING -> 3 * stageDuration() - 1;
+            case CAT_TRANSFORMING -> stageDuration() - 1;
+            default -> 0;
+        };
+        int next = Mth.clamp(ticks, 0, Math.max(0, maximum));
+        if (elapsed == next) return false;
+        elapsed = next;
+        return true;
+    }
+
+    public boolean setAbility(int ability, boolean enabled) {
+        int mask = ability & (AGILITY | VISION | PAWS);
+        int next = enabled ? abilities | mask : abilities & ~mask;
+        if (abilities == next) return false;
+        abilities = next;
+        return true;
+    }
+
+    public boolean setLives(int lives) {
+        if (!isNeko()) return false;
+        int next = Mth.clamp(lives, 1, 9);
+        if (this.lives == next) return false;
+        this.lives = next;
+        return true;
+    }
+
+    public boolean setAccelerated(boolean accelerated) {
+        if (!isTransforming() || this.accelerated == accelerated) return false;
+        this.accelerated = accelerated;
+        setElapsed(elapsed);
+        return true;
+    }
+
+    public boolean advance(RandomSource random) {
+        switch (phase) {
+            case HUMAN -> begin();
+            case SHOCK -> {
+                phase = Phase.TRANSFORMING;
+                elapsed = 0;
+            }
+            case TRANSFORMING -> {
+                int boundary = (elapsed / stageDuration() + 1) * stageDuration();
+                elapsed = Math.min(boundary - 1, 3 * stageDuration() - 1);
+                tick(random);
+            }
+            case CAT_TRANSFORMING -> {
+                phase = Phase.CAT;
+                elapsed = 0;
+            }
+            case NEKO, CAT -> { return false; }
+        }
         return true;
     }
 
@@ -79,6 +148,7 @@ public final class NekoState implements INBTSerializable<CompoundTag> {
                 }
             }
             if (elapsed >= 3 * stageDuration()) {
+                abilities = AGILITY | VISION | PAWS;
                 phase = Phase.CAT_TRANSFORMING;
                 elapsed = 0;
                 lives = 9;
@@ -98,7 +168,7 @@ public final class NekoState implements INBTSerializable<CompoundTag> {
         if (isTransforming() && !isNeko()) reset();
     }
 
-    private void reset() {
+    public void reset() {
         phase = Phase.HUMAN;
         elapsed = abilities = lives = 0;
         accelerated = false;

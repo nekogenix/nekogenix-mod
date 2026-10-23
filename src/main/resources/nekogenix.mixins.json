@@ -4,6 +4,6 @@
   "package": "io.github.nekogenix.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": ["FoodDataMixin", "PlayerFoodMixin", "InteractionReachMixin", "CatDimensionsMixin"],
-  "client": ["CameraMixin", "CameraTargetingMixin", "FelineVisionMixin"],
+  "client": ["CameraMixin", "CameraTargetingMixin", "FelineVisionMixin", "GuiAttackIndicatorMixin"],
   "injectors": {"defaultRequire": 1}
 }

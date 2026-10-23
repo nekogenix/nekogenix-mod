@@ -128,5 +128,20 @@
   "recipe.nekogenix.duration": "%s с",
   "recipe.nekogenix.returned": "Повертається після обробки",
   "recipe.nekogenix.collecting": "Використайте ватну паличку на своєму прирученому коті, щоб зібрати мазок слини. Обробіть мазок у варильній стійці, щоб отримати пляшечку котячої слини.",
-  "recipe.nekogenix.cleaning": "Киньте використаний шприц у повний казан води з нагріванням знизу. Через 10 секунд вода випарується, а шприц очиститься. Підійдуть вогонь, вогонь душ, лава, магмовий блок і запалені багаття."
+  "recipe.nekogenix.cleaning": "Киньте використаний шприц у повний казан води з нагріванням знизу. Через 10 секунд вода випарується, а шприц очиститься. Підійдуть вогонь, вогонь душ, лава, магмовий блок і запалені багаття.",
+  "commands.nekogenix.help": "Адмін-команди Nekogenix: status, phase, progress, ability, lives, accelerate, stabilize, reset, kit",
+  "commands.nekogenix.status": "Фаза: %1$s; прогрес: %2$s тіків; здібності: %3$s; життя: %4$s; прискорення: %5$s",
+  "commands.nekogenix.invalid_phase": "Невідома фаза Nekogenix: %s",
+  "commands.nekogenix.invalid_ability": "Невідома котяча здібність: %s",
+  "commands.nekogenix.no_changes": "Стан гравців не змінився",
+  "commands.nekogenix.phase": "Для гравців (%1$s) встановлено фазу %2$s",
+  "commands.nekogenix.progress": "Для гравців (%1$s) встановлено прогрес %2$s тіків",
+  "commands.nekogenix.next": "Прогрес перетворення просунуто для гравців: %1$s",
+  "commands.nekogenix.ability_granted": "Здібність %2$s видано гравцям: %1$s",
+  "commands.nekogenix.ability_revoked": "Здібність %2$s забрано у гравців: %1$s",
+  "commands.nekogenix.lives": "Гравцям (%1$s) встановлено %2$s життів",
+  "commands.nekogenix.accelerated": "Для гравців (%1$s) режим прискорення встановлено на %2$s",
+  "commands.nekogenix.stabilized": "Стабілізовано гравців: %1$s",
+  "commands.nekogenix.reset": "Гравців (%1$s) повернуто до людського стану",
+  "commands.nekogenix.kit": "Тестовий набір Nekogenix видано гравцям: %1$s"
 }

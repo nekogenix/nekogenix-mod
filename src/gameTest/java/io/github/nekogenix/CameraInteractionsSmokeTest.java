@@ -19,6 +19,7 @@ public final class CameraInteractionsSmokeTest {
     private static final BlockPos LOW = new BlockPos(0, 80, 4);
     private static final BlockPos CLOSE = new BlockPos(0, 80, 0);
     private static boolean entityInteraction;
+    private static boolean vegetationAttack;
 
     private static void button(ServerPlayer player, BlockPos pos) {
         player.serverLevel().setBlockAndUpdate(pos.south(), Blocks.STONE.defaultBlockState());
@@ -62,12 +63,24 @@ public final class CameraInteractionsSmokeTest {
         }
         if (age == 545) {
             check(entityInteraction, "Native use input reaches the server for an entity");
-            Nekogenix.LOGGER.info("Nekogenix camera interactions server smoke passed: grass distant and close buttons native breaking and entity use");
+        }
+        if (age == 580) {
+            CatTransformationTests.cat(player);
+            player.serverLevel().setBlockAndUpdate(new BlockPos(0, 80, 1), Blocks.SHORT_GRASS.defaultBlockState());
+        }
+        if (age == 660) {
+            check(vegetationAttack, "A low cat can attack an entity through replaceable vegetation");
+            Nekogenix.LOGGER.info("Nekogenix camera interactions server smoke passed: grass distant and close buttons native breaking entity use and cat attacks through vegetation");
         }
     }
 
     @SubscribeEvent public static void entity(net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.EntityInteractSpecific event) {
         if (ENABLED && !event.getLevel().isClientSide && event.getTarget() instanceof net.minecraft.world.entity.decoration.ArmorStand) entityInteraction = true;
+    }
+
+    @SubscribeEvent public static void attack(net.neoforged.neoforge.event.entity.player.AttackEntityEvent event) {
+        if (ENABLED && !event.getEntity().level().isClientSide && event.getTarget() instanceof net.minecraft.world.entity.decoration.ArmorStand
+                && io.github.nekogenix.gameplay.CatForm.active(event.getEntity())) vegetationAttack = true;
     }
 
     @EventBusSubscriber(modid = Nekogenix.ID, value = net.neoforged.api.distmarker.Dist.CLIENT)
@@ -95,8 +108,13 @@ public final class CameraInteractionsSmokeTest {
             if (age == 430) check(block().equals(CLOSE.south()), "Solid walls still block targets behind them");
             if (age == 460) check(mc.hitResult.getType() == net.minecraft.world.phys.HitResult.Type.MISS, "Targets beyond native reach remain out of range");
             if (age == 510) check(mc.hitResult instanceof net.minecraft.world.phys.EntityHitResult, "Entity selection also follows the low viewpoint");
-            if (age == 560) {
-                Nekogenix.LOGGER.info("Nekogenix camera interactions client smoke passed: grass close and far targets prone hitbox wall occlusion reach boundary entities and agility FOV scaling");
+            if (age == 620) check(mc.player.getData(Content.CAT_FORM)
+                    && mc.hitResult instanceof net.minecraft.world.phys.EntityHitResult,
+                    "A low cat selects an entity through replaceable vegetation");
+            if (age == 630) mc.options.keyAttack.setDown(true);
+            if (age == 631) mc.options.keyAttack.setDown(false);
+            if (age == 680) {
+                Nekogenix.LOGGER.info("Nekogenix camera interactions client smoke passed: grass targets prone hitbox wall occlusion reach boundary entities cat vegetation attacks and agility FOV scaling");
                 mc.stop();
             }
         }
