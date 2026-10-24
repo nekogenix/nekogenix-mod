@@ -33,3 +33,5 @@ jobs:
         uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c
       - name: Build and run server tests
         run: ./gradlew --no-daemon build compileGameTestJava runGameTestServer
+      - name: Test publishing validation
+        run: python3 -B -m unittest discover -s .github/publishing -p 'test_*.py'
