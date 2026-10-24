@@ -19,6 +19,10 @@
   </a>
 </p>
 
+<p align="center">
+    <a href="https://liberapay.com/Nekogenix/donate"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg"></a>
+</p>
+
 <h2><img src=".github/readme/icons/cat.svg" width="28" height="28" alt="" /> Minecraft as a cat</h2>
 
 Nekogenix is a Minecraft Java Edition mod for NeoForge. A Neko Injection starts a gradual transformation from human to neko, then into a cat with its own model and animations. You can stop the transformation if you’d rather stay a neko.
