@@ -1,0 +1,37 @@
+import groovy.json.JsonSlurper
+
+plugins {
+    id 'me.modmuss50.mod-publish-plugin' version '2.2.1'
+}
+
+def bundle = file(providers.environmentVariable('RELEASE_BUNDLE').get())
+def release = new JsonSlurper().parse(new File(bundle, 'release.json'))
+def projects = new JsonSlurper().parse(file('projects.json'))
+
+publishMods {
+    file = new File(bundle, release.filename)
+    version = release.version
+    displayName = release.name
+    changelog = new File(bundle, 'changelog.md').getText('UTF-8')
+    type = release.release_type == 'alpha' ? ALPHA : release.release_type == 'beta' ? BETA : STABLE
+    modLoaders.add('neoforge')
+    dryRun = providers.environmentVariable('PUBLISH_DRY_RUN').orElse('true').map { it.toBoolean() }
+    maxRetries = 0
+
+    modrinth {
+        projectId = projects.modrinth
+        accessToken = providers.environmentVariable('MODRINTH_TOKEN')
+        minecraftVersions.add(release.minecraft)
+        environment = CLIENT_AND_SERVER
+    }
+
+    curseforge {
+        projectId = projects.curseforge
+        projectSlug = 'nekogenix'
+        accessToken = providers.environmentVariable('CURSEFORGE_TOKEN')
+        minecraftVersions.add(release.minecraft)
+        javaVersions.add(JavaVersion.VERSION_21)
+        client = true
+        server = true
+    }
+}

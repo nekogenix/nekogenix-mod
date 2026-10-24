@@ -1,0 +1,103 @@
+name: Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing GitHub release tag with a manual changelog and JAR
+        required: true
+        type: string
+      platform:
+        description: Destination
+        type: choice
+        options: [both, modrinth, curseforge]
+        default: both
+      release_type:
+        description: Platform release type
+        type: choice
+        options: [alpha, beta, release]
+        default: alpha
+      dry_run:
+        description: Validate without uploading
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-${{ inputs.tag }}
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    outputs:
+      platforms: ${{ steps.release.outputs.platforms }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Validate release and download the exact published JAR
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+          RELEASE_TYPE: ${{ inputs.release_type }}
+          RELEASE_PLATFORM: ${{ inputs.platform }}
+          RELEASE_BUNDLE: ${{ runner.temp }}/release-bundle
+        run: python3 .github/publishing/release.py prepare
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c
+      - name: Test the release source without rebuilding the published artifact
+        env:
+          RELEASE_SHA: ${{ steps.release.outputs.sha }}
+        run: |
+          git worktree add --detach "$RUNNER_TEMP/release-source" "$RELEASE_SHA"
+          "$RUNNER_TEMP/release-source/gradlew" --project-dir "$RUNNER_TEMP/release-source" --no-daemon build compileGameTestJava runGameTestServer
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: release-bundle
+          path: ${{ runner.temp }}/release-bundle/
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    needs: prepare
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: ${{ fromJSON(needs.prepare.outputs.platforms) }}
+    permissions:
+      contents: read
+      deployments: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: release-bundle
+          path: ${{ runner.temp }}/release-bundle
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c
+      - name: Publish the selected platform or validate a dry run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+          CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
+          RELEASE_BUNDLE: ${{ runner.temp }}/release-bundle
+          PUBLISH_PLATFORM: ${{ matrix.platform }}
+          PUBLISH_DRY_RUN: ${{ inputs.dry_run }}
+        run: python3 .github/publishing/release.py publish
