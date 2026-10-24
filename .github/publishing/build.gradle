@@ -16,7 +16,7 @@ publishMods {
     type = release.release_type == 'alpha' ? ALPHA : release.release_type == 'beta' ? BETA : STABLE
     modLoaders.add('neoforge')
     dryRun = providers.environmentVariable('PUBLISH_DRY_RUN').orElse('true').map { it.toBoolean() }
-    maxRetries = 0
+    maxRetries = 1
 
     modrinth {
         projectId = projects.modrinth
