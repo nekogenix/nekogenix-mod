@@ -14,8 +14,9 @@
 </p>
 
 <p align="center">
-  <a href="https://neoforged.net/">
-    <img src="https://img.shields.io/badge/Minecraft_Java-NeoForge-b977a0?style=flat-square&amp;labelColor=29232f" alt="Minecraft Java Edition, NeoForge" />
+  <strong>Available on</strong>&nbsp;
+  <a href="https://www.curseforge.com/minecraft/mc-mods/nekogenix">
+    <img src="https://img.shields.io/badge/CURSEFORGE-F16436?style=for-the-badge&logo=curseforge&logoColor=white&labelColor=000000" alt="CurseForge" align="absmiddle" />
   </a>
 </p>
 
@@ -73,8 +74,6 @@ Choose a vanilla cat coat or [import your own skin](https://nekogenix.github.io/
 3. Put the mod’s `.jar` in your game instance’s `mods` folder.
 
 For multiplayer, install Nekogenix on the server and on each player’s client. The [installation guide](https://nekogenix.github.io/wiki/getting-started/) covers the official launcher, Prism Launcher, Modrinth App and CurseForge App.
-
-CurseForge and Modrinth releases are coming soon.
 
 <details>
 <summary>Building from source</summary>
