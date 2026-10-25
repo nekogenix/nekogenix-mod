@@ -12,17 +12,17 @@
     },
     {
       "type": "minecraft:single",
-      "resource": "minecraft:mob_effect/speed",
+      "resource": "nekogenix:mob_effect/feline_agility",
       "sprite": "nekogenix:feline_agility"
     },
     {
       "type": "minecraft:single",
-      "resource": "minecraft:mob_effect/night_vision",
+      "resource": "nekogenix:mob_effect/feline_vision",
       "sprite": "nekogenix:feline_vision"
     },
     {
       "type": "minecraft:single",
-      "resource": "minecraft:mob_effect/slow_falling",
+      "resource": "nekogenix:mob_effect/soft_paw_pads",
       "sprite": "nekogenix:soft_paw_pads"
     },
     {

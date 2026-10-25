@@ -105,6 +105,7 @@ public final class CatPlayerRenderer extends CatRenderer {
     @Override
     protected void setupRotations(Cat cat, PoseStack pose, float age, float yaw, float partial, float scale) {
         PlayerCat proxy = (PlayerCat) cat;
+        if (proxy.player.isSleeping() && proxy.player.getBedOrientation() != null) yaw = proxy.player.getBedOrientation().toYRot();
         super.setupRotations(cat, pose, age, yaw + proxy.bodyYaw(partial), partial, scale);
         if (proxy.player.isSleeping() || cat.isInSittingPose()) return;
         pose.translate(0, .35, 0);
@@ -169,8 +170,29 @@ public final class CatPlayerRenderer extends CatRenderer {
         event.setCanceled(true);
         PlayerCat cat = proxy(player);
         float partial = event.getPartialTick();
+        var pose = event.getPoseStack();
+        pose.pushPose();
+        if (player.isSleeping()) {
+            var bed = player.getSleepingPos().orElse(player.blockPosition());
+            var shape = player.level().getBlockState(bed).getShape(player.level(), bed);
+            double top = bed.getY() + (shape.isEmpty() ? .5625 : shape.max(net.minecraft.core.Direction.Axis.Y));
+            float yaw = Mth.rotLerp(partial, player.yBodyRotO, player.yBodyRot);
+            float scale = cat.getScale();
+            var boundsPose = new PoseStack();
+            boundsPose.scale(scale, scale, scale);
+            renderer.setupRotations(cat, boundsPose, player.tickCount + partial, yaw, partial, scale);
+            boundsPose.scale(-1, -1, 1);
+            renderer.scale(cat, boundsPose, partial);
+            boundsPose.translate(0, -1.501, 0);
+            renderer.model.young = false;
+            renderer.model.prepareMobModel(cat, 0, 0, partial);
+            renderer.model.setupAnim(cat, 0, 0, player.tickCount + partial, 0, 0);
+            double feet = Mth.lerp(partial, player.yo, player.getY());
+            pose.translate(0, top + .002 * scale - feet - ((PawModel)renderer.model).bottom(boundsPose), 0);
+        }
         renderer.render(cat, Mth.rotLerp(partial, player.yRotO, player.getYRot()), partial,
-                event.getPoseStack(), event.getMultiBufferSource(), event.getPackedLight());
+                pose, event.getMultiBufferSource(), event.getPackedLight());
+        pose.popPose();
     }
 
     @SubscribeEvent(priority = net.neoforged.bus.api.EventPriority.LOWEST)
@@ -227,9 +249,25 @@ public final class CatPlayerRenderer extends CatRenderer {
 
     private static final class PawModel extends CatModel<Cat> {
         private final ModelPart ears;
+        private final ModelPart root;
         private final CatBodyPose posture;
-        private PawModel(ModelPart root) { super(root); ears = head.getChild("ears"); posture = new CatBodyPose(root); }
+        private PawModel(ModelPart root) { super(root); this.root = root; ears = head.getChild("ears"); posture = new CatBodyPose(root); }
         private ModelPart paw(HumanoidArm arm) { return arm == HumanoidArm.LEFT ? leftFrontLeg : rightFrontLeg; }
+
+        private double bottom(PoseStack pose) {
+            double[] bottom = {Double.POSITIVE_INFINITY};
+            root.visit(pose, (transform, path, index, cube) -> {
+                if (path.endsWith("/ears") && !ears.visible) return;
+                var matrix = transform.pose();
+                for (int corner = 0; corner < 8; corner++) {
+                    float x = ((corner & 1) == 0 ? cube.minX : cube.maxX) / 16;
+                    float y = ((corner & 2) == 0 ? cube.minY : cube.maxY) / 16;
+                    float z = ((corner & 4) == 0 ? cube.minZ : cube.maxZ) / 16;
+                    bottom[0] = Math.min(bottom[0], matrix.m01() * x + matrix.m11() * y + matrix.m21() * z + matrix.m31());
+                }
+            });
+            return bottom[0];
+        }
 
         private static ModelPart createRoot() {
             var mesh = CatModel.createBodyMesh(CubeDeformation.NONE);
@@ -422,7 +460,7 @@ public final class CatPlayerRenderer extends CatRenderer {
             float tailBlend = 1 - (float)Math.pow(.82, ticks);
             tipVertical = Mth.lerp(tailBlend, tipVertical, vertical);
             tipSideways = Mth.lerp(tailBlend, tipSideways, sideways);
-            boolean aligning = player.isFallFlying() || swimming;
+            boolean aligning = player.isFallFlying() || swimming && player.isSwimming();
             this.horizontal = Mth.lerp(blend, this.horizontal, aligning ? 1 : 0);
             double horizontal = motion.horizontalDistance();
             float targetYaw = aligning && horizontal > .015

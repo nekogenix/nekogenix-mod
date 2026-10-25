@@ -3,6 +3,7 @@ package io.github.nekogenix.client;
 import io.github.nekogenix.Content;
 import io.github.nekogenix.Nekogenix;
 import io.github.nekogenix.gameplay.CatForm;
+import io.github.nekogenix.gameplay.FelineWetness;
 import java.util.Map;
 import java.util.WeakHashMap;
 import net.minecraft.client.Minecraft;
@@ -15,8 +16,10 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
 
 @EventBusSubscriber(modid = Nekogenix.ID, value = Dist.CLIENT)
 public final class NekoEarShake {
@@ -42,9 +45,19 @@ public final class NekoEarShake {
                 continue;
             }
             var state = STATES.computeIfAbsent(player, key -> new Shake());
-            state.tick(headInWater(player));
+            state.tick(headInWater(player), player.isInWaterOrBubble(), FelineWetness.exposed(player),
+                    player.hasEffect(Content.HEAVY_EARS));
             if (state.age >= 6 && state.age <= 22
                     && player.distanceToSqr(mc.player) <= 4096) droplets(player);
+        }
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void effectReapplied(MobEffectEvent.Applicable event) {
+        if (event.getEntity() instanceof AbstractClientPlayer player && player.level().isClientSide
+                && event.getEffectInstance().is(Content.HEAVY_EARS) && !player.hasEffect(Content.HEAVY_EARS)) {
+            var state = STATES.get(player);
+            if (state != null) state.effectReappliedAfterRemoval();
         }
     }
 
@@ -84,17 +97,27 @@ public final class NekoEarShake {
 
     static final class Shake {
         private boolean wet;
+        private boolean rainWet;
+        private boolean effectActive;
+        private boolean effectRemoved;
         private int age = -1;
 
-        void tick(boolean inWater) {
-            if (inWater) {
-                wet = true;
+        void tick(boolean headInWater, boolean touchingWater, boolean inRain, boolean hasWetEffect) {
+            if (inRain) rainWet = true;
+            else if (touchingWater || headInWater) rainWet = false;
+            boolean effectEnded = (effectActive && !hasWetEffect || effectRemoved) && rainWet;
+            effectActive = hasWetEffect;
+            effectRemoved = false;
+            boolean leftWater = wet && !headInWater;
+            wet = headInWater;
+            if (headInWater) {
                 age = -1;
-            } else if (wet) {
-                wet = false;
-                age = 0;
-            } else if (age >= 0 && ++age >= DURATION) age = -1;
+            } else if (age >= 0) {
+                if (++age >= DURATION) age = -1;
+            } else if (leftWater || effectEnded) age = 0;
         }
+
+        void effectReappliedAfterRemoval() { if (effectActive) effectRemoved = true; }
 
         float progress(float partial) {
             return age < 0 ? -1 : Mth.clamp((age + partial) / DURATION, 0, 1);

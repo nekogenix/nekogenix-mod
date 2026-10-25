@@ -23,6 +23,7 @@ import net.neoforged.neoforge.client.event.ScreenEvent;
 @EventBusSubscriber(modid = Nekogenix.ID, value = Dist.CLIENT)
 public final class InventoryAbilities {
     private static final ResourceLocation BACKGROUND = ResourceLocation.withDefaultNamespace("container/inventory/effect_background_small");
+    private static final ResourceLocation SCENT_ICON = Content.id("textures/mob_effect/feline_scent.png");
 
     @SubscribeEvent
     public static void render(ScreenEvent.Render.Post event) {
@@ -38,8 +39,10 @@ public final class InventoryAbilities {
             var cell = cells.get(i);
             var ability = abilities.get(i);
             graphics.blitSprite(BACKGROUND, cell.left(), cell.top(), cell.width(), cell.height());
-            graphics.blit(cell.left() + (cell.width() - 18) / 2, cell.top() + (cell.height() - 18) / 2,
-                    0, 18, 18, mc.getMobEffectTextures().get(ability));
+            int x = cell.left() + (cell.width() - 18) / 2;
+            int y = cell.top() + (cell.height() - 18) / 2;
+            if (ability.equals(MobEffects.CONDUIT_POWER)) graphics.blit(SCENT_ICON, x, y, 0, 0, 18, 18, 18, 18);
+            else graphics.blit(x, y, 0, 18, 18, mc.getMobEffectTextures().get(ability));
         }
         for (int i = 0; i < abilities.size(); i++) {
             if (cells.get(i).containsPoint(event.getMouseX(), event.getMouseY())) {

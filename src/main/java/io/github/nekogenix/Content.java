@@ -88,6 +88,8 @@ public final class Content {
     public static final DeferredHolder<MobEffect, MobEffect> AGILITY = effect("feline_agility", MobEffectCategory.BENEFICIAL, 0xA9D6D1);
     public static final DeferredHolder<MobEffect, MobEffect> VISION = effect("feline_vision", MobEffectCategory.BENEFICIAL, 0xBED487);
     public static final DeferredHolder<MobEffect, MobEffect> PAWS = effect("soft_paw_pads", MobEffectCategory.BENEFICIAL, 0xE9B6C9);
+    public static final DeferredHolder<MobEffect, MobEffect> HEAVY_EARS = effect("heavy_ears", MobEffectCategory.HARMFUL, 0x7795B3);
+    public static final DeferredHolder<MobEffect, MobEffect> HEAVY_FUR = effect("heavy_fur", MobEffectCategory.HARMFUL, 0x6887A6);
     public static final DeferredHolder<MobEffect, MobEffect> SWEETNESS = EFFECTS.register("sweetness", io.github.nekogenix.gameplay.SweetnessEffect::new);
     public static final DeferredHolder<MobEffect, MobEffect> CRYSTALLIZATION = EFFECTS.register("crystallization", io.github.nekogenix.gameplay.CrystallizationEffect::new);
     public static final DeferredHolder<MobEffect, MobEffect> SALIVA_CLOUD = EFFECTS.register("cat_saliva_exposure", io.github.nekogenix.gameplay.SalivaCloudEffect::new);

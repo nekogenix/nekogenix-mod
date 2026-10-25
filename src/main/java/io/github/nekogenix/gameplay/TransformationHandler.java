@@ -57,10 +57,12 @@ public final class TransformationHandler {
             }
         }
         boolean agility = state.has(NekoState.AGILITY);
+        boolean wet = FelineWetness.update(player);
+        boolean speedBoost = agility && !wet;
         if (agility && player.isShiftKeyDown() && !player.isSwimming()
                 && !player.getAbilities().flying && !player.isFallFlying()) player.setSprinting(false);
-        modifier(player.getAttribute(Attributes.MOVEMENT_SPEED), "feline_sprint", agility && player.isSprinting());
-        modifier(player.getAttribute(Attributes.SNEAKING_SPEED), "feline_sneak", agility);
+        modifier(player.getAttribute(Attributes.MOVEMENT_SPEED), "feline_sprint", speedBoost && player.isSprinting());
+        modifier(player.getAttribute(Attributes.SNEAKING_SPEED), "feline_sneak", speedBoost);
         if (player.tickCount % 20 == 0) refreshEffects(player);
         boolean visionChanged = FelineVisionControl.changed(player);
         if (visionChanged || player.tickCount % 10 == 0) vision(player, state);
