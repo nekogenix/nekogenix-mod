@@ -16,6 +16,12 @@ public final class CatMovementInput {
     @SubscribeEvent public static void movement(MovementInputUpdateEvent event) {
         if (!(event.getEntity() instanceof LocalPlayer player)) return;
         var input = event.getInput();
+        if (io.github.nekogenix.gameplay.FelineWetness.active(player)) {
+            var sprint = player.getAttribute(Attributes.MOVEMENT_SPEED);
+            var sneak = player.getAttribute(Attributes.SNEAKING_SPEED);
+            if (sprint != null) sprint.removeModifier(Content.id("feline_sprint"));
+            if (sneak != null) sneak.removeModifier(Content.id("feline_sneak"));
+        }
         if (input.shiftKeyDown && player.hasEffect(Content.AGILITY) && !player.isSwimming()
                 && !player.getAbilities().flying && !player.isFallFlying()) {
             player.setSprinting(false);

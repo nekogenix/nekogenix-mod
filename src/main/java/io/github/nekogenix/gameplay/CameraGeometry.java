@@ -17,7 +17,7 @@ public final class CameraGeometry {
         double height = selected(percent) * player.getScale() - crouchOffset(player, percent);
         if (CameraPosture.passage(player) || CameraPosture.passageJumpPending(player)) height = Math.min(height, (CatForm.active(player) ? CatForm.STANDING_EYE_HEIGHT : .4F) * player.getScale());
         if (CatForm.active(player) && CameraPosture.seated(player)) return .595 * player.getScale();
-        if (CatForm.active(player) && !CameraPosture.ordinaryPose(player)) height = Math.min(height, CatForm.STANDING_EYE_HEIGHT * player.getScale());
+        if (CatForm.active(player) && !CameraPosture.standingCatPose(player)) height = Math.min(height, CatForm.STANDING_EYE_HEIGHT * player.getScale());
         if (!CatForm.active(player) && !CameraPosture.cameraProne(player) && player.getPose() != Pose.STANDING && player.getPose() != Pose.CROUCHING) {
             height = Math.min(height, player.getEyeHeight());
         }

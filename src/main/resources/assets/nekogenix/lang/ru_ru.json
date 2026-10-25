@@ -143,5 +143,8 @@
   "commands.nekogenix.accelerated": "Для игроков (%1$s) режим ускорения установлен на %2$s",
   "commands.nekogenix.stabilized": "Стабилизированы игроки: %1$s",
   "commands.nekogenix.reset": "Игроки (%1$s) возвращены в человеческое состояние",
-  "commands.nekogenix.kit": "Тестовый набор Nekogenix выдан игрокам: %1$s"
+  "commands.nekogenix.kit": "Тестовый набор Nekogenix выдан игрокам: %1$s",
+  "effect.nekogenix.heavy_ears": "Тяжёлые ушки",
+  "effect.nekogenix.heavy_fur": "Тяжёлая шерсть",
+  "effect.nekogenix.water_contact": "Контакт с водой"
 }

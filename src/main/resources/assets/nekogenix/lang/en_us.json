@@ -143,5 +143,8 @@
   "commands.nekogenix.accelerated": "Set accelerated mode to %2$s for %1$s player(s)",
   "commands.nekogenix.stabilized": "Stabilized %1$s player(s)",
   "commands.nekogenix.reset": "Reset %1$s player(s) to human state",
-  "commands.nekogenix.kit": "Gave the Nekogenix test kit to %1$s player(s)"
+  "commands.nekogenix.kit": "Gave the Nekogenix test kit to %1$s player(s)",
+  "effect.nekogenix.heavy_ears": "Heavy Ears",
+  "effect.nekogenix.heavy_fur": "Heavy Fur",
+  "effect.nekogenix.water_contact": "Contact with water"
 }

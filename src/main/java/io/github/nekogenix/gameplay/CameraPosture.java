@@ -28,11 +28,17 @@ public final class CameraPosture {
                 && !player.isAutoSpinAttack() && !player.isPassenger() && !player.hasPose(Pose.SITTING) && !player.onClimbable();
     }
 
+    public static boolean standingCatPose(Player player) {
+        return ordinaryPose(player) || CatForm.active(player) && player.isAlive() && !player.isSpectator()
+                && (player.isInWaterOrBubble() || player.onClimbable()) && !player.isSwimming() && !player.isSleeping()
+                && !player.isFallFlying() && !player.isAutoSpinAttack() && !player.isPassenger() && !player.hasPose(Pose.SITTING);
+    }
+
     public static float catEye(Player player) {
         if (seated(player)) return .595F * player.getScale();
         float height = player.hasData(Content.CAMERA_VIEW) ? player.getData(Content.CAMERA_VIEW).bodyEye : -1;
         float resting = (player.isCrouching() ? CatForm.CROUCHING_EYE_HEIGHT : CatForm.STANDING_EYE_HEIGHT) * player.getScale();
-        return height < 0 ? resting : ordinaryPose(player) ? height : Math.min(height, resting);
+        return height < 0 ? resting : standingCatPose(player) ? height : Math.min(height, resting);
     }
 
     public static boolean upright(Player player) {
@@ -47,7 +53,7 @@ public final class CameraPosture {
 
     public static EntityDimensions catDimensions(Player player, Pose pose) {
         float eye = catEye(player) / player.getScale();
-        float body = upright(player) && ordinaryPose(player) ? player.isCrouching() ? 1.45F : UPRIGHT_HEIGHT : .7F;
+        float body = upright(player) && standingCatPose(player) ? player.isCrouching() ? 1.45F : UPRIGHT_HEIGHT : .7F;
         return CatForm.dimensions(pose).scale(1, Math.max(body, eye + .18F) / .7F).withEyeHeight(eye);
     }
 
@@ -242,9 +248,9 @@ public final class CameraPosture {
         }
         if (CatForm.active(player)) {
             if (seated(player)) approved = .595F * player.getScale();
-            else if (!ordinaryPose(player)) approved = Math.min(approved, CatForm.STANDING_EYE_HEIGHT * player.getScale());
+            else if (!standingCatPose(player)) approved = Math.min(approved, CatForm.STANDING_EYE_HEIGHT * player.getScale());
             approved = (float)limitCatHeight(player, player.position(), approved, preference);
-            view.upright = !seated(player) && preference > QUADRUPED_MAX_CAMERA && (!ordinaryPose(player)
+            view.upright = !seated(player) && preference > QUADRUPED_MAX_CAMERA && (!standingCatPose(player)
                     || approved + CameraGeometry.crouchOffset(player, preference) > CameraGeometry.selected(QUADRUPED_MAX_CAMERA) * player.getScale() + .0001);
         } else if (cameraProne(player)) {
             if (passage(player)) approved = Math.min(approved, player.getData(Content.CAT_SIZE).passageEye);

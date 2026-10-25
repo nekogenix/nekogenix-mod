@@ -1,6 +1,8 @@
 package io.github.nekogenix.client;
 
 import io.github.nekogenix.Content;
+import io.github.nekogenix.Nekogenix;
+import io.github.nekogenix.gameplay.FelineWetness;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.EffectRenderingInventoryScreen;
@@ -8,13 +10,18 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffectUtil;
 import net.minecraft.world.effect.MobEffects;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.GatherEffectScreenTooltipsEvent;
 import net.neoforged.neoforge.client.extensions.common.IClientMobEffectExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 
-final class EffectDisplay implements IClientMobEffectExtensions {
+@EventBusSubscriber(modid = Nekogenix.ID, value = Dist.CLIENT)
+public final class EffectDisplay implements IClientMobEffectExtensions {
     static void register(RegisterClientExtensionsEvent event) {
         event.registerMobEffect(new EffectDisplay(), Content.SHOCK, Content.TRANSFORMING, Content.CAT_TRANSFORMING,
-                Content.SWEETNESS, Content.CRYSTALLIZATION);
+                Content.SWEETNESS, Content.CRYSTALLIZATION, Content.HEAVY_EARS, Content.HEAVY_FUR);
         event.registerMobEffect(new IClientMobEffectExtensions() {
             @Override
             public boolean isVisibleInInventory(MobEffectInstance instance) { return false; }
@@ -67,9 +74,26 @@ final class EffectDisplay implements IClientMobEffectExtensions {
         graphics.drawString(mc.font, name, 0, 0, 0xFFFFFF);
         graphics.pose().popPose();
         float tickRate = mc.level == null ? 20F : mc.level.tickRateManager().tickrate();
-        graphics.drawString(mc.font, MobEffectUtil.formatDuration(instance, 1F, tickRate), x + 28, y + 16, 0x7F7F7F);
+        Component duration = FelineWetness.isWetEffect(instance) && instance.isInfiniteDuration()
+                ? contactDuration() : MobEffectUtil.formatDuration(instance, 1F, tickRate);
+        float durationScale = Math.min(1F, 86F / Math.max(1, mc.font.width(duration)));
+        graphics.pose().pushPose();
+        graphics.pose().translate(x + 28, y + 16, blitOffset);
+        graphics.pose().scale(durationScale, durationScale, 1F);
+        graphics.drawString(mc.font, duration, 0, 0, 0x7F7F7F);
+        graphics.pose().popPose();
         return true;
     }
+
+    @SubscribeEvent
+    public static void wetnessTooltip(GatherEffectScreenTooltipsEvent event) {
+        if (FelineWetness.isWetEffect(event.getEffectInstance()) && event.getEffectInstance().isInfiniteDuration()
+                && event.getTooltip().size() > 1) {
+            event.getTooltip().set(1, contactDuration());
+        }
+    }
+
+    private static Component contactDuration() { return Component.translatable("effect.nekogenix.water_contact"); }
 
     private EffectDisplay() {}
 }

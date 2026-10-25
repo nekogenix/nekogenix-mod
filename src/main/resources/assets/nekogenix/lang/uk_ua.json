@@ -143,5 +143,8 @@
   "commands.nekogenix.accelerated": "Для гравців (%1$s) режим прискорення встановлено на %2$s",
   "commands.nekogenix.stabilized": "Стабілізовано гравців: %1$s",
   "commands.nekogenix.reset": "Гравців (%1$s) повернуто до людського стану",
-  "commands.nekogenix.kit": "Тестовий набір Nekogenix видано гравцям: %1$s"
+  "commands.nekogenix.kit": "Тестовий набір Nekogenix видано гравцям: %1$s",
+  "effect.nekogenix.heavy_ears": "Важкі вушка",
+  "effect.nekogenix.heavy_fur": "Важка шерсть",
+  "effect.nekogenix.water_contact": "Контакт із водою"
 }
