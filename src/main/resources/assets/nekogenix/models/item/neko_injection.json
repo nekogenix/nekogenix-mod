@@ -45,6 +45,24 @@
         "nekogenix:injection_stage": 7
       },
       "model": "nekogenix:item/syringe"
+    },
+    {
+      "predicate": {
+        "minecraft:custom_model_data": 1
+      },
+      "model": "nekogenix:item/advancement_cat"
+    },
+    {
+      "predicate": {
+        "minecraft:custom_model_data": 2
+      },
+      "model": "nekogenix:item/advancement_logo"
+    },
+    {
+      "predicate": {
+        "minecraft:custom_model_data": 3
+      },
+      "model": "nekogenix:item/advancement_dual_injection"
     }
   ]
 }

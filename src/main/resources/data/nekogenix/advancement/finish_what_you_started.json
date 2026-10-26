@@ -1,0 +1,26 @@
+{
+  "parent": "nekogenix:what_could_go_wrong",
+  "display": {
+    "icon": {
+      "id": "nekogenix:neko_injection",
+      "components": {
+        "minecraft:custom_model_data": 1
+      }
+    },
+    "title": {
+      "translate": "advancements.nekogenix.finish_what_you_started.title"
+    },
+    "description": {
+      "translate": "advancements.nekogenix.finish_what_you_started.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "became_cat": {
+      "trigger": "nekogenix:cat_transformation_completed"
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "parent": "nekogenix:what_could_go_wrong",
+  "display": {
+    "icon": {
+      "id": "nekogenix:stabilizing_injection"
+    },
+    "title": {
+      "translate": "advancements.nekogenix.weeb.title"
+    },
+    "description": {
+      "translate": "advancements.nekogenix.weeb.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "stabilized": {
+      "trigger": "minecraft:consume_item",
+      "conditions": {
+        "item": {
+          "items": "nekogenix:stabilizing_injection"
+        }
+      }
+    }
+  }
+}

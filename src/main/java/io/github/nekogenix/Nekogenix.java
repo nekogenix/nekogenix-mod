@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils;
 import io.github.nekogenix.network.InjectionInput;
 import io.github.nekogenix.network.AirJumpInput;
 import io.github.nekogenix.config.ClientConfig;
+import io.github.nekogenix.config.ModFiles;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.ModContainer;
@@ -18,10 +19,12 @@ public final class Nekogenix {
 
     public Nekogenix(IEventBus bus, ModContainer container) {
         Content.register(bus);
+        io.github.nekogenix.gameplay.FelineAdvancements.register(bus);
         io.github.nekogenix.recipe.ProcessingRecipes.register(bus);
         VoiceSounds.register(bus);
         InjectionSounds.register(bus);
-        container.registerConfig(ModConfig.Type.CLIENT, ClientConfig.SPEC);
+        ModFiles.prepare();
+        container.registerConfig(ModConfig.Type.CLIENT, ClientConfig.SPEC, ModFiles.CLIENT_CONFIG);
         bus.addListener(Nekogenix::network);
         bus.addListener((net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent event) -> {
             event.registerBlockEntity(net.neoforged.neoforge.capabilities.Capabilities.ItemHandler.BLOCK,

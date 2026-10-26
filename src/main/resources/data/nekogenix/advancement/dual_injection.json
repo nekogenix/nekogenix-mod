@@ -1,0 +1,26 @@
+{
+  "parent": "nekogenix:what_could_go_wrong",
+  "display": {
+    "icon": {
+      "id": "nekogenix:neko_injection",
+      "components": {
+        "minecraft:custom_model_data": 3
+      }
+    },
+    "title": {
+      "translate": "advancements.nekogenix.dual_injection.title"
+    },
+    "description": {
+      "translate": "advancements.nekogenix.dual_injection.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "both_doses": {
+      "trigger": "nekogenix:dual_injection_completed"
+    }
+  }
+}

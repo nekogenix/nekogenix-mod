@@ -3,6 +3,7 @@ package io.github.nekogenix.client.skin;
 import com.mojang.blaze3d.platform.NativeImage;
 import io.github.nekogenix.Content;
 import io.github.nekogenix.Nekogenix;
+import io.github.nekogenix.config.ModFiles;
 import io.github.nekogenix.skin.CatSkin;
 import io.github.nekogenix.skin.SkinPackets;
 import java.nio.file.Files;
@@ -56,11 +57,13 @@ public final class CatSkins {
     public static boolean checking() { return checking; }
     public static Component message() { return message.isEmpty() ? Component.empty() : Component.translatable("skins.nekogenix." + message); }
 
-    private static Path directory() { return Minecraft.getInstance().gameDirectory.toPath().resolve("nekogenix/cat_skins"); }
+    private static Path directory() { return ModFiles.directory().resolve("cat_skins"); }
     public static void load() {
         if (loaded || loading) return;
         loading = true;
         if (!work(() -> {
+            try { prune(directory().resolve("cache")); }
+            catch (java.io.IOException e) { Nekogenix.LOGGER.warn("Could not clean the cat skin cache", e); }
             try {
                 library = new SkinLibrary(directory().resolve("library"));
                 var saved = library.selected(); var items = library.entries();
@@ -261,6 +264,7 @@ public final class CatSkins {
     }
 
     private static void prune(Path cache) throws java.io.IOException {
+        if (!Files.isDirectory(cache)) return;
         try (var stream = Files.list(cache)) {
             var files = new ArrayList<>(stream.filter(p -> p.getFileName().toString().matches("[0-9a-f]{64}\\.png")).toList());
             files.sort(java.util.Comparator.comparingLong(p -> p.toFile().lastModified()));

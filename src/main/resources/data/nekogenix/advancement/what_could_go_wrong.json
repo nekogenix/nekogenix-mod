@@ -1,0 +1,23 @@
+{
+  "parent": "nekogenix:root",
+  "display": {
+    "icon": {
+      "id": "nekogenix:neko_injection"
+    },
+    "title": {
+      "translate": "advancements.nekogenix.what_could_go_wrong.title"
+    },
+    "description": {
+      "translate": "advancements.nekogenix.what_could_go_wrong.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "injected": {
+      "trigger": "nekogenix:single_injection_completed"
+    }
+  }
+}
