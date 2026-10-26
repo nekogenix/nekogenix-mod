@@ -110,7 +110,7 @@ public final class CatSkinSmokeTest {
             if (age == 165) {
                 check(mc.screen instanceof CatSkinScreen && CatSkins.entries().size() == previousSkins + 1, "Save adds exactly one named custom skin");
                 testSkin = CatSkins.entries().stream().filter(e -> e.name().equals("Midnight Mint")).findFirst().orElseThrow().skin();
-                var restored = new io.github.nekogenix.client.skin.SkinLibrary(mc.gameDirectory.toPath().resolve("nekogenix/cat_skins/library"));
+                var restored = new io.github.nekogenix.client.skin.SkinLibrary(io.github.nekogenix.config.ModFiles.directory().resolve("cat_skins/library"));
                 check(restored.entries().stream().anyMatch(e -> e.name().equals("Midnight Mint") && e.skin().hash().equals(testSkin.hash())), "The custom texture and its name are persisted");
                 capture = "cat-skins-custom-library.png";
                 check(!CatSkins.licensed(), "The development client has no verified account"); CatSkins.apply(testSkin);

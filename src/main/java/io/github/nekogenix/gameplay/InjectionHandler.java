@@ -3,6 +3,7 @@ package io.github.nekogenix.gameplay;
 import io.github.nekogenix.Content;
 import io.github.nekogenix.Nekogenix;
 import io.github.nekogenix.state.NekoState;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -45,6 +46,7 @@ public final class InjectionHandler {
         private final Dose main = new Dose();
         private final Dose off = new Dose();
         private boolean paired;
+        private int nekoDoses;
         private NekoState transformation;
 
         private Dose dose(InteractionHand hand) { return hand == InteractionHand.MAIN_HAND ? main : off; }
@@ -105,6 +107,9 @@ public final class InjectionHandler {
         tickHand(player, InteractionHand.MAIN_HAND, session);
         tickHand(player, InteractionHand.OFF_HAND, session);
         if (!session.main.active && !session.off.active) {
+            if (session.nekoDoses == 1) FelineAdvancements.SINGLE_INJECTION_COMPLETED.get().trigger(player);
+            else if (session.nekoDoses == 2) FelineAdvancements.DUAL_INJECTION_COMPLETED.get().trigger(player);
+            session.nekoDoses = 0;
             session.paired = session.main.completed = session.off.completed = false;
             session.transformation = null;
         }
@@ -153,11 +158,15 @@ public final class InjectionHandler {
         boolean completed = stabilizing ? state.stabilize() : state.begin();
         if (completed && !stabilizing) session.transformation = state;
         if (!completed && !stabilizing && session.paired && session.other(hand).completed
-                && state == session.transformation) completed = state.accelerate();
+                && state == session.transformation) {
+            completed = state.accelerate();
+        }
         if (completed) {
+            if (!stabilizing) session.nekoDoses++;
             if (stabilizing) player.addEffect(new net.minecraft.world.effect.MobEffectInstance(Content.CRYSTALLIZATION,
                     CrystallizationEffect.DURATION, 0, false, false, true));
             FelineSounds.sync(player);
+            CriteriaTriggers.CONSUME_ITEM.trigger(player, dose.stack);
             player.setItemInHand(hand, Content.USED_SYRINGE.toStack());
             TransformationHandler.refreshEffects(player);
             player.serverLevel().sendParticles(ParticleTypes.WITCH, player.getX(), player.getY() + 1,

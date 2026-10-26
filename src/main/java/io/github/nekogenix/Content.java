@@ -5,7 +5,6 @@ import io.github.nekogenix.gameplay.InjectionHandler;
 import io.github.nekogenix.gameplay.FelineJump;
 import io.github.nekogenix.item.SalivaBottleItem;
 import io.github.nekogenix.item.NekoInjectionItem;
-import io.github.nekogenix.item.NucleocardItem;
 import io.github.nekogenix.item.SalivaProjectile;
 import io.github.nekogenix.state.NekoState;
 import io.github.nekogenix.state.BreedingState;
@@ -65,8 +64,8 @@ public final class Content {
     public static final DeferredItem<io.github.nekogenix.item.ThrownBottleItem> SPLASH_SWEET_AMETHYST = ITEMS.register("splash_potion_of_sweet_amethyst", () -> new io.github.nekogenix.item.ThrownBottleItem(true, false));
     public static final DeferredItem<io.github.nekogenix.item.ThrownBottleItem> LINGERING_SWEET_AMETHYST = ITEMS.register("lingering_potion_of_sweet_amethyst", () -> new io.github.nekogenix.item.ThrownBottleItem(true, true));
     public static final DeferredItem<NekoInjectionItem> STABILIZING_INJECTION = ITEMS.register("stabilizing_injection", () -> new NekoInjectionItem(true));
-    public static final DeferredItem<NucleocardItem> BLANK_NUCLEOCARD = ITEMS.register("blank_nucleocard", () -> new NucleocardItem(false));
-    public static final DeferredItem<NucleocardItem> CAT_NUCLEOCARD = ITEMS.register("cat_nucleocard", () -> new NucleocardItem(true));
+    public static final DeferredItem<Item> BLANK_NUCLEOCARD = ITEMS.register("blank_nucleocard", () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final DeferredItem<Item> CAT_NUCLEOCARD = ITEMS.register("cat_nucleocard", () -> new Item(new Item.Properties().stacksTo(1)));
     public static final DeferredBlock<CentrifugeBlock> CENTRIFUGE = BLOCKS.registerBlock("centrifuge", CentrifugeBlock::new,
             BlockBehaviour.Properties.of().strength(3.5F).sound(SoundType.METAL).requiresCorrectToolForDrops().noOcclusion());
     public static final DeferredItem<net.minecraft.world.item.BlockItem> CENTRIFUGE_ITEM = ITEMS.registerSimpleBlockItem(CENTRIFUGE);

@@ -17,27 +17,28 @@ final class ModTooltips {
                 new MobEffectInstance(Content.SHOCK, NekoState.SHOCK_DURATION),
                 new MobEffectInstance(Content.TRANSFORMING, 3 * NekoState.DAY),
                 new MobEffectInstance(Content.CAT_TRANSFORMING, NekoState.DAY)), tooltip::add, 1F, context.tickRate());
-        line(tooltip, "injection_use", ChatFormatting.GRAY);
-        line(tooltip, "dual_injection", ChatFormatting.GRAY);
-        line(tooltip, "dual_stages", ChatFormatting.GRAY);
-        line(tooltip, "dual_sickness", ChatFormatting.GRAY);
-        line(tooltip, "stages", ChatFormatting.GRAY);
-        line(tooltip, "stage_ability", ChatFormatting.GRAY);
-        line(tooltip, "cat_stage", ChatFormatting.GRAY);
         tooltip.add(CommonComponents.EMPTY);
-        tooltip.add(Component.translatable("potion.whenDrank").withStyle(ChatFormatting.DARK_PURPLE));
-        line(tooltip, "agility", ChatFormatting.BLUE);
+        line(tooltip, "after_stages", ChatFormatting.DARK_PURPLE);
+        tooltip.add(Component.translatable("effect.nekogenix.feline_agility").withStyle(ChatFormatting.BLUE));
         line(tooltip, "double_jump", ChatFormatting.BLUE);
-        line(tooltip, "vision", ChatFormatting.BLUE);
-        line(tooltip, "paws", ChatFormatting.BLUE);
+        tooltip.add(Component.translatable("effect.nekogenix.feline_vision").withStyle(ChatFormatting.BLUE));
+        tooltip.add(Component.translatable("effect.nekogenix.soft_paw_pads").withStyle(ChatFormatting.BLUE));
+        tooltip.add(Component.translatable("ability.nekogenix.feline_scent").withStyle(ChatFormatting.BLUE));
+        line(tooltip, "cat_body", ChatFormatting.BLUE);
+        line(tooltip, "lives", ChatFormatting.BLUE);
+        line(tooltip, "hunger", ChatFormatting.BLUE);
+        line(tooltip, "diet", ChatFormatting.BLUE);
+        line(tooltip, "cats", ChatFormatting.BLUE);
+        line(tooltip, "creepers", ChatFormatting.BLUE);
+        line(tooltip, "phantoms", ChatFormatting.BLUE);
+        line(tooltip, "wetness", ChatFormatting.RED);
+        line(tooltip, "food_intolerance", ChatFormatting.RED);
     }
 
     static void stabilizer(Item.TooltipContext context, List<Component> tooltip) {
         PotionContents.addPotionTooltip(List.of(new MobEffectInstance(Content.CRYSTALLIZATION,
                 io.github.nekogenix.gameplay.CrystallizationEffect.DURATION)), tooltip::add, 1F, context.tickRate());
-        line(tooltip, "injection_use", ChatFormatting.GRAY);
         line(tooltip, "stabilizing_injection", ChatFormatting.BLUE);
-        line(tooltip, "stabilizing_permanent", ChatFormatting.GRAY);
     }
 
     static void sweetAmethyst(Item.TooltipContext context, List<Component> tooltip) {

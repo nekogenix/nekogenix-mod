@@ -41,6 +41,7 @@ public final class TransformationHandler {
         FelineSounds.sync(player);
         if (state.tick(player.getRandom())) {
             refreshEffects(player);
+            if (state.isCat()) FelineAdvancements.CAT_TRANSFORMATION_COMPLETED.get().trigger(player);
             InjectionHandler.sound(player, SoundEvents.AMETHYST_BLOCK_CHIME, 0.8F, 0.9F);
         }
         if (state.phase() == NekoState.Phase.SHOCK && state.elapsed() == 200) {

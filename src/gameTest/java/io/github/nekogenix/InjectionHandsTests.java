@@ -82,6 +82,7 @@ public final class InjectionHandsTests {
                     && player.getOffhandItem().is(Content.USED_SYRINGE), "Both complete doses produce used syringes");
             helper.assertTrue(player.getData(Content.NEKO).phase() == NekoState.Phase.SHOCK
                     && player.getData(Content.NEKO).stageDuration() == 6000, "Two doses accelerate one transformation");
+            helper.assertTrue(pairedAdvancement(player), "Completing both Neko doses awards the paired injection advancement");
             helper.assertTrue(player.getEffect(Content.SHOCK).getDuration() > 3550
                     && player.getEffect(net.minecraft.world.effect.MobEffects.CONFUSION).getDuration() > 3550,
                     "Both sickness and its hidden nausea extend to three minutes when the second dose completes");
@@ -118,9 +119,11 @@ public final class InjectionHandsTests {
             helper.assertTrue(player.getData(Content.NEKO).sicknessDuration() == 1200
                     && player.getEffect(Content.SHOCK).getDuration() <= 1200,
                     "An interrupted second dose leaves the one-minute sickness unchanged");
+            helper.assertFalse(pairedAdvancement(player), "Completing one dose and interrupting the other cannot award paired injections");
             InjectionHandler.input(player, false, true);
             helper.assertTrue(InjectionHandler.started(player, InteractionHand.OFF_HAND) == -1,
                     "A later injection cannot stack onto an existing transformation");
+            helper.assertFalse(pairedAdvancement(player), "A later separate injection cannot substitute for overlapping completed doses");
             GameplayTests.remove(player);
             helper.succeed();
         });
@@ -144,11 +147,17 @@ public final class InjectionHandsTests {
         helper.runAfterDelay(70, () -> InjectionHandler.input(paired, true, true));
         helper.runAfterDelay(90, () -> helper.assertTrue(paired.getHealth() == 18,
                 "Slightly staggered needles both hurt despite vanilla damage immunity frames"));
+        helper.runAfterDelay(160, () -> helper.assertFalse(pairedAdvancement(paired),
+                "The first completed hand cannot award the pair while its partner is still injecting"));
+        helper.runAfterDelay(160, () -> helper.assertFalse(singleAdvancement(paired),
+                "A pending partner also prevents premature single-dose completion"));
         helper.runAfterDelay(175, () -> {
             helper.assertTrue(single.getMainHandItem().is(Items.SHIELD) && single.getOffhandItem().is(Content.USED_SYRINGE)
                     && single.getData(Content.NEKO).stageDuration() == 24000, "An offhand injection works without consuming the main hand");
             helper.assertTrue(paired.getMainHandItem().is(Content.USED_SYRINGE) && paired.getOffhandItem().is(Content.USED_SYRINGE)
                     && paired.getData(Content.NEKO).stageDuration() == 6000, "Staggered completion preserves the paired dose until both finish");
+            helper.assertTrue(pairedAdvancement(paired) && !pairedAdvancement(single), "Only the completed overlapping pair earns its advancement");
+            helper.assertTrue(singleAdvancement(single) && !singleAdvancement(paired), "Single and staggered paired sessions award mutually exclusive advancements");
             helper.assertTrue(paired.getEffect(Content.SHOCK).getDuration() > 3550
                     && paired.getEffect(net.minecraft.world.effect.MobEffects.CONFUSION).getDuration() > 3550,
                     "Staggered doses extend both sickness effects as soon as the second injection completes");
@@ -184,9 +193,20 @@ public final class InjectionHandsTests {
             for (var player : new net.minecraft.server.level.ServerPlayer[] {left, both}) {
                 helper.assertTrue(player.getData(Content.NEKO).phase() == NekoState.Phase.NEKO
                         && player.getData(Content.NEKO).stageDuration() == 24000, "Stabilization never accelerates transformation");
+                helper.assertFalse(pairedAdvancement(player), "Holding two stabilizers cannot award paired Neko injections");
                 GameplayTests.remove(player);
             }
             helper.succeed();
         });
+    }
+
+    private static boolean pairedAdvancement(net.minecraft.server.level.ServerPlayer player) {
+        return player.getAdvancements().getOrStartProgress(java.util.Objects.requireNonNull(
+                player.server.getAdvancements().get(Content.id("dual_injection")))).isDone();
+    }
+
+    private static boolean singleAdvancement(net.minecraft.server.level.ServerPlayer player) {
+        return player.getAdvancements().getOrStartProgress(java.util.Objects.requireNonNull(
+                player.server.getAdvancements().get(Content.id("what_could_go_wrong")))).isDone();
     }
 }

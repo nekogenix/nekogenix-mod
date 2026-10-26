@@ -1,0 +1,26 @@
+{
+  "display": {
+    "icon": {
+      "id": "nekogenix:neko_injection",
+      "components": {
+        "minecraft:custom_model_data": 2
+      }
+    },
+    "title": {
+      "text": "Nekogenix"
+    },
+    "description": {
+      "translate": "advancements.nekogenix.root.description"
+    },
+    "background": "minecraft:textures/block/amethyst_block.png",
+    "frame": "task",
+    "show_toast": false,
+    "announce_to_chat": false,
+    "hidden": false
+  },
+  "criteria": {
+    "joined": {
+      "trigger": "minecraft:tick"
+    }
+  }
+}
