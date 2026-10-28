@@ -110,5 +110,7 @@ The built `.jar` is in `build/libs/`.
 
 <h2><img src=".github/readme/icons/scale.svg" width="28" height="28" alt="" /> License</h2>
 
-- **Code:** [PolyForm Noncommercial License 1.0.0](https://github.com/nekogenix/nekogenix-mod/blob/main/LICENSE.md#code-license).
-- **Assets under `src/main/resources/assets/`:** [All Rights Reserved](https://github.com/nekogenix/nekogenix-mod/blob/main/LICENSE.md#assets-license), Rudator and Wechirok.
+Copyright (c) 2026 Rudator and Wechirok.
+
+- **Code:** [GNU General Public License, version 3 only (GPL-3.0-only)](https://github.com/nekogenix/nekogenix-mod/blob/main/LICENSE.md).
+- **Assets under `src/main/resources/assets/`:** [All Rights Reserved](https://github.com/nekogenix/nekogenix-mod/blob/main/src/main/resources/assets/LICENSE.md), Rudator and Wechirok.
