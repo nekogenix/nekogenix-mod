@@ -24,15 +24,15 @@
   <a href="https://liberapay.com/Nekogenix/donate"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg"></a>
 </p>
 
-<p>
-  <img src=".github/readme/icons/credits-code.svg" width="20" height="20" alt=""> Code: AI-assisted
-  &nbsp;&nbsp;&nbsp;
-  <img src=".github/readme/icons/credits-palette.svg" width="20" height="20" alt=""> Assets: made by the developers using <a href="https://www.aseprite.org/">Aseprite</a> and <a href="https://blockbench.net/">Blockbench</a>
-</p>
-
 > [!NOTE]
 > <details>
 > <summary>AI disclosure</summary>
+>
+> <p>
+>   <img src=".github/readme/icons/credits-code.svg" width="20" height="20" alt=""> Code: AI-assisted
+>   &nbsp;&nbsp;&nbsp;
+>   <img src=".github/readme/icons/credits-palette.svg" width="20" height="20" alt=""> Assets: made by the developers using <a href="https://www.aseprite.org/">Aseprite</a> and <a href="https://blockbench.net/">Blockbench</a>
+> </p>
 >
 > <p>We're not hiding that AI helped write most of Nekogenix's code. Does that make it low-quality garbage? Hell NO. We're not the kind of people who throw a prompt at some LLM and sit there like a goddamn cuck waiting for it to finish. We decide HOW things work: libs, server vs client logic, data persistence, networking, nf events vs mixins, rendering, hitboxes, and mods compatibility. We read, review, and test the whole code instead of assuming it works just because it compiles. Every asset/icons/our logo was made by hand. We regularly discuss our ideas with experienced modders in the community and work out the best ways to implement them. Sure, it's a simple mod, but we give a damn about making it good. Slop is everywhere, and we understand wanting to hit "Hide AI content." Half-assed projects deserve the criticism. But we're putting real work into Nekogenix, and we'd recommend it even to hardcore AI haters.</p>
 >
