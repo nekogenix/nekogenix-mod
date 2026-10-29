@@ -24,6 +24,12 @@
   <a href="https://liberapay.com/Nekogenix/donate"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg"></a>
 </p>
 
+<p>
+  <img src=".github/readme/icons/credits-code.svg" width="20" height="20" alt=""> Code: AI-assisted
+  &nbsp;&nbsp;&nbsp;
+  <img src=".github/readme/icons/credits-palette.svg" width="20" height="20" alt=""> Assets: made by the developers using <a href="https://www.aseprite.org/">Aseprite</a> and <a href="https://blockbench.net/">Blockbench</a>
+</p>
+
 > [!NOTE]
 > <details>
 > <summary>AI disclosure</summary>
